@@ -7,7 +7,7 @@
 [![WordPress 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759B.svg)](#)
 
 <p align="center">
-  <img src="./.wordpress-org/screenshot-1.png" alt="A/B Tests admin list — experiments grouped by URL with per-variant stats and winner badges" width="800">
+  <img src="./.wordpress-org/banner-1544x500.png" alt="Uplift – A/B Testing — self-hosted A/B testing for WordPress" width="900">
 </p>
 
 Uplift is a self-hosted A/B testing plugin for WordPress. Test landing pages, compare conversion rates, and pipe events to your analytics stack — all on your own database, no third-party dependency required.
@@ -38,6 +38,11 @@ Built around three core ideas:
 - **Per-URL `noindex` toggle** — checkbox on the experiment edit form sends `<meta robots>` + `X-Robots-Tag: noindex, nofollow` on every visit to a flagged URL. Recommended for paid-traffic landing pages or any URL where you don't want both A/B variants to compete in search results.
 
 ### Tracking & Stats
+
+<p align="center">
+  <img src="./.wordpress-org/screenshot-1.png" alt="A/B Tests admin list — experiments grouped by URL with per-variant stats and winner badges" width="800">
+</p>
+
 - Internal events table (impressions + conversions) — full ownership of your data
 - Server-side conversion validation via cookie (no client-side spoofing)
 - Two-proportion **z-test** for statistical significance
