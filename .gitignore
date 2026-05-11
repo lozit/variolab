@@ -22,6 +22,10 @@ package-lock.json
 /build/
 /dist/
 
+# Claude Code local overrides (personal, not committed)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
 # OS / editor noise
 Thumbs.db
 *.swp
