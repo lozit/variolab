@@ -21,7 +21,7 @@ jobs:
         php: ['8.1', '8.2', '8.3']
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
@@ -69,7 +69,7 @@ jobs:
     # still strict). See phpcs.xml.dist for the rationale.
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP 8.1
         uses: shivammathur/setup-php@v2
@@ -109,7 +109,7 @@ jobs:
     # never reach a wp.org installer anyway.
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build plugin folder (mirrors release.yml's rsync)
         # Same exclusion list as release.yml so what we scan = what ships.
