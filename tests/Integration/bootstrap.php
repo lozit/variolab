@@ -50,7 +50,7 @@ require_once $abtest_phpunit_dir . '/includes/functions.php';
 tests_add_filter(
 	'muplugins_loaded',
 	static function (): void {
-		require dirname( __DIR__, 2 ) . '/uplift-ab-testing.php';
+		require dirname( __DIR__, 2 ) . '/variolab.php';
 	}
 );
 

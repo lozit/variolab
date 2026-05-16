@@ -11,7 +11,7 @@ Applies to: every `.php` file in the plugin.
 - CSS / JS handles: `abtest-xxx`
 - Tables: `{$wpdb->prefix}abtest_xxx`
 - Cookies: `abtest_xxx`
-- Text domain: `uplift-ab-testing` (= plugin slug)
+- Text domain: `variolab` (= plugin slug)
 
 ## PSR-4 namespace
 Root namespace: `Abtest\` → mapped to `includes/`.

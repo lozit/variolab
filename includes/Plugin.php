@@ -216,7 +216,7 @@ final class Plugin {
 	public static function duplicate_for_resume( int $original_id ) {
 		$original = get_post( $original_id );
 		if ( ! $original instanceof \WP_Post || Experiment::POST_TYPE !== $original->post_type ) {
-			return new \WP_Error( 'not_found', __( 'Original experiment not found.', 'uplift-ab-testing' ) );
+			return new \WP_Error( 'not_found', __( 'Original experiment not found.', 'variolab' ) );
 		}
 
 		$new_id = wp_insert_post(

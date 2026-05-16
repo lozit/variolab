@@ -17,7 +17,7 @@ The plugin is in active development — only the latest minor branch receives pa
 
 Use GitHub's **Private vulnerability reporting** to disclose responsibly :
 
-1. Go to https://github.com/lozit/uplift-ab-testing/security/advisories
+1. Go to https://github.com/lozit/variolab/security/advisories
 2. Click **Report a vulnerability**
 3. Fill the form with reproduction steps + impact assessment
 

@@ -237,15 +237,15 @@ final class Router {
 			: '';
 
 		if ( '' === $path && isset( $_SERVER['REQUEST_URI'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			$uri    = (string) $_SERVER['REQUEST_URI'];
+			$uri    = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 			$parsed = wp_parse_url( $uri, PHP_URL_PATH );
 			$path   = is_string( $parsed ) ? $parsed : '';
 		}
 
 		// Append the request's query string so subset-matching can run.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		$query = isset( $_SERVER['QUERY_STRING'] ) ? (string) $_SERVER['QUERY_STRING'] : '';
+		$query = isset( $_SERVER['QUERY_STRING'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['QUERY_STRING'] ) )
+			: '';
 		if ( '' !== $query ) {
 			$path .= '?' . $query;
 		}
@@ -303,19 +303,31 @@ final class Router {
 		return 'publish' === $post->post_status;
 	}
 
+	/**
+	 * Output admin-curated tracking scripts (Adwords / FB Pixel / Lemlist) at the
+	 * `wp_body_open` slot. Raw output is intentional — the feature is precisely to
+	 * let admins inject pixel/JS code that the visitor's browser will execute.
+	 * Trust model gate is at intake: Admin\Admin::handle_save() requires
+	 * `manage_options` + nonce + `unfiltered_html` before persisting any code body
+	 * to UrlScripts::set(). No untrusted path reaches this output.
+	 */
 	public function print_scripts_after_body_open(): void {
 		if ( '' === $this->current_test_url ) {
 			return;
 		}
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-curated raw JS/HTML; cap-gated at intake (unfiltered_html), see docblock above.
 		echo UrlScripts::render_for_position( $this->current_test_url, UrlScripts::POSITION_AFTER_BODY_OPEN );
 	}
 
+	/**
+	 * Same as {@see print_scripts_after_body_open()} but rendered just before `</body>`.
+	 * Trust model gate at intake (see that method's docblock).
+	 */
 	public function print_scripts_before_body_close(): void {
 		if ( '' === $this->current_test_url ) {
 			return;
 		}
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-curated raw JS/HTML; cap-gated at intake (unfiltered_html), see docblock above.
 		echo UrlScripts::render_for_position( $this->current_test_url, UrlScripts::POSITION_BEFORE_BODY_CLOSE );
 	}
 
@@ -334,8 +346,9 @@ final class Router {
 	}
 
 	private function is_bot(): bool {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) $_SERVER['HTTP_USER_AGENT'] : '';
+		$ua = isset( $_SERVER['HTTP_USER_AGENT'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
+			: '';
 		if ( '' === $ua ) {
 			return true;
 		}
@@ -382,20 +395,20 @@ final class Router {
 				}
 
 				$label_map = [
-					'A'        => __( 'Variant A', 'uplift-ab-testing' ),
-					'B'        => __( 'Variant B', 'uplift-ab-testing' ),
-					'original' => __( 'Original page', 'uplift-ab-testing' ),
+					'A'        => __( 'Variant A', 'variolab' ),
+					'B'        => __( 'Variant B', 'variolab' ),
+					'original' => __( 'Original page', 'variolab' ),
 				];
 				$current_label = $label_map[ $current_view ] ?? $current_view;
 
-				$mode_suffix = $has_variant_b ? '' : ' · ' . __( 'baseline', 'uplift-ab-testing' );
+				$mode_suffix = $has_variant_b ? '' : ' · ' . __( 'baseline', 'variolab' );
 
 				$bar->add_node(
 					[
 						'id'    => 'abtest-preview',
 						'title' => sprintf(
 							/* translators: 1: experiment title, 2: current variant label, 3: mode suffix */
-							esc_html__( 'A/B: %1$s — viewing %2$s%3$s', 'uplift-ab-testing' ),
+							esc_html__( 'A/B: %1$s — viewing %2$s%3$s', 'variolab' ),
 							esc_html( get_the_title( $experiment ) ),
 							esc_html( $current_label ),
 							esc_html( $mode_suffix )
@@ -406,13 +419,13 @@ final class Router {
 				);
 
 				$variants = [
-					'a' => [ 'label' => __( 'View Variant A', 'uplift-ab-testing' ), 'view' => 'A' ],
+					'a' => [ 'label' => __( 'View Variant A', 'variolab' ), 'view' => 'A' ],
 				];
 				if ( $has_variant_b ) {
-					$variants['b'] = [ 'label' => __( 'View Variant B', 'uplift-ab-testing' ), 'view' => 'B' ];
+					$variants['b'] = [ 'label' => __( 'View Variant B', 'variolab' ), 'view' => 'B' ];
 				}
 				if ( $has_underlying ) {
-					$variants['original'] = [ 'label' => __( 'View original page', 'uplift-ab-testing' ), 'view' => 'original' ];
+					$variants['original'] = [ 'label' => __( 'View original page', 'variolab' ), 'view' => 'original' ];
 				}
 
 				foreach ( $variants as $key => $opt ) {
@@ -433,7 +446,7 @@ final class Router {
 					[
 						'parent' => 'abtest-preview',
 						'id'     => 'abtest-preview-edit',
-						'title'  => esc_html__( 'Edit experiment', 'uplift-ab-testing' ),
+						'title'  => esc_html__( 'Edit experiment', 'variolab' ),
 						'href'   => admin_url( 'admin.php?page=ab-testing&action=edit&experiment=' . $experiment->ID ),
 					]
 				);

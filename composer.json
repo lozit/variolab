@@ -1,6 +1,6 @@
 {
-  "name": "guillaumeferrari/uplift-ab-testing",
-  "description": "Uplift – A/B Testing: lightweight A/B testing for pages with internal tracking and a 50/50 cookie split.",
+  "name": "guillaumeferrari/variolab",
+  "description": "Variolab – A/B Testing: lightweight A/B testing for pages with internal tracking and a 50/50 cookie split.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "require": {

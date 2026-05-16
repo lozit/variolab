@@ -29,7 +29,7 @@ final class ExperimentEdit {
 		<div class="abtest-variant-row" data-index="<?php echo (int) $index; ?>">
 			<span class="abtest-variant-label"><?php echo esc_html( $label ); ?></span>
 			<select name="variants[<?php echo (int) $index; ?>][post_id]" class="abtest-variant-select">
-				<option value="0"><?php echo 0 === $index ? esc_html__( '— Select page —', 'uplift-ab-testing' ) : esc_html__( '— None / remove —', 'uplift-ab-testing' ); ?></option>
+				<option value="0"><?php echo 0 === $index ? esc_html__( '— Select page —', 'variolab' ) : esc_html__( '— None / remove —', 'variolab' ); ?></option>
 				<?php foreach ( $pages as $page ) : ?>
 					<option value="<?php echo (int) $page->ID; ?>" <?php selected( (int) $page->ID, $selected_post_id ); ?>>
 						<?php echo esc_html( get_the_title( $page ) . ' (#' . $page->ID . ' · ' . $page->post_status . ')' ); ?>
@@ -37,8 +37,8 @@ final class ExperimentEdit {
 				<?php endforeach; ?>
 			</select>
 			<?php if ( $index > 0 ) : ?>
-				<button type="button" class="button-link abtest-variant-remove" aria-label="<?php esc_attr_e( 'Remove this variant', 'uplift-ab-testing' ); ?>">
-					<?php esc_html_e( 'Remove', 'uplift-ab-testing' ); ?>
+				<button type="button" class="button-link abtest-variant-remove" aria-label="<?php esc_attr_e( 'Remove this variant', 'variolab' ); ?>">
+					<?php esc_html_e( 'Remove', 'variolab' ); ?>
 				</button>
 			<?php endif; ?>
 		</div>
@@ -51,14 +51,14 @@ final class ExperimentEdit {
 	 */
 	public static function render_script_row( int $index, string $position, string $code ): void {
 		$positions = [
-			\Abtest\UrlScripts::POSITION_AFTER_BODY_OPEN   => __( 'After <body> opening tag', 'uplift-ab-testing' ),
-			\Abtest\UrlScripts::POSITION_BEFORE_BODY_CLOSE => __( 'Before </body> closing tag', 'uplift-ab-testing' ),
+			\Abtest\UrlScripts::POSITION_AFTER_BODY_OPEN   => __( 'After <body> opening tag', 'variolab' ),
+			\Abtest\UrlScripts::POSITION_BEFORE_BODY_CLOSE => __( 'Before </body> closing tag', 'variolab' ),
 		];
 		?>
 		<div class="abtest-url-script-row">
 			<div class="abtest-url-script-head">
 				<label>
-					<?php esc_html_e( 'Position:', 'uplift-ab-testing' ); ?>
+					<?php esc_html_e( 'Position:', 'variolab' ); ?>
 					<select name="url_scripts[<?php echo (int) $index; ?>][position]">
 						<?php foreach ( $positions as $value => $label ) : ?>
 							<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $position, $value ); ?>>
@@ -67,11 +67,11 @@ final class ExperimentEdit {
 						<?php endforeach; ?>
 					</select>
 				</label>
-				<button type="button" class="button-link abtest-url-script-remove" aria-label="<?php esc_attr_e( 'Remove this script', 'uplift-ab-testing' ); ?>">
-					<?php esc_html_e( 'Remove', 'uplift-ab-testing' ); ?>
+				<button type="button" class="button-link abtest-url-script-remove" aria-label="<?php esc_attr_e( 'Remove this script', 'variolab' ); ?>">
+					<?php esc_html_e( 'Remove', 'variolab' ); ?>
 				</button>
 			</div>
-			<textarea name="url_scripts[<?php echo (int) $index; ?>][code]" rows="6" class="large-text code" placeholder="<?php /* phpcs:ignore WordPress.WP.I18n.NoHtmlWrappedStrings -- example snippet shown in placeholder, intentional */ esc_attr_e( '<script>gtag(\'event\', \'page_view\')</script>', 'uplift-ab-testing' ); ?>"><?php echo esc_textarea( $code ); ?></textarea>
+			<textarea name="url_scripts[<?php echo (int) $index; ?>][code]" rows="6" class="large-text code" placeholder="<?php /* phpcs:ignore WordPress.WP.I18n.NoHtmlWrappedStrings -- example snippet shown in placeholder, intentional */ esc_attr_e( '<script>gtag(\'event\', \'page_view\')</script>', 'variolab' ); ?>"><?php echo esc_textarea( $code ); ?></textarea>
 		</div>
 		<?php
 	}
@@ -124,15 +124,15 @@ final class ExperimentEdit {
 		}
 		?>
 		<div class="wrap abtest-wrap">
-			<h1><?php echo esc_html( $is_new ? __( 'New A/B Test', 'uplift-ab-testing' ) : __( 'Edit A/B Test', 'uplift-ab-testing' ) ); ?></h1>
+			<h1><?php echo esc_html( $is_new ? __( 'New A/B Test', 'variolab' ) : __( 'Edit A/B Test', 'variolab' ) ); ?></h1>
 
 			<?php if ( $full_url ) : ?>
 				<div class="notice notice-info inline abtest-test-url-banner">
 					<p>
-						<strong><?php esc_html_e( 'Test URL — share this with your visitors:', 'uplift-ab-testing' ); ?></strong><br>
+						<strong><?php esc_html_e( 'Test URL — share this with your visitors:', 'variolab' ); ?></strong><br>
 						<a href="<?php echo esc_url( $full_url ); ?>" target="_blank" rel="noopener"><code><?php echo esc_html( $full_url ); ?></code></a>
 						<br>
-						<em><?php esc_html_e( 'Visitors are split 50/50 between the two variants via a cookie. The URL stays the same for everyone.', 'uplift-ab-testing' ); ?></em>
+						<em><?php esc_html_e( 'Visitors are split 50/50 between the two variants via a cookie. The URL stays the same for everyone.', 'variolab' ); ?></em>
 					</p>
 				</div>
 			<?php endif; ?>
@@ -143,7 +143,7 @@ final class ExperimentEdit {
 						<?php
 						printf(
 							/* translators: 1: existing post title, 2: post ID */
-							esc_html__( 'Heads up: a published post already lives at this URL — "%1$s" (#%2$d). The A/B test will hide it while running, and restore it when the test is paused or ended.', 'uplift-ab-testing' ),
+							esc_html__( 'Heads up: a published post already lives at this URL — "%1$s" (#%2$d). The A/B test will hide it while running, and restore it when the test is paused or ended.', 'variolab' ),
 							esc_html( get_the_title( $conflict_post ) ),
 							(int) $conflict_post->ID
 						);
@@ -159,32 +159,32 @@ final class ExperimentEdit {
 
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><label for="abtest-title"><?php esc_html_e( 'Title', 'uplift-ab-testing' ); ?></label></th>
+						<th scope="row"><label for="abtest-title"><?php esc_html_e( 'Title', 'variolab' ); ?></label></th>
 						<td><input type="text" id="abtest-title" name="title" class="regular-text" value="<?php echo esc_attr( $title ); ?>" required></td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="abtest-test-url"><?php esc_html_e( 'Test URL', 'uplift-ab-testing' ); ?></label></th>
+						<th scope="row"><label for="abtest-test-url"><?php esc_html_e( 'Test URL', 'variolab' ); ?></label></th>
 						<td>
 							<input type="text" id="abtest-test-url" name="test_url" class="regular-text code" placeholder="/promo/" value="<?php echo esc_attr( $test_path ); ?>" required>
 							<p class="description">
-								<?php esc_html_e( 'Public URL where visitors will see the A/B test. Examples: /promo/, /landing-2026/, /pricing/new/, /promotion-été/, /中文/. Optional query params target campaigns: /promo/?campaign=fb (visitor URL must include campaign=fb; extra params like utm_source or fbclid are tolerated).', 'uplift-ab-testing' ); ?>
+								<?php esc_html_e( 'Public URL where visitors will see the A/B test. Examples: /promo/, /landing-2026/, /pricing/new/, /promotion-été/, /中文/. Optional query params target campaigns: /promo/?campaign=fb (visitor URL must include campaign=fb; extra params like utm_source or fbclid are tolerated).', 'variolab' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'SEO', 'uplift-ab-testing' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'SEO', 'variolab' ); ?></th>
 						<td>
 							<label>
 								<input type="checkbox" id="abtest-url-noindex" name="url_noindex" value="1" <?php checked( $url_noindex ); ?>>
-								<?php esc_html_e( 'Mark this URL as no-index (block search engines)', 'uplift-ab-testing' ); ?>
+								<?php esc_html_e( 'Mark this URL as no-index (block search engines)', 'variolab' ); ?>
 							</label>
 							<p class="description">
-								<?php esc_html_e( 'Sends `<meta name="robots" content="noindex,nofollow">` and the matching `X-Robots-Tag` HTTP header on every visit to this URL — regardless of which experiment is running. Recommended for landing pages dedicated to paid traffic, or any URL where you don\'t want both A/B variants to compete in search results. The setting is per-URL: every experiment that lands on the same URL inherits it.', 'uplift-ab-testing' ); ?>
+								<?php esc_html_e( 'Sends `<meta name="robots" content="noindex,nofollow">` and the matching `X-Robots-Tag` HTTP header on every visit to this URL — regardless of which experiment is running. Recommended for landing pages dedicated to paid traffic, or any URL where you don\'t want both A/B variants to compete in search results. The setting is per-URL: every experiment that lands on the same URL inherits it.', 'variolab' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Variants', 'uplift-ab-testing' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Variants', 'variolab' ); ?></th>
 						<td>
 							<?php
 							// Build the rendered list: at least 1 row (Variant A), up to MAX_VARIANTS.
@@ -198,13 +198,13 @@ final class ExperimentEdit {
 							<p>
 								<button type="button" class="button button-secondary abtest-variant-add"
 										<?php echo count( $rendered ) >= Experiment::MAX_VARIANTS ? 'disabled' : ''; ?>>
-									+ <?php esc_html_e( 'Add variant', 'uplift-ab-testing' ); ?>
+									+ <?php esc_html_e( 'Add variant', 'variolab' ); ?>
 								</button>
 								<span class="abtest-variant-help description">
 									<?php
 									printf(
 										/* translators: %d: max variants */
-										esc_html__( 'Up to %d variants. Visitors are split equally (1/N each). Variant A is the baseline — others are compared against it. Leave only A to run in baseline mode.', 'uplift-ab-testing' ),
+										esc_html__( 'Up to %d variants. Visitors are split equally (1/N each). Variant A is the baseline — others are compared against it. Leave only A to run in baseline mode.', 'variolab' ),
 										(int) Experiment::MAX_VARIANTS
 									);
 									?>
@@ -213,39 +213,39 @@ final class ExperimentEdit {
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Goal', 'uplift-ab-testing' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Goal', 'variolab' ); ?></th>
 						<td>
 							<fieldset>
 								<label>
 									<input type="radio" name="goal_type" value="<?php echo esc_attr( Experiment::GOAL_URL ); ?>" <?php checked( $goal['type'], Experiment::GOAL_URL ); ?>>
-									<?php esc_html_e( 'URL visited (e.g. /thank-you)', 'uplift-ab-testing' ); ?>
+									<?php esc_html_e( 'URL visited (e.g. /thank-you)', 'variolab' ); ?>
 								</label><br>
 								<label>
 									<input type="radio" name="goal_type" value="<?php echo esc_attr( Experiment::GOAL_SELECTOR ); ?>" <?php checked( $goal['type'], Experiment::GOAL_SELECTOR ); ?>>
-									<?php esc_html_e( 'CSS selector clicked (e.g. .cta-buy)', 'uplift-ab-testing' ); ?>
+									<?php esc_html_e( 'CSS selector clicked (e.g. .cta-buy)', 'variolab' ); ?>
 								</label>
 							</fieldset>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="abtest-goal-value"><?php esc_html_e( 'Goal value', 'uplift-ab-testing' ); ?></label></th>
+						<th scope="row"><label for="abtest-goal-value"><?php esc_html_e( 'Goal value', 'variolab' ); ?></label></th>
 						<td>
 							<input type="text" id="abtest-goal-value" name="goal_value" class="regular-text" value="<?php echo esc_attr( $goal['value'] ); ?>" required>
-							<p class="description"><?php esc_html_e( 'URL path or CSS selector matching the conversion event.', 'uplift-ab-testing' ); ?></p>
+							<p class="description"><?php esc_html_e( 'URL path or CSS selector matching the conversion event.', 'variolab' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Current status', 'uplift-ab-testing' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Current status', 'variolab' ); ?></th>
 						<td>
 							<?php if ( $is_new ) : ?>
-								<span class="abtest-status abtest-status-draft"><?php esc_html_e( 'New', 'uplift-ab-testing' ); ?></span>
+								<span class="abtest-status abtest-status-draft"><?php esc_html_e( 'New', 'variolab' ); ?></span>
 							<?php else : ?>
 								<span class="abtest-status abtest-status-<?php echo esc_attr( $status ); ?>"><?php echo esc_html( ucfirst( $status ) ); ?></span>
 							<?php endif; ?>
 							<?php if ( Experiment::STATUS_PAUSED === $status ) : ?>
-								<p class="description"><?php esc_html_e( 'To run this paused experiment again, use the Resume action from the experiments list — it creates a new experiment with fresh dates and ends this one cleanly.', 'uplift-ab-testing' ); ?></p>
+								<p class="description"><?php esc_html_e( 'To run this paused experiment again, use the Resume action from the experiments list — it creates a new experiment with fresh dates and ends this one cleanly.', 'variolab' ); ?></p>
 							<?php elseif ( Experiment::STATUS_ENDED === $status ) : ?>
-								<p class="description"><?php esc_html_e( 'This experiment is ended (terminal state). Its dates are locked.', 'uplift-ab-testing' ); ?></p>
+								<p class="description"><?php esc_html_e( 'This experiment is ended (terminal state). Its dates are locked.', 'variolab' ); ?></p>
 							<?php endif; ?>
 						</td>
 					</tr>
@@ -257,17 +257,17 @@ final class ExperimentEdit {
 					$end_input      = '' !== $schedule_end ? str_replace( ' ', 'T', substr( $schedule_end, 0, 16 ) ) : '';
 					?>
 					<tr>
-						<th scope="row"><label for="abtest-schedule-start"><?php esc_html_e( 'Auto-start at (optional)', 'uplift-ab-testing' ); ?></label></th>
+						<th scope="row"><label for="abtest-schedule-start"><?php esc_html_e( 'Auto-start at (optional)', 'variolab' ); ?></label></th>
 						<td>
 							<input type="datetime-local" id="abtest-schedule-start" name="schedule_start_at" value="<?php echo esc_attr( $start_input ); ?>">
-							<p class="description"><?php esc_html_e( 'When this date passes, a Draft experiment auto-transitions to Running (via WP-Cron, hourly check). Cleared after firing. Skipped if another experiment is already running on the same URL.', 'uplift-ab-testing' ); ?></p>
+							<p class="description"><?php esc_html_e( 'When this date passes, a Draft experiment auto-transitions to Running (via WP-Cron, hourly check). Cleared after firing. Skipped if another experiment is already running on the same URL.', 'variolab' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="abtest-schedule-end"><?php esc_html_e( 'Auto-end at (optional)', 'uplift-ab-testing' ); ?></label></th>
+						<th scope="row"><label for="abtest-schedule-end"><?php esc_html_e( 'Auto-end at (optional)', 'variolab' ); ?></label></th>
 						<td>
 							<input type="datetime-local" id="abtest-schedule-end" name="schedule_end_at" value="<?php echo esc_attr( $end_input ); ?>">
-							<p class="description"><?php esc_html_e( 'When this date passes, a Running experiment auto-transitions to Ended.', 'uplift-ab-testing' ); ?></p>
+							<p class="description"><?php esc_html_e( 'When this date passes, a Running experiment auto-transitions to Ended.', 'variolab' ); ?></p>
 						</td>
 					</tr>
 					<?php
@@ -275,14 +275,14 @@ final class ExperimentEdit {
 					$target_countries = $is_new ? [] : Experiment::get_target_countries( $experiment_id );
 					?>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Device targeting (optional)', 'uplift-ab-testing' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Device targeting (optional)', 'variolab' ); ?></th>
 						<td>
 							<fieldset class="abtest-target-devices">
 								<?php
 								$device_labels = [
-									'mobile'  => __( 'Mobile', 'uplift-ab-testing' ),
-									'tablet'  => __( 'Tablet', 'uplift-ab-testing' ),
-									'desktop' => __( 'Desktop', 'uplift-ab-testing' ),
+									'mobile'  => __( 'Mobile', 'variolab' ),
+									'tablet'  => __( 'Tablet', 'variolab' ),
+									'desktop' => __( 'Desktop', 'variolab' ),
 								];
 								foreach ( $device_labels as $value => $label ) :
 									?>
@@ -292,15 +292,15 @@ final class ExperimentEdit {
 									</label>
 								<?php endforeach; ?>
 							</fieldset>
-							<p class="description"><?php esc_html_e( 'Leave all unchecked to include every device. Detection uses the visitor\'s User-Agent.', 'uplift-ab-testing' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Leave all unchecked to include every device. Detection uses the visitor\'s User-Agent.', 'variolab' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="abtest-target-countries"><?php esc_html_e( 'Country targeting (optional)', 'uplift-ab-testing' ); ?></label></th>
+						<th scope="row"><label for="abtest-target-countries"><?php esc_html_e( 'Country targeting (optional)', 'variolab' ); ?></label></th>
 						<td>
 							<input type="text" id="abtest-target-countries" name="target_countries" class="regular-text code" value="<?php echo esc_attr( implode( ', ', $target_countries ) ); ?>" placeholder="FR, BE, CH">
 							<p class="description">
-								<?php esc_html_e( 'Comma-separated ISO 3166-1 alpha-2 codes (e.g. FR, BE, CH). Leave empty to target everyone. Requires a country header from your CDN/host (Cloudflare, Kinsta) or the `abtest_visitor_country` filter — visitors with unknown country are excluded when targeting is set.', 'uplift-ab-testing' ); ?>
+								<?php esc_html_e( 'Comma-separated ISO 3166-1 alpha-2 codes (e.g. FR, BE, CH). Leave empty to target everyone. Requires a country header from your CDN/host (Cloudflare, Kinsta) or the `abtest_visitor_country` filter — visitors with unknown country are excluded when targeting is set.', 'variolab' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -314,20 +314,20 @@ final class ExperimentEdit {
 					$url_scripts = [];
 				}
 				?>
-				<h2 class="abtest-section-title"><?php esc_html_e( 'Tracking scripts', 'uplift-ab-testing' ); ?></h2>
+				<h2 class="abtest-section-title"><?php esc_html_e( 'Tracking scripts', 'variolab' ); ?></h2>
 				<p class="description">
 					<?php
 					printf(
 						/* translators: %s: URL path */
-						esc_html__( 'Shared with every experiment on %s. Injected as-is into the rendered page (Blank Canvas templates and themed pages alike). Save the form to persist changes.', 'uplift-ab-testing' ),
+						esc_html__( 'Shared with every experiment on %s. Injected as-is into the rendered page (Blank Canvas templates and themed pages alike). Save the form to persist changes.', 'variolab' ),
 						'<code>' . esc_html( $test_path ?: '/your-url/' ) . '</code>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					);
 					?>
 				</p>
 
-				<div class="abtest-url-scripts" data-empty-msg="<?php esc_attr_e( 'No scripts yet — click + Add script.', 'uplift-ab-testing' ); ?>">
+				<div class="abtest-url-scripts" data-empty-msg="<?php esc_attr_e( 'No scripts yet — click + Add script.', 'variolab' ); ?>">
 					<?php if ( empty( $url_scripts ) ) : ?>
-						<p class="abtest-url-scripts-empty"><?php esc_html_e( 'No scripts yet — click + Add script.', 'uplift-ab-testing' ); ?></p>
+						<p class="abtest-url-scripts-empty"><?php esc_html_e( 'No scripts yet — click + Add script.', 'variolab' ); ?></p>
 					<?php else : ?>
 						<?php foreach ( $url_scripts as $i => $entry ) : ?>
 							<?php self::render_script_row( $i, (string) $entry['position'], (string) $entry['code'] ); ?>
@@ -336,7 +336,7 @@ final class ExperimentEdit {
 				</div>
 
 				<p>
-					<button type="button" class="button button-secondary abtest-url-script-add">+ <?php esc_html_e( 'Add script', 'uplift-ab-testing' ); ?></button>
+					<button type="button" class="button button-secondary abtest-url-script-add">+ <?php esc_html_e( 'Add script', 'variolab' ); ?></button>
 				</p>
 
 				<?php
@@ -347,20 +347,20 @@ final class ExperimentEdit {
 				// Map each allowed target status to a button label (kept-vs-transitioned).
 				$button_specs = [
 					Experiment::STATUS_DRAFT   => [
-						'keep' => __( 'Save as Draft', 'uplift-ab-testing' ),
-						'to'   => __( 'Save as Draft', 'uplift-ab-testing' ),
+						'keep' => __( 'Save as Draft', 'variolab' ),
+						'to'   => __( 'Save as Draft', 'variolab' ),
 					],
 					Experiment::STATUS_RUNNING => [
-						'keep' => __( 'Save (still running)', 'uplift-ab-testing' ),
-						'to'   => __( 'Save & Start', 'uplift-ab-testing' ),
+						'keep' => __( 'Save (still running)', 'variolab' ),
+						'to'   => __( 'Save & Start', 'variolab' ),
 					],
 					Experiment::STATUS_PAUSED  => [
-						'keep' => __( 'Save (still paused)', 'uplift-ab-testing' ),
-						'to'   => __( 'Save & Pause', 'uplift-ab-testing' ),
+						'keep' => __( 'Save (still paused)', 'variolab' ),
+						'to'   => __( 'Save & Pause', 'variolab' ),
 					],
 					Experiment::STATUS_ENDED   => [
-						'keep' => __( 'Save (still ended)', 'uplift-ab-testing' ),
-						'to'   => __( 'Save & End', 'uplift-ab-testing' ),
+						'keep' => __( 'Save (still ended)', 'variolab' ),
+						'to'   => __( 'Save & End', 'variolab' ),
 					],
 				];
 

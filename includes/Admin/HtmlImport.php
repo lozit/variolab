@@ -49,10 +49,10 @@ final class HtmlImport {
 		);
 		?>
 		<div class="wrap abtest-wrap">
-			<h1><?php esc_html_e( 'Import HTML', 'uplift-ab-testing' ); ?></h1>
+			<h1><?php esc_html_e( 'Import HTML', 'variolab' ); ?></h1>
 
 			<p class="description">
-				<?php esc_html_e( 'Upload a complete HTML document (with its own DOCTYPE, head, body) and import it as a WordPress page rendered with no theme wrapper. Useful for landing-page templates designed outside WordPress.', 'uplift-ab-testing' ); ?>
+				<?php esc_html_e( 'Upload a complete HTML document (with its own DOCTYPE, head, body) and import it as a WordPress page rendered with no theme wrapper. Useful for landing-page templates designed outside WordPress.', 'variolab' ); ?>
 			</p>
 
 			<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( $action_url ); ?>" class="abtest-form abtest-import-form">
@@ -61,12 +61,12 @@ final class HtmlImport {
 
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><label for="abtest-html-file"><?php esc_html_e( 'HTML file', 'uplift-ab-testing' ); ?></label></th>
+						<th scope="row"><label for="abtest-html-file"><?php esc_html_e( 'HTML file', 'variolab' ); ?></label></th>
 						<td>
 							<div class="abtest-html-dropzone" data-max-bytes="<?php echo (int) self::max_bytes(); ?>">
 								<input type="file" id="abtest-html-file" name="html_file" accept=".html,.htm,.zip" required>
 								<p class="abtest-html-dropzone-hint">
-									<?php esc_html_e( 'Drop a .html or .zip file here, or click to browse.', 'uplift-ab-testing' ); ?>
+									<?php esc_html_e( 'Drop a .html or .zip file here, or click to browse.', 'variolab' ); ?>
 								</p>
 								<p class="abtest-html-dropzone-meta" hidden></p>
 							</div>
@@ -74,7 +74,7 @@ final class HtmlImport {
 								<?php
 								printf(
 									/* translators: %s: max size, human-readable */
-									esc_html__( 'Max %s. Accepted: .html, .htm, or .zip (extracts to wp-content/uploads/abtest-templates/{slug}/, rewriting relative asset paths so CSS/JS/images load).', 'uplift-ab-testing' ),
+									esc_html__( 'Max %s. Accepted: .html, .htm, or .zip (extracts to wp-content/uploads/abtest-templates/{slug}/, rewriting relative asset paths so CSS/JS/images load).', 'variolab' ),
 									esc_html( size_format( self::max_bytes() ) )
 								);
 								?>
@@ -82,35 +82,35 @@ final class HtmlImport {
 						</td>
 					</tr>
 					<tr class="abtest-html-preview-row" hidden>
-						<th scope="row"><?php esc_html_e( 'Preview', 'uplift-ab-testing' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Preview', 'variolab' ); ?></th>
 						<td>
-							<p class="description"><?php esc_html_e( 'Rendered as it will appear on the published page (sandboxed iframe — local scripts run in isolation, but external resources are blocked).', 'uplift-ab-testing' ); ?></p>
-							<iframe class="abtest-html-preview-frame" sandbox="allow-scripts" srcdoc="" loading="lazy" title="<?php esc_attr_e( 'HTML preview', 'uplift-ab-testing' ); ?>"></iframe>
+							<p class="description"><?php esc_html_e( 'Rendered as it will appear on the published page (sandboxed iframe — local scripts run in isolation, but external resources are blocked).', 'variolab' ); ?></p>
+							<iframe class="abtest-html-preview-frame" sandbox="allow-scripts" srcdoc="" loading="lazy" title="<?php esc_attr_e( 'HTML preview', 'variolab' ); ?>"></iframe>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="abtest-target"><?php esc_html_e( 'Target', 'uplift-ab-testing' ); ?></label></th>
+						<th scope="row"><label for="abtest-target"><?php esc_html_e( 'Target', 'variolab' ); ?></label></th>
 						<td>
 							<select id="abtest-target" name="target_page_id">
-								<option value="0"><?php esc_html_e( '— Create a new page —', 'uplift-ab-testing' ); ?></option>
+								<option value="0"><?php esc_html_e( '— Create a new page —', 'variolab' ); ?></option>
 								<?php foreach ( $pages as $page ) : ?>
 									<option value="<?php echo (int) $page->ID; ?>">
 										<?php echo esc_html( get_the_title( $page ) . ' (#' . $page->ID . ' · ' . $page->post_status . ')' ); ?>
 									</option>
 								<?php endforeach; ?>
 							</select>
-							<p class="description"><?php esc_html_e( 'Pick an existing page to overwrite, or leave on "Create a new page" to make a fresh one.', 'uplift-ab-testing' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Pick an existing page to overwrite, or leave on "Create a new page" to make a fresh one.', 'variolab' ); ?></p>
 						</td>
 					</tr>
 					<tr class="abtest-new-page-row">
-						<th scope="row"><label for="abtest-new-title"><?php esc_html_e( 'Page title (when creating new)', 'uplift-ab-testing' ); ?></label></th>
+						<th scope="row"><label for="abtest-new-title"><?php esc_html_e( 'Page title (when creating new)', 'variolab' ); ?></label></th>
 						<td>
-							<input type="text" id="abtest-new-title" name="new_title" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. Variant A — Landing v1', 'uplift-ab-testing' ); ?>">
+							<input type="text" id="abtest-new-title" name="new_title" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. Variant A — Landing v1', 'variolab' ); ?>">
 						</td>
 					</tr>
 				</table>
 
-				<?php submit_button( __( 'Import HTML', 'uplift-ab-testing' ) ); ?>
+				<?php submit_button( __( 'Import HTML', 'variolab' ) ); ?>
 			</form>
 
 			<?php self::render_watcher_panel( $action_url ); ?>
@@ -127,28 +127,28 @@ final class HtmlImport {
 		$last      = Watcher::last_run();
 		?>
 		<hr style="margin:32px 0;">
-		<h2><?php esc_html_e( 'Watch directory (auto-sync)', 'uplift-ab-testing' ); ?></h2>
+		<h2><?php esc_html_e( 'Watch directory (auto-sync)', 'variolab' ); ?></h2>
 		<p class="description">
 			<?php
 			printf(
 				/* translators: %s: full path to wp-content/uploads/abtest-templates/ */
-				esc_html__( 'Drop or edit HTML files in %1$s — every 5 minutes WP-Cron syncs changed files into pages with the Blank Canvas template. New folders create a page; edits to an existing %2$s update the matching page.', 'uplift-ab-testing' ),
+				esc_html__( 'Drop or edit HTML files in %1$s — every 5 minutes WP-Cron syncs changed files into pages with the Blank Canvas template. New folders create a page; edits to an existing %2$s update the matching page.', 'variolab' ),
 				'<code>' . esc_html( $watch_dir ) . '/{slug}/</code>',
 				'<code>index.html</code>'
 			);
 			?>
 		</p>
 		<p class="description">
-			<?php esc_html_e( 'Tip: combine with your IDE / SFTP / cloud sync (Dropbox, iCloud Drive…) so changes propagate without leaving the editor. The watcher only adds and updates — it never deletes pages.', 'uplift-ab-testing' ); ?>
+			<?php esc_html_e( 'Tip: combine with your IDE / SFTP / cloud sync (Dropbox, iCloud Drive…) so changes propagate without leaving the editor. The watcher only adds and updates — it never deletes pages.', 'variolab' ); ?>
 		</p>
 		<?php if ( null !== $last ) : ?>
 			<p>
-				<strong><?php esc_html_e( 'Last scan:', 'uplift-ab-testing' ); ?></strong>
+				<strong><?php esc_html_e( 'Last scan:', 'variolab' ); ?></strong>
 				<?php
 				$ago = human_time_diff( (int) $last['time'], time() );
 				printf(
 					/* translators: 1: time ago, 2: created count, 3: updated count, 4: skipped count */
-					esc_html__( '%1$s ago — %2$d created, %3$d updated, %4$d unchanged.', 'uplift-ab-testing' ),
+					esc_html__( '%1$s ago — %2$d created, %3$d updated, %4$d unchanged.', 'variolab' ),
 					esc_html( $ago ),
 					(int) ( $last['stats']['created'] ?? 0 ),
 					(int) ( $last['stats']['updated'] ?? 0 ),
@@ -163,14 +163,14 @@ final class HtmlImport {
 		<form method="post" action="<?php echo esc_url( $action_url ); ?>" style="margin-top:8px;">
 			<?php wp_nonce_field( self::SCAN_NONCE, '_abtest_scan_nonce' ); ?>
 			<input type="hidden" name="action" value="abtest_watch_scan">
-			<?php submit_button( __( 'Scan now', 'uplift-ab-testing' ), 'secondary', 'submit', false ); ?>
+			<?php submit_button( __( 'Scan now', 'variolab' ), 'secondary', 'submit', false ); ?>
 		</form>
 		<?php
 	}
 
 	public static function handle_scan_now(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Forbidden', 'uplift-ab-testing' ), 403 );
+			wp_die( esc_html__( 'Forbidden', 'variolab' ), 403 );
 		}
 		check_admin_referer( self::SCAN_NONCE, '_abtest_scan_nonce' );
 
@@ -178,7 +178,7 @@ final class HtmlImport {
 
 		$message = sprintf(
 			/* translators: 1: created, 2: updated, 3: skipped */
-			__( 'Scan complete: %1$d created, %2$d updated, %3$d unchanged.', 'uplift-ab-testing' ),
+			__( 'Scan complete: %1$d created, %2$d updated, %3$d unchanged.', 'variolab' ),
 			(int) $stats['created'],
 			(int) $stats['updated'],
 			(int) $stats['skipped']
@@ -206,13 +206,13 @@ final class HtmlImport {
 
 	public static function handle_upload(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Forbidden', 'uplift-ab-testing' ), 403 );
+			wp_die( esc_html__( 'Forbidden', 'variolab' ), 403 );
 		}
 		check_admin_referer( self::NONCE, '_abtest_import_nonce' );
 
 		// Validate upload.
 		if ( ! isset( $_FILES['html_file'] ) || ! is_array( $_FILES['html_file'] ) ) {
-			self::redirect_error( __( 'No file uploaded.', 'uplift-ab-testing' ) );
+			self::redirect_error( __( 'No file uploaded.', 'variolab' ) );
 		}
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		$file = $_FILES['html_file'];
@@ -223,13 +223,13 @@ final class HtmlImport {
 
 		$size = (int) ( $file['size'] ?? 0 );
 		if ( $size <= 0 ) {
-			self::redirect_error( __( 'Empty file.', 'uplift-ab-testing' ) );
+			self::redirect_error( __( 'Empty file.', 'variolab' ) );
 		}
 		if ( $size > self::max_bytes() ) {
 			self::redirect_error(
 				sprintf(
 					/* translators: 1: actual size, 2: limit */
-					__( 'File too large (%1$s). Max %2$s.', 'uplift-ab-testing' ),
+					__( 'File too large (%1$s). Max %2$s.', 'variolab' ),
 					size_format( $size ),
 					size_format( self::max_bytes() )
 				)
@@ -242,7 +242,7 @@ final class HtmlImport {
 			self::redirect_error(
 				sprintf(
 					/* translators: 1: comma-separated list of allowed extensions, 2: rejected extension */
-					__( 'Only %1$s files are accepted (got: .%2$s).', 'uplift-ab-testing' ),
+					__( 'Only %1$s files are accepted (got: .%2$s).', 'variolab' ),
 					'.' . implode( ', .', self::ALLOWED_EXTS ),
 					'' === $ext ? '(none)' : $ext
 				)
@@ -251,7 +251,7 @@ final class HtmlImport {
 
 		$tmp_name = isset( $file['tmp_name'] ) ? (string) $file['tmp_name'] : '';
 		if ( '' === $tmp_name || ! is_uploaded_file( $tmp_name ) ) {
-			self::redirect_error( __( 'Upload failed.', 'uplift-ab-testing' ) );
+			self::redirect_error( __( 'Upload failed.', 'variolab' ) );
 		}
 
 		// Real MIME check (finfo magic bytes) on top of the extension allowlist.
@@ -271,7 +271,7 @@ final class HtmlImport {
 			self::redirect_error(
 				sprintf(
 					/* translators: %s: rejected extension */
-					__( 'File MIME type does not match its .%s extension. Refused.', 'uplift-ab-testing' ),
+					__( 'File MIME type does not match its .%s extension. Refused.', 'variolab' ),
 					$ext
 				)
 			);
@@ -293,7 +293,7 @@ final class HtmlImport {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local upload tmp path, wp_remote_get does not apply
 			$contents = file_get_contents( $tmp_name );
 			if ( false === $contents ) {
-				self::redirect_error( __( 'Could not read uploaded file.', 'uplift-ab-testing' ) );
+				self::redirect_error( __( 'Could not read uploaded file.', 'variolab' ) );
 			}
 		}
 
@@ -304,7 +304,7 @@ final class HtmlImport {
 		}
 
 		if ( is_wp_error( $page_id ) || ! $page_id ) {
-			$msg = is_wp_error( $page_id ) ? $page_id->get_error_message() : __( 'Failed to save page.', 'uplift-ab-testing' );
+			$msg = is_wp_error( $page_id ) ? $page_id->get_error_message() : __( 'Failed to save page.', 'variolab' );
 			self::redirect_error( (string) $msg );
 		}
 
@@ -324,7 +324,7 @@ final class HtmlImport {
 		self::redirect_success(
 			sprintf(
 				/* translators: 1: page title, 2: page ID */
-				__( 'HTML imported into "%1$s" (#%2$d).', 'uplift-ab-testing' ),
+				__( 'HTML imported into "%1$s" (#%2$d).', 'variolab' ),
 				get_the_title( (int) $page_id ),
 				(int) $page_id
 			),
@@ -339,7 +339,7 @@ final class HtmlImport {
 		if ( '' === $title ) {
 			$title = sprintf(
 				/* translators: %s: timestamp at upload time */
-				__( 'HTML import — %s', 'uplift-ab-testing' ),
+				__( 'HTML import — %s', 'variolab' ),
 				current_time( 'Y-m-d H:i:s' )
 			);
 		}
@@ -363,7 +363,7 @@ final class HtmlImport {
 	private static function replace_existing( int $page_id, string $html ) {
 		$existing = get_post( $page_id );
 		if ( ! $existing instanceof \WP_Post ) {
-			return new \WP_Error( 'not_found', __( 'Target page not found.', 'uplift-ab-testing' ) );
+			return new \WP_Error( 'not_found', __( 'Target page not found.', 'variolab' ) );
 		}
 		$result = wp_update_post(
 			[
@@ -391,25 +391,25 @@ final class HtmlImport {
 	 */
 	private static function extract_zip_to_uploads( string $tmp_zip, string $slug ) {
 		if ( ! class_exists( 'ZipArchive' ) ) {
-			return new \WP_Error( 'no_zip', __( 'PHP ZipArchive extension is required to import .zip files.', 'uplift-ab-testing' ) );
+			return new \WP_Error( 'no_zip', __( 'PHP ZipArchive extension is required to import .zip files.', 'variolab' ) );
 		}
 
 		$zip = new \ZipArchive();
 		if ( true !== $zip->open( $tmp_zip ) ) {
-			return new \WP_Error( 'bad_zip', __( 'Could not open the .zip archive.', 'uplift-ab-testing' ) );
+			return new \WP_Error( 'bad_zip', __( 'Could not open the .zip archive.', 'variolab' ) );
 		}
 
 		$uploads = wp_upload_dir();
 		if ( ! empty( $uploads['error'] ) ) {
 			$zip->close();
-			return new \WP_Error( 'no_uploads', __( 'Could not access the uploads directory.', 'uplift-ab-testing' ) );
+			return new \WP_Error( 'no_uploads', __( 'Could not access the uploads directory.', 'variolab' ) );
 		}
 		$dest_dir = trailingslashit( $uploads['basedir'] ) . self::ASSETS_SUBDIR . '/' . $slug;
 		$dest_url = trailingslashit( $uploads['baseurl'] ) . self::ASSETS_SUBDIR . '/' . $slug;
 
 		if ( ! wp_mkdir_p( $dest_dir ) ) {
 			$zip->close();
-			return new \WP_Error( 'mkdir_failed', __( 'Could not create the assets directory.', 'uplift-ab-testing' ) );
+			return new \WP_Error( 'mkdir_failed', __( 'Could not create the assets directory.', 'variolab' ) );
 		}
 
 		$allowed_exts = [ 'html', 'htm', 'css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'avif', 'woff', 'woff2', 'ttf', 'otf', 'ico', 'json', 'txt', 'map' ];
@@ -472,14 +472,14 @@ final class HtmlImport {
 		$zip->close();
 
 		if ( '' === $index_html_path ) {
-			return new \WP_Error( 'no_html', __( 'No .html file found inside the archive.', 'uplift-ab-testing' ) );
+			return new \WP_Error( 'no_html', __( 'No .html file found inside the archive.', 'variolab' ) );
 		}
 
 		// Read the index HTML, rewrite relative asset paths to absolute URLs.
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local extracted file path, wp_remote_get does not apply
 		$html = file_get_contents( $index_html_path );
 		if ( false === $html ) {
-			return new \WP_Error( 'read_html', __( 'Could not read the index HTML file from the archive.', 'uplift-ab-testing' ) );
+			return new \WP_Error( 'read_html', __( 'Could not read the index HTML file from the archive.', 'variolab' ) );
 		}
 
 		// Determine the base URL of the index relative to the assets folder root,
@@ -599,16 +599,16 @@ final class HtmlImport {
 		switch ( $code ) {
 			case UPLOAD_ERR_INI_SIZE:
 			case UPLOAD_ERR_FORM_SIZE:
-				return __( 'File too large (server upload limit).', 'uplift-ab-testing' );
+				return __( 'File too large (server upload limit).', 'variolab' );
 			case UPLOAD_ERR_PARTIAL:
-				return __( 'Upload was interrupted.', 'uplift-ab-testing' );
+				return __( 'Upload was interrupted.', 'variolab' );
 			case UPLOAD_ERR_NO_FILE:
-				return __( 'No file selected.', 'uplift-ab-testing' );
+				return __( 'No file selected.', 'variolab' );
 			case UPLOAD_ERR_NO_TMP_DIR:
 			case UPLOAD_ERR_CANT_WRITE:
-				return __( 'Server could not save the upload.', 'uplift-ab-testing' );
+				return __( 'Server could not save the upload.', 'variolab' );
 			default:
-				return __( 'Upload error.', 'uplift-ab-testing' );
+				return __( 'Upload error.', 'variolab' );
 		}
 	}
 

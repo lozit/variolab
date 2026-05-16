@@ -1,7 +1,7 @@
 {
-  "name": "uplift-ab-testing",
+  "name": "variolab",
   "version": "0.1.0",
-  "description": "Uplift – A/B Testing: lightweight A/B testing for pages with internal tracking and a 50/50 cookie split.",
+  "description": "Variolab – A/B Testing: lightweight A/B testing for pages with internal tracking and a 50/50 cookie split.",
   "private": true,
   "scripts": {
     "env:start": "wp-env start",

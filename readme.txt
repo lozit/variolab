@@ -1,10 +1,10 @@
-=== Uplift – A/B Testing ===
+=== Variolab – A/B Testing ===
 Contributors: guillaumeferrari
 Tags: ab testing, split testing, conversion, analytics
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.1
-Stable tag: 0.12.0
+Stable tag: 0.13.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,7 +61,7 @@ For W3 Total Cache, WP Super Cache, WP Fastest Cache, and Cache Enabler — the 
 == Installation ==
 
 1. Upload the plugin folder to `/wp-content/plugins/`.
-2. Activate **Uplift – A/B Testing** through the Plugins menu.
+2. Activate **Variolab – A/B Testing** through the Plugins menu.
 3. Go to **A/B Tests** in the admin sidebar to create your first experiment.
 
 == REST API ==
@@ -90,7 +90,7 @@ The response includes for each experiment: id, title, test_url, status, dates, c
 
 The plugin stores no raw IP, no User-Agent, no email, no name, and no cross-site tracking identifier. The events table contains: experiment_id, variant, test_url, event_type, created_at, and a `visitor_hash` = first 16 hex chars (64 bits) of `sha256(IP + UA + wp_salt('auth'))` — non-reversible, single-site, salt-rotated, dedup-safe. Cookies are httponly, samesite=Lax, secure on HTTPS, value = a single letter (a/b/c/d), 30-day TTL.
 
-A native WordPress privacy guide snippet is registered automatically — find it under Settings → Privacy → Policy Guide → Uplift – A/B Testing to paste into your privacy policy.
+A native WordPress privacy guide snippet is registered automatically — find it under Settings → Privacy → Policy Guide → Variolab – A/B Testing to paste into your privacy policy.
 
 For consent-banner sites: enable "Require consent" in the plugin settings and wire your banner to the `abtest_visitor_has_consent` filter (return true to track, false/null to block). Snippets for Complianz, CookieYes, and Cookiebot are in the README on GitHub.
 
@@ -115,6 +115,11 @@ v1 only swaps the entire page (the variant must be a separate post). Block-level
 4. Settings — generic webhooks (Zapier / Make / n8n / Slack) and REST API documentation
 
 == Changelog ==
+
+= 0.13.0 =
+* **Renamed plugin** to **Variolab – A/B Testing** (slug `variolab`). The wp.org Plugin Review Team flagged "Uplift" on two cumulative grounds: (1) it is the standard industry term for the A/B-testing lift metric (non-distinctive — every VWO/Statsig/Insider/etc. doc uses "uplift" to mean conversion-rate lift), and (2) UPLIFT® is a live USPTO trademark (Reg. 4973441, UPLIFT INC., San Francisco) in the same "Advertising, Business & Retail Services" class as the plugin. Variolab is an invented term (vario + lab) with no wp.org / USPTO / SaaS hit at name-pick time.
+* Coordinated multi-file change: plugin header display name + text domain (`uplift-ab-testing` → `variolab` everywhere — every `__()`/`_e()` call across `includes/`), main plugin file `uplift-ab-testing.php` → `variolab.php`, `composer.json`/`package.json` package names, `phpcs.xml.dist` text-domain element + file ref + ruleset name, `tests/Integration/bootstrap.php` require path, `.github/workflows/{ci,release}.yml` build folder + zip filename + header-version grep.
+* **Internal naming kept untouched** (no DB / cookie / option / hook breaking change for existing installs): `Abtest\` PHP namespace, `abtest_*` hook/cookie prefixes, REST namespace `abtest/v1`, custom table `wp_abtest_events`, option keys (`abtest_settings`, `abtest_db_version`).
 
 = 0.12.0 =
 * **Renamed plugin** to **Uplift – A/B Testing** (slug `uplift-ab-testing`). The WordPress trademark guideline forbids the word "WordPress" in both the plugin display name and the slug — this rename closes the last remaining wp.org submission blocker.
@@ -187,7 +192,7 @@ v1 only swaps the entire page (the variant must be a separate post). Block-level
 
 = 0.8.0 =
 * Privacy & consent gating (GDPR): new "Require consent" toggle in Settings — when on, the plugin sets no cookie and logs no event until the `abtest_visitor_has_consent` filter returns true. Without consent, visitors silently see Variant A (same path as out-of-target). Off by default, no breaking change.
-* Native WordPress privacy guide content registered via `wp_add_privacy_policy_content()` — find it under Settings → Privacy → Policy Guide → Uplift – A/B Testing, ready to paste into your privacy policy.
+* Native WordPress privacy guide content registered via `wp_add_privacy_policy_content()` — find it under Settings → Privacy → Policy Guide → Variolab – A/B Testing, ready to paste into your privacy policy.
 * README now has a Privacy & GDPR section with copy-paste filter snippets for Complianz, CookieYes, and Cookiebot.
 * New `Consent` helper class + 5 unit tests covering the 4 gate states (off, on+true, on+false, on+null/missing filter).
 

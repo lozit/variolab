@@ -1,16 +1,16 @@
-# Uplift – A/B Testing
+# Variolab – A/B Testing
 
-[![CI](https://github.com/lozit/uplift-ab-testing/actions/workflows/ci.yml/badge.svg)](https://github.com/lozit/uplift-ab-testing/actions/workflows/ci.yml)
+[![CI](https://github.com/lozit/variolab/actions/workflows/ci.yml/badge.svg)](https://github.com/lozit/variolab/actions/workflows/ci.yml)
 [![Security Audit](https://img.shields.io/badge/security%20audit-10%2F10-brightgreen)](./docs/security/latest.md)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](./LICENSE)
 [![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-777BB4.svg)](#)
 [![WordPress 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759B.svg)](#)
 
 <p align="center">
-  <img src="./.wordpress-org/banner-1544x500.png" alt="Uplift – A/B Testing — self-hosted A/B testing for WordPress" width="900">
+  <img src="./.wordpress-org/banner-1544x500.png" alt="Variolab – A/B Testing — self-hosted A/B testing for WordPress" width="900">
 </p>
 
-Uplift is a self-hosted A/B testing plugin for WordPress. Test landing pages, compare conversion rates, and pipe events to your analytics stack — all on your own database, no third-party dependency required.
+Variolab is a self-hosted A/B testing plugin for WordPress. Test landing pages, compare conversion rates, and pipe events to your analytics stack — all on your own database, no third-party dependency required.
 
 Built around three core ideas:
 
@@ -98,9 +98,9 @@ Built around three core ideas:
 1. Clone this repo into `wp-content/plugins/`:
    ```bash
    cd wp-content/plugins
-   git clone https://github.com/<you>/uplift-ab-testing.git
+   git clone https://github.com/<you>/variolab.git
    ```
-2. Activate **Uplift – A/B Testing** in wp-admin → Plugins.
+2. Activate **Variolab – A/B Testing** in wp-admin → Plugins.
 
 ### Create your first test
 1. wp-admin → **A/B Tests** → **Add new**
@@ -158,7 +158,7 @@ The plugin is designed to be conservative by default — no raw IP, no User-Agen
 | `visitor_hash` | First 16 hex chars (64 bits) of `sha256(IP + '|' + UA + '|' + wp_salt('auth'))` — non-reversible, single-site, salt-rotated; **no raw IP or UA stored**. Truncation reduces brute-force surface while keeping dedup statistically safe (collision probability < 3e-8 at 1M visitors/exp). |
 | Third parties | None by default. GA4 / Webhooks integrations are off until configured. |
 
-A native privacy-policy snippet is registered with WordPress on activation — find it under **Settings → Privacy → Policy Guide → Uplift – A/B Testing**, ready to paste into your privacy policy.
+A native privacy-policy snippet is registered with WordPress on activation — find it under **Settings → Privacy → Policy Guide → Variolab – A/B Testing**, ready to paste into your privacy policy.
 
 ### Right to erasure
 
@@ -212,7 +212,7 @@ Security is verified at three points :
 **Disclosure policy** : see [`SECURITY.md`](./SECURITY.md)
 **Audit methodology** : [`.claude/commands/security-audit.md`](./.claude/commands/security-audit.md)
 
-To report a vulnerability : use GitHub's **Private vulnerability reporting** at https://github.com/lozit/uplift-ab-testing/security/advisories — please do not open a public issue.
+To report a vulnerability : use GitHub's **Private vulnerability reporting** at https://github.com/lozit/variolab/security/advisories — please do not open a public issue.
 
 ---
 
@@ -330,8 +330,8 @@ Used internally by the GA4 and Webhook integrations. Your own code can subscribe
 ## Architecture
 
 ```
-uplift-ab-testing/
-├── uplift-ab-testing.php          # Bootstrap (plugin header, activation hook, autoloader)
+variolab/
+├── variolab.php                   # Bootstrap (plugin header, activation hook, autoloader)
 ├── includes/
 │   ├── Plugin.php                  # Orchestrator, schema migration, components registration
 │   ├── Schema.php                  # wp_abtest_events table (dbDelta)

@@ -1,4 +1,4 @@
-# Uplift – A/B Testing Plugin
+# Variolab – A/B Testing Plugin
 
 Standalone WordPress plugin for whole-page A/B testing : internal DB tracking, persistent-cookie 50/50 split, no third-party dependency.
 
@@ -24,7 +24,7 @@ Standalone WordPress plugin for whole-page A/B testing : internal DB tracking, p
 
 ## Structure
 ```
-uplift-ab-testing.php      # bootstrap (plugin header + autoload)
+variolab.php               # bootstrap (plugin header + autoload)
 includes/                  # plugin classes (PSR-4)
 includes/Admin/            # wp-admin UI
 assets/js/                 # tracker.js frontend

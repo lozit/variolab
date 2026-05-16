@@ -32,10 +32,10 @@ jobs:
 
       - name: Sanity check — plugin header version matches tag
         run: |
-          HEADER_VERSION=$(grep -E "^\s\*\s+Version:\s+" uplift-ab-testing.php | awk '{print $3}' | tr -d '\r\n ')
+          HEADER_VERSION=$(grep -E "^\s\*\s+Version:\s+" variolab.php | awk '{print $3}' | tr -d '\r\n ')
           if [ "$HEADER_VERSION" != "${{ steps.version.outputs.version }}" ]; then
             echo "::error::Plugin header version ($HEADER_VERSION) does not match tag (${{ steps.version.outputs.version }})."
-            echo "Bump 'Version:' in uplift-ab-testing.php to ${{ steps.version.outputs.version }} and re-tag."
+            echo "Bump 'Version:' in variolab.php to ${{ steps.version.outputs.version }} and re-tag."
             exit 1
           fi
           echo "Plugin header version matches: $HEADER_VERSION ✓"
@@ -61,7 +61,7 @@ jobs:
 
       - name: Build distribution folder
         run: |
-          mkdir -p build/uplift-ab-testing
+          mkdir -p build/variolab
           rsync -av \
             --exclude='.git' \
             --exclude='.github' \
@@ -91,18 +91,18 @@ jobs:
             --exclude='wp-tests-config.php' \
             --exclude='phpunit.xml*' \
             --exclude='phpcs.xml*' \
-            ./ build/uplift-ab-testing/
+            ./ build/variolab/
           echo "--- Bundle contents (top level) ---"
-          ls -la build/uplift-ab-testing/
+          ls -la build/variolab/
           echo "--- File count ---"
-          find build/uplift-ab-testing/ -type f | wc -l
+          find build/variolab/ -type f | wc -l
 
       - name: Create zip
         run: |
           cd build
-          zip -r "../uplift-ab-testing-${{ steps.version.outputs.version }}.zip" uplift-ab-testing
+          zip -r "../variolab-${{ steps.version.outputs.version }}.zip" variolab
           cd ..
-          ls -lh uplift-ab-testing-${{ steps.version.outputs.version }}.zip
+          ls -lh variolab-${{ steps.version.outputs.version }}.zip
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v3
@@ -112,4 +112,4 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
-            uplift-ab-testing-${{ steps.version.outputs.version }}.zip
+            variolab-${{ steps.version.outputs.version }}.zip

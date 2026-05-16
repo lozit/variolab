@@ -152,13 +152,13 @@ final class CacheBypass {
 			if ( in_array( $plugin, [ 'WP Rocket', 'LiteSpeed Cache' ], true ) ) {
 				$messages[] = sprintf(
 					/* translators: %s: plugin name */
-					esc_html__( '%s detected — running experiments are auto-excluded from cache.', 'uplift-ab-testing' ),
+					esc_html__( '%s detected — running experiments are auto-excluded from cache.', 'variolab' ),
 					esc_html( $plugin )
 				);
 			} else {
 				$messages[] = sprintf(
 					/* translators: %s: plugin name */
-					esc_html__( '%s detected. No automatic exclusion API for this plugin — manually add your test URLs to its cache exclusion list, otherwise all visitors will see the same variant.', 'uplift-ab-testing' ),
+					esc_html__( '%s detected. No automatic exclusion API for this plugin — manually add your test URLs to its cache exclusion list, otherwise all visitors will see the same variant.', 'variolab' ),
 					esc_html( $plugin )
 				);
 			}
@@ -167,15 +167,24 @@ final class CacheBypass {
 		if ( $kinsta ) {
 			$messages[] = sprintf(
 				/* translators: %s: link to Kinsta cache bypass docs */
-				esc_html__( 'Kinsta hosting detected. We send no-store headers on every test page so the edge cache should bypass them. For 100%% safety, also add your test URLs to %s.', 'uplift-ab-testing' ),
+				esc_html__( 'Kinsta hosting detected. We send no-store headers on every test page so the edge cache should bypass them. For 100%% safety, also add your test URLs to %s.', 'variolab' ),
 				'<a href="https://kinsta.com/help/cache-control-bypass/" target="_blank" rel="noopener">MyKinsta → Tools → Cache → Cache Bypass</a>'
 			);
 		}
 
+		$allowed_tags = [
+			'br'     => [],
+			'strong' => [],
+			'a'      => [
+				'href'   => true,
+				'target' => true,
+				'rel'    => true,
+			],
+		];
 		printf(
 			'<div class="notice notice-info"><p><strong>%s</strong> %s</p></div>',
-			esc_html__( 'A/B Testing — caching:', 'uplift-ab-testing' ),
-			implode( '<br>', $messages ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			esc_html__( 'A/B Testing — caching:', 'variolab' ),
+			wp_kses( implode( '<br>', $messages ), $allowed_tags )
 		);
 	}
 

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<ruleset name="Uplift A/B Testing">
-    <description>WPCS ruleset for the Uplift – A/B Testing plugin — relaxed cosmetic rules, strict security.</description>
+<ruleset name="Variolab A/B Testing">
+    <description>WPCS ruleset for the Variolab – A/B Testing plugin — relaxed cosmetic rules, strict security.</description>
 
-    <file>./uplift-ab-testing.php</file>
+    <file>./variolab.php</file>
     <file>./includes</file>
     <file>./uninstall.php</file>
 
@@ -59,7 +59,7 @@
     <rule ref="WordPress.WP.I18n">
         <properties>
             <property name="text_domain" type="array">
-                <element value="uplift-ab-testing"/>
+                <element value="variolab"/>
             </property>
         </properties>
     </rule>
