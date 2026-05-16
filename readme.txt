@@ -1,5 +1,5 @@
 === Variolab – A/B Testing ===
-Contributors: guillaumeferrari
+Contributors: guillaumeferrari, lozit
 Tags: ab testing, split testing, conversion, analytics
 Requires at least: 6.0
 Tested up to: 6.9
@@ -113,6 +113,29 @@ v1 only swaps the entire page (the variant must be a separate post). Block-level
 2. Import HTML page — drag-and-drop upload (.html / .htm / .zip with assets) plus the Watch Directory panel for IDE sync
 3. Settings — privacy / consent gating (GDPR) and Google Analytics 4 Measurement Protocol integration
 4. Settings — generic webhooks (Zapier / Make / n8n / Slack) and REST API documentation
+
+== External services ==
+
+This plugin connects to one external service, **only when the site administrator opts in** through the plugin's Settings → Google Analytics 4 panel by entering a Measurement ID and API Secret. With the GA4 integration disabled (default), no data leaves your site.
+
+= Google Analytics 4 (Measurement Protocol) =
+
+What it is and what it's used for: when the GA4 integration is enabled, the plugin forwards A/B-test impression and conversion events to Google Analytics 4 via the Measurement Protocol, so the test results can be analyzed alongside your existing GA4 reports.
+
+What data is sent and when: on each impression and each conversion logged by the plugin, a single fire-and-forget HTTPS request is sent to `https://www.google-analytics.com/mp/collect` with a JSON payload containing:
+
+* `client_id` — the plugin's internal visitor hash (truncated salted SHA-256 of IP + User-Agent; never the raw IP or UA)
+* `events[].name` — `abtest_impression` or `abtest_conversion`
+* `events[].params.experiment_id` — the WordPress post ID of the experiment
+* `events[].params.variant` — the variant served (`a`, `b`, `c`, or `d`)
+* `events[].params.test_url` — the URL path under test (e.g. `/promo/`)
+
+No raw IP address, User-Agent string, email, name, WordPress user ID, or page content is sent.
+
+Service provided by Google. Please review their terms and policies before enabling the integration:
+
+* Google Analytics terms of service: https://marketingplatform.google.com/about/analytics/terms/us/
+* Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
 
