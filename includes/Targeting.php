@@ -46,8 +46,9 @@ final class Targeting {
 	 * Classify the current visitor's User-Agent into one of: mobile, tablet, desktop.
 	 */
 	public static function current_device(): string {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) $_SERVER['HTTP_USER_AGENT'] : '';
+		$ua = isset( $_SERVER['HTTP_USER_AGENT'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
+			: '';
 		return self::device_from_ua( $ua );
 	}
 
@@ -82,12 +83,11 @@ final class Targeting {
 			'HTTP_GEOIP_COUNTRY_CODE', // Apache mod_geoip / nginx ngx_http_geoip_module
 		];
 		foreach ( $headers as $h ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			if ( empty( $_SERVER[ $h ] ) ) {
 				continue;
 			}
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			$code = strtoupper( substr( (string) $_SERVER[ $h ], 0, 2 ) );
+			$raw  = sanitize_text_field( wp_unslash( $_SERVER[ $h ] ) );
+			$code = strtoupper( substr( $raw, 0, 2 ) );
 			if ( preg_match( '/^[A-Z]{2}$/', $code ) && 'XX' !== $code && 'T1' !== $code ) {
 				return $code;
 			}

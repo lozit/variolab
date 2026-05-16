@@ -80,14 +80,12 @@ final class Cookie {
 	 * non-reversible across sites — then truncated to HASH_LENGTH hex chars.
 	 */
 	public static function visitor_hash(): string {
-		$ip = '';
-		if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip = (string) $_SERVER['REMOTE_ADDR']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		}
-		$ua = '';
-		if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
-			$ua = (string) $_SERVER['HTTP_USER_AGENT']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		}
+		$ip = isset( $_SERVER['REMOTE_ADDR'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
+			: '';
+		$ua = isset( $_SERVER['HTTP_USER_AGENT'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
+			: '';
 		return substr( hash( 'sha256', $ip . '|' . $ua . '|' . wp_salt( 'auth' ) ), 0, self::HASH_LENGTH );
 	}
 

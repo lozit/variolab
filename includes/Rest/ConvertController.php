@@ -98,8 +98,9 @@ final class ConvertController {
 	 * wp_salt so we never store a raw address in the transient key.
 	 */
 	private function is_rate_limited(): bool {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- IP only used as wp_hash() input for transient key, never stored or echoed
-		$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) wp_unslash( $_SERVER['REMOTE_ADDR'] ) : '';
+		$ip  = isset( $_SERVER['REMOTE_ADDR'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
+			: '';
 		$key = 'abtest_convert_rl_' . substr( wp_hash( $ip, 'auth' ), 0, 16 );
 
 		$count = (int) get_transient( $key );

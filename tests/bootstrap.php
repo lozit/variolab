@@ -50,6 +50,21 @@ if ( ! function_exists( 'wp_unslash' ) ) {
 		return is_string( $value ) ? stripslashes( $value ) : $value;
 	}
 }
+if ( ! function_exists( 'sanitize_text_field' ) ) {
+	function sanitize_text_field( $str ): string {
+		$str = (string) $str;
+		$str = wp_check_invalid_utf8( $str );
+		$str = strip_tags( $str );
+		// Replace line breaks / tabs / multiple spaces with a single space, then trim.
+		$str = preg_replace( '/[\r\n\t ]+/', ' ', $str );
+		return trim( (string) $str );
+	}
+}
+if ( ! function_exists( 'wp_check_invalid_utf8' ) ) {
+	function wp_check_invalid_utf8( $str, $strip = false ): string {
+		return (string) $str;
+	}
+}
 if ( ! function_exists( 'is_ssl' ) ) {
 	function is_ssl(): bool {
 		return false;

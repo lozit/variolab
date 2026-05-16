@@ -126,8 +126,7 @@ final class UrlSettings {
 		if ( is_admin() || ! isset( $_SERVER['REQUEST_URI'] ) ) {
 			return false;
 		}
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- read-only routing key, normalized below
-		$uri    = (string) wp_unslash( $_SERVER['REQUEST_URI'] );
+		$uri    = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		$parsed = wp_parse_url( $uri, PHP_URL_PATH );
 		$path   = is_string( $parsed ) ? $parsed : '';
 		if ( '' === $path ) {
