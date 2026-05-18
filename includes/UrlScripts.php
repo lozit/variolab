@@ -171,7 +171,7 @@ final class UrlScripts {
 	 */
 	private static function parse_script_attrs( string $attrs_str ): array {
 		$attrs = [];
-		// Key="value" or key='value' pairs.
+		// Match quoted key/value pairs (double or single quotes).
 		if ( preg_match_all( '#(\w[\w-]*)\s*=\s*(["\'])([^"\']*)\2#', $attrs_str, $matches, PREG_SET_ORDER ) ) {
 			foreach ( $matches as $match ) {
 				$attrs[ strtolower( $match[1] ) ] = $match[3];
