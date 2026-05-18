@@ -1,5 +1,5 @@
 {
-  "name": "guillaumeferrari/variolab",
+  "name": "guillaumeferrari/variolab-ab-testing",
   "description": "Variolab – A/B Testing: lightweight A/B testing for pages with internal tracking and a 50/50 cookie split.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",

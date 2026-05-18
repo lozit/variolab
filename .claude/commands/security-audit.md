@@ -18,7 +18,7 @@ Run in this order. If any fails, fix before moving on to the manual audit (the W
 - `composer run lint` — PHPCS WordPress ruleset.
 - `composer run test` then `composer run test:integration` — cover regressions on consent gate, dedup, state machine, batch stats.
 - `composer audit` — CVEs on composer dependencies.
-- `gh api repos/lozit/uplift-ab-testing/dependabot/alerts --jq '.[] | select(.state == "open") | {state, severity, package: .security_advisory.summary}'` — open Dependabot alerts (ignore "fixed" / "dismissed"). Skip if Dependabot is disabled on the repo.
+- `gh api repos/lozit/variolab/dependabot/alerts --jq '.[] | select(.state == "open") | {state, severity, package: .security_advisory.summary}'` — open Dependabot alerts (ignore "fixed" / "dismissed"). Skip if Dependabot is disabled on the repo.
 
 If everything passes: continue. If something breaks: report the tooling findings in the report first, fix, re-run, then move on.
 
@@ -101,7 +101,7 @@ Files: `includes/Scheduler.php`, `includes/Watcher.php`.
 - Cron handlers `tick()` / `scan()` trust no external input — everything comes from the DB or filesystem we control?
 
 ### H. Direct file access + bootstrap
-Files: `includes/*.php`, `uplift-ab-testing.php`.
+Files: `includes/*.php`, `variolab-ab-testing.php`.
 
 - Do all PHP files start with `defined('ABSPATH') || exit;`?
 - No side-effects at require in the main file (only hook registrations)?
@@ -176,7 +176,7 @@ Conclude with:
 
 Read the current version:
 ```bash
-grep "ABTEST_VERSION" uplift-ab-testing.php | grep -oE "[0-9]+\.[0-9]+\.[0-9]+"
+grep "ABTEST_VERSION" variolab-ab-testing.php | grep -oE "[0-9]+\.[0-9]+\.[0-9]+"
 ```
 
 Write the report into **TWO** files:

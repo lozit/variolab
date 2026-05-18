@@ -11,7 +11,7 @@ Applies to: every `.php` file in the plugin.
 - CSS / JS handles: `abtest-xxx`
 - Tables: `{$wpdb->prefix}abtest_xxx`
 - Cookies: `abtest_xxx`
-- Text domain: `variolab` (= plugin slug)
+- Text domain: `variolab-ab-testing` (= plugin slug)
 
 ## PSR-4 namespace
 Root namespace: `Abtest\` → mapped to `includes/`.
@@ -35,7 +35,7 @@ Class name = file name (e.g. `Abtest\Router` → `includes/Router.php`).
 ```php
 <?php
 /**
- * Plugin Name: Uplift – A/B Testing
+ * Plugin Name: Variolab – A/B Testing
  * Description: Simple A/B testing, internal tracking, 50/50 cookie split.
  * Version: 0.1.0
  * Requires at least: 6.0

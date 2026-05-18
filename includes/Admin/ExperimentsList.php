@@ -45,14 +45,14 @@ final class ExperimentsList {
 		$csv_url = CsvExport::download_url( $from, $to, $show );
 		?>
 		<div class="wrap abtest-wrap">
-			<h1 class="wp-heading-inline"><?php esc_html_e( 'A/B Tests', 'variolab' ); ?></h1>
-			<a href="<?php echo esc_url( $new_url ); ?>" class="page-title-action"><?php esc_html_e( 'Add new', 'variolab' ); ?></a>
-			<a href="<?php echo esc_url( $csv_url ); ?>" class="page-title-action" title="<?php esc_attr_e( 'Download all visible experiments as CSV (respects current filters).', 'variolab' ); ?>">⬇ <?php esc_html_e( 'Export CSV', 'variolab' ); ?></a>
+			<h1 class="wp-heading-inline"><?php esc_html_e( 'A/B Tests', 'variolab-ab-testing' ); ?></h1>
+			<a href="<?php echo esc_url( $new_url ); ?>" class="page-title-action"><?php esc_html_e( 'Add new', 'variolab-ab-testing' ); ?></a>
+			<a href="<?php echo esc_url( $csv_url ); ?>" class="page-title-action" title="<?php esc_attr_e( 'Download all visible experiments as CSV (respects current filters).', 'variolab-ab-testing' ); ?>">⬇ <?php esc_html_e( 'Export CSV', 'variolab-ab-testing' ); ?></a>
 
 			<?php self::render_date_filter( $from, $to ); ?>
 
 			<?php if ( empty( $experiments ) ) : ?>
-				<p><?php esc_html_e( 'No experiments yet. Create your first A/B test.', 'variolab' ); ?></p>
+				<p><?php esc_html_e( 'No experiments yet. Create your first A/B test.', 'variolab-ab-testing' ); ?></p>
 				<?php return; ?>
 			<?php endif; ?>
 
@@ -80,11 +80,11 @@ final class ExperimentsList {
 					if ( ! $show_all && $hidden_count > 0 ) {
 						printf(
 							/* translators: %s: link to show all */
-							esc_html__( 'No URLs with a running experiment. %s to see archived URLs.', 'variolab' ),
-							'<a href="' . esc_url( add_query_arg( [ 'page' => Admin::menu_slug(), 'show' => 'all' ], admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Show all', 'variolab' ) . '</a>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							esc_html__( 'No URLs with a running experiment. %s to see archived URLs.', 'variolab-ab-testing' ),
+							'<a href="' . esc_url( add_query_arg( [ 'page' => Admin::menu_slug(), 'show' => 'all' ], admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Show all', 'variolab-ab-testing' ) . '</a>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						);
 					} else {
-						esc_html_e( 'No experiments to display.', 'variolab' );
+						esc_html_e( 'No experiments to display.', 'variolab-ab-testing' );
 					}
 					?>
 				</p>
@@ -109,7 +109,7 @@ final class ExperimentsList {
 						<?php if ( '' !== $url ) : ?>
 							<a href="<?php echo esc_url( $test_url_full ); ?>" target="_blank" rel="noopener"><code><?php echo esc_html( $url ); ?></code></a>
 						<?php else : ?>
-							<code class="abtest-no-url"><?php esc_html_e( '(no URL set)', 'variolab' ); ?></code>
+							<code class="abtest-no-url"><?php esc_html_e( '(no URL set)', 'variolab-ab-testing' ); ?></code>
 						<?php endif; ?>
 						<small class="abtest-url-meta">
 							<?php
@@ -120,7 +120,7 @@ final class ExperimentsList {
 										'%1$d experiment · %2$s impressions · %3$s conversions · %4$s overall',
 										'%1$d experiments · %2$s impressions · %3$s conversions · %4$s overall',
 										$exp_count,
-										'variolab'
+										'variolab-ab-testing'
 									)
 								),
 								(int) $exp_count,
@@ -130,17 +130,17 @@ final class ExperimentsList {
 							);
 							?>
 						</small>
-						<a href="<?php echo esc_url( $add_to_url ); ?>" class="page-title-action abtest-add-to-url">+ <?php esc_html_e( 'Add experiment to this URL', 'variolab' ); ?></a>
+						<a href="<?php echo esc_url( $add_to_url ); ?>" class="page-title-action abtest-add-to-url">+ <?php esc_html_e( 'Add experiment to this URL', 'variolab-ab-testing' ); ?></a>
 					</h2>
 
 					<table class="wp-list-table widefat striped abtest-list">
 						<thead>
 							<tr>
-								<th style="width:24%;"><?php esc_html_e( 'Experiment', 'variolab' ); ?></th>
-								<th style="width:10%;"><?php esc_html_e( 'Status', 'variolab' ); ?></th>
-								<th style="width:46%;"><?php esc_html_e( 'Variants', 'variolab' ); ?></th>
-								<th style="width:8%;"><?php esc_html_e( 'Best', 'variolab' ); ?></th>
-								<th style="width:12%;"><?php esc_html_e( 'Actions', 'variolab' ); ?></th>
+								<th style="width:24%;"><?php esc_html_e( 'Experiment', 'variolab-ab-testing' ); ?></th>
+								<th style="width:10%;"><?php esc_html_e( 'Status', 'variolab-ab-testing' ); ?></th>
+								<th style="width:46%;"><?php esc_html_e( 'Variants', 'variolab-ab-testing' ); ?></th>
+								<th style="width:8%;"><?php esc_html_e( 'Best', 'variolab-ab-testing' ); ?></th>
+								<th style="width:12%;"><?php esc_html_e( 'Actions', 'variolab-ab-testing' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -201,7 +201,7 @@ final class ExperimentsList {
 						if ( $started_at && $ended_at ) {
 							printf(
 								/* translators: 1: start date, 2: end date, 3: duration like "3 days" */
-								esc_html__( '%1$s → %2$s (%3$s)', 'variolab' ),
+								esc_html__( '%1$s → %2$s (%3$s)', 'variolab-ab-testing' ),
 								esc_html( mysql2date( get_option( 'date_format' ), $started_at ) ),
 								esc_html( mysql2date( get_option( 'date_format' ), $ended_at ) ),
 								esc_html( $duration )
@@ -209,7 +209,7 @@ final class ExperimentsList {
 						} elseif ( $started_at ) {
 							printf(
 								/* translators: 1: start date, 2: duration */
-								esc_html__( 'Since %1$s (%2$s)', 'variolab' ),
+								esc_html__( 'Since %1$s (%2$s)', 'variolab-ab-testing' ),
 								esc_html( mysql2date( get_option( 'date_format' ), $started_at ) ),
 								esc_html( $duration )
 							);
@@ -224,13 +224,13 @@ final class ExperimentsList {
 			</td>
 			<td>
 				<?php if ( count( $labels ) <= 1 ) : ?>
-					<span class="abtest-badge abtest-badge-baseline"><?php esc_html_e( 'Baseline', 'variolab' ); ?></span>
+					<span class="abtest-badge abtest-badge-baseline"><?php esc_html_e( 'Baseline', 'variolab-ab-testing' ); ?></span>
 				<?php elseif ( null !== $multi['best'] ) : ?>
 					<span class="abtest-badge abtest-badge-sig">
 						<?php
 						printf(
 							/* translators: %s: variant label */
-							esc_html__( '%s wins', 'variolab' ),
+							esc_html__( '%s wins', 'variolab-ab-testing' ),
 							esc_html( (string) $multi['best'] )
 						);
 						?>
@@ -242,7 +242,7 @@ final class ExperimentsList {
 					<span class="abtest-muted abtest-ci abtest-no-winner" title="<?php echo esc_attr( $reason ); ?>">
 						<?php
 						/* translators: %s: alpha threshold */
-						printf( esc_html__( 'No winner (α=%s)', 'variolab' ), esc_html( number_format_i18n( (float) $multi['alpha'], 3 ) ) );
+						printf( esc_html__( 'No winner (α=%s)', 'variolab-ab-testing' ), esc_html( number_format_i18n( (float) $multi['alpha'], 3 ) ) );
 						?>
 						<span class="abtest-help-icon" aria-hidden="true">?</span>
 						<span class="screen-reader-text"><?php echo esc_html( $reason ); ?></span>
@@ -250,34 +250,34 @@ final class ExperimentsList {
 				<?php endif; ?>
 			</td>
 			<td class="abtest-actions">
-				<a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'Edit', 'variolab' ); ?></a>
+				<a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'Edit', 'variolab-ab-testing' ); ?></a>
 
 				<?php if ( Experiment::STATUS_DRAFT === $status ) : ?>
-					| <a href="<?php echo esc_url( self::status_url( $exp_id, Experiment::STATUS_RUNNING ) ); ?>"><?php esc_html_e( 'Start', 'variolab' ); ?></a>
+					| <a href="<?php echo esc_url( self::status_url( $exp_id, Experiment::STATUS_RUNNING ) ); ?>"><?php esc_html_e( 'Start', 'variolab-ab-testing' ); ?></a>
 				<?php elseif ( Experiment::STATUS_RUNNING === $status ) : ?>
-					| <a href="<?php echo esc_url( self::status_url( $exp_id, Experiment::STATUS_PAUSED ) ); ?>"><?php esc_html_e( 'Pause', 'variolab' ); ?></a>
-					| <a href="<?php echo esc_url( self::status_url( $exp_id, Experiment::STATUS_ENDED ) ); ?>"><?php esc_html_e( 'End', 'variolab' ); ?></a>
+					| <a href="<?php echo esc_url( self::status_url( $exp_id, Experiment::STATUS_PAUSED ) ); ?>"><?php esc_html_e( 'Pause', 'variolab-ab-testing' ); ?></a>
+					| <a href="<?php echo esc_url( self::status_url( $exp_id, Experiment::STATUS_ENDED ) ); ?>"><?php esc_html_e( 'End', 'variolab-ab-testing' ); ?></a>
 				<?php elseif ( Experiment::STATUS_PAUSED === $status ) : ?>
 					| <a href="<?php echo esc_url( self::resume_url( $exp_id ) ); ?>"
 						 class="abtest-resume"
-						 title="<?php esc_attr_e( 'Create a new experiment from this one and start it. The original keeps its locked dates.', 'variolab' ); ?>"
-						 onclick="return confirm('<?php echo esc_js( __( 'Resume by creating a new experiment with fresh dates? The original stays paused with its current period locked.', 'variolab' ) ); ?>');">
-						<?php esc_html_e( 'Resume', 'variolab' ); ?>
+						 title="<?php esc_attr_e( 'Create a new experiment from this one and start it. The original keeps its locked dates.', 'variolab-ab-testing' ); ?>"
+						 onclick="return confirm('<?php echo esc_js( __( 'Resume by creating a new experiment with fresh dates? The original stays paused with its current period locked.', 'variolab-ab-testing' ) ); ?>');">
+						<?php esc_html_e( 'Resume', 'variolab-ab-testing' ); ?>
 					</a>
-					| <a href="<?php echo esc_url( self::status_url( $exp_id, Experiment::STATUS_ENDED ) ); ?>"><?php esc_html_e( 'End', 'variolab' ); ?></a>
+					| <a href="<?php echo esc_url( self::status_url( $exp_id, Experiment::STATUS_ENDED ) ); ?>"><?php esc_html_e( 'End', 'variolab-ab-testing' ); ?></a>
 				<?php endif; ?>
 
 				<?php if ( Experiment::STATUS_RUNNING !== $status && Experiment::STATUS_ENDED !== $status && $running_other instanceof \WP_Post ) : ?>
 					|
 					<a href="<?php echo esc_url( self::replace_running_url( $exp_id ) ); ?>"
 					   class="abtest-replace"
-					   title="<?php echo esc_attr( sprintf( /* translators: %s: title of the experiment that will be paused */ __( 'Pause "%s" and start this one in a single action.', 'variolab' ), get_the_title( $running_other ) ) ); ?>"
-					   onclick="return confirm('<?php echo esc_js( sprintf( /* translators: 1: running experiment title, 2: new experiment title */ __( 'Replace "%1$s" (running) with "%2$s"? The current one will be paused.', 'variolab' ), get_the_title( $running_other ), get_the_title( $experiment ) ) ); ?>');">
-						<?php esc_html_e( 'Replace running', 'variolab' ); ?>
+					   title="<?php echo esc_attr( sprintf( /* translators: %s: title of the experiment that will be paused */ __( 'Pause "%s" and start this one in a single action.', 'variolab-ab-testing' ), get_the_title( $running_other ) ) ); ?>"
+					   onclick="return confirm('<?php echo esc_js( sprintf( /* translators: 1: running experiment title, 2: new experiment title */ __( 'Replace "%1$s" (running) with "%2$s"? The current one will be paused.', 'variolab-ab-testing' ), get_the_title( $running_other ), get_the_title( $experiment ) ) ); ?>');">
+						<?php esc_html_e( 'Replace running', 'variolab-ab-testing' ); ?>
 					</a>
 				<?php endif; ?>
 
-				| <a href="<?php echo esc_url( self::delete_url( $exp_id ) ); ?>" class="abtest-delete" onclick="return confirm('<?php echo esc_js( __( 'Delete this experiment? Events will be lost.', 'variolab' ) ); ?>');"><?php esc_html_e( 'Delete', 'variolab' ); ?></a>
+				| <a href="<?php echo esc_url( self::delete_url( $exp_id ) ); ?>" class="abtest-delete" onclick="return confirm('<?php echo esc_js( __( 'Delete this experiment? Events will be lost.', 'variolab-ab-testing' ) ); ?>');"><?php esc_html_e( 'Delete', 'variolab-ab-testing' ); ?></a>
 			</td>
 		</tr>
 		<?php
@@ -348,7 +348,7 @@ final class ExperimentsList {
 		$canvas_id = 'abtest-chart-' . md5( $url );
 		?>
 		<div class="abtest-chart-wrap">
-			<h3 class="abtest-chart-title"><?php esc_html_e( 'Daily conversion rate', 'variolab' ); ?></h3>
+			<h3 class="abtest-chart-title"><?php esc_html_e( 'Daily conversion rate', 'variolab-ab-testing' ); ?></h3>
 			<div class="abtest-chart-canvas-wrap">
 				<canvas id="<?php echo esc_attr( $canvas_id ); ?>" class="abtest-url-chart"></canvas>
 				<script type="application/json" class="abtest-chart-data"><?php echo wp_json_encode( $breakdown ); ?></script>
@@ -367,8 +367,8 @@ final class ExperimentsList {
 		?>
 		<p class="abtest-visibility-toggle">
 			<?php if ( $show_all ) : ?>
-				<?php esc_html_e( 'Showing all URLs (including those without a running experiment).', 'variolab' ); ?>
-				<a href="<?php echo esc_url( add_query_arg( $base, admin_url( 'admin.php' ) ) ); ?>"><?php esc_html_e( 'Show only running', 'variolab' ); ?></a>
+				<?php esc_html_e( 'Showing all URLs (including those without a running experiment).', 'variolab-ab-testing' ); ?>
+				<a href="<?php echo esc_url( add_query_arg( $base, admin_url( 'admin.php' ) ) ); ?>"><?php esc_html_e( 'Show only running', 'variolab-ab-testing' ); ?></a>
 			<?php elseif ( $hidden_count > 0 ) : ?>
 				<?php
 				printf(
@@ -378,13 +378,13 @@ final class ExperimentsList {
 							'%d archived URL hidden (no running experiment).',
 							'%d archived URLs hidden (no running experiment).',
 							$hidden_count,
-							'variolab'
+							'variolab-ab-testing'
 						)
 					),
 					(int) $hidden_count
 				);
 				?>
-				<a href="<?php echo esc_url( add_query_arg( array_merge( $base, [ 'show' => 'all' ] ), admin_url( 'admin.php' ) ) ); ?>"><?php esc_html_e( 'Show all', 'variolab' ); ?></a>
+				<a href="<?php echo esc_url( add_query_arg( array_merge( $base, [ 'show' => 'all' ] ), admin_url( 'admin.php' ) ) ); ?>"><?php esc_html_e( 'Show all', 'variolab-ab-testing' ); ?></a>
 			<?php endif; ?>
 		</p>
 		<?php
@@ -419,7 +419,7 @@ final class ExperimentsList {
 						<?php
 						printf(
 							/* translators: 1: conversions, 2: impressions, 3: conversion rate */
-							esc_html__( '%1$d / %2$d (%3$s)', 'variolab' ),
+							esc_html__( '%1$d / %2$d (%3$s)', 'variolab-ab-testing' ),
 							(int) $row['conversions'],
 							(int) $row['impressions'],
 							esc_html( self::pct( (float) $row['rate'] ) )
@@ -427,19 +427,19 @@ final class ExperimentsList {
 						?>
 					</span>
 					<?php if ( $label === $baseline ) : ?>
-						<span class="abtest-variant-baseline"><?php esc_html_e( 'baseline', 'variolab' ); ?></span>
+						<span class="abtest-variant-baseline"><?php esc_html_e( 'baseline', 'variolab-ab-testing' ); ?></span>
 					<?php elseif ( $cmp ) : ?>
 						<span class="abtest-lift abtest-lift-<?php echo $cmp['lift'] >= 0 ? 'pos' : 'neg'; ?>">
 							<?php echo esc_html( self::pct( (float) $cmp['lift'], true ) ); ?>
 						</span>
 						<?php if ( $cmp['significant'] ) : ?>
-							<span class="abtest-badge abtest-badge-sig"><?php esc_html_e( 'sig', 'variolab' ); ?></span>
+							<span class="abtest-badge abtest-badge-sig"><?php esc_html_e( 'sig', 'variolab-ab-testing' ); ?></span>
 						<?php else : ?>
 							<span class="abtest-muted abtest-ci">
 								<?php
 								printf(
 									/* translators: 1: low bound, 2: high bound */
-									esc_html__( '95%% CI [%1$s ; %2$s]', 'variolab' ),
+									esc_html__( '95%% CI [%1$s ; %2$s]', 'variolab-ab-testing' ),
 									esc_html( self::pct( (float) $cmp['lift_ci_low'], true ) ),
 									esc_html( self::pct( (float) $cmp['lift_ci_high'], true ) )
 								);
@@ -466,33 +466,33 @@ final class ExperimentsList {
 		<form method="get" class="abtest-date-filter">
 			<input type="hidden" name="page" value="<?php echo esc_attr( Admin::menu_slug() ); ?>">
 			<label>
-				<?php esc_html_e( 'From', 'variolab' ); ?>
+				<?php esc_html_e( 'From', 'variolab-ab-testing' ); ?>
 				<input type="date" name="from" value="<?php echo esc_attr( $from ); ?>" max="<?php echo esc_attr( $today ); ?>">
 			</label>
 			<label>
-				<?php esc_html_e( 'To', 'variolab' ); ?>
+				<?php esc_html_e( 'To', 'variolab-ab-testing' ); ?>
 				<input type="date" name="to" value="<?php echo esc_attr( $to ); ?>" max="<?php echo esc_attr( $today ); ?>">
 			</label>
-			<button type="submit" class="button button-secondary"><?php esc_html_e( 'Apply', 'variolab' ); ?></button>
+			<button type="submit" class="button button-secondary"><?php esc_html_e( 'Apply', 'variolab-ab-testing' ); ?></button>
 			<span class="abtest-date-presets">
-				<a href="<?php echo esc_url( $preset_url( [ 'from' => $preset_7, 'to' => $today ] ) ); ?>"><?php esc_html_e( 'Last 7 days', 'variolab' ); ?></a>
+				<a href="<?php echo esc_url( $preset_url( [ 'from' => $preset_7, 'to' => $today ] ) ); ?>"><?php esc_html_e( 'Last 7 days', 'variolab-ab-testing' ); ?></a>
 				·
-				<a href="<?php echo esc_url( $preset_url( [ 'from' => $preset_30, 'to' => $today ] ) ); ?>"><?php esc_html_e( 'Last 30 days', 'variolab' ); ?></a>
+				<a href="<?php echo esc_url( $preset_url( [ 'from' => $preset_30, 'to' => $today ] ) ); ?>"><?php esc_html_e( 'Last 30 days', 'variolab-ab-testing' ); ?></a>
 				·
-				<a href="<?php echo esc_url( $preset_url( [] ) ); ?>"><?php esc_html_e( 'All time', 'variolab' ); ?></a>
+				<a href="<?php echo esc_url( $preset_url( [] ) ); ?>"><?php esc_html_e( 'All time', 'variolab-ab-testing' ); ?></a>
 			</span>
 			<?php if ( '' !== $from || '' !== $to ) : ?>
 				<span class="abtest-date-active">
 					<?php
 					if ( '' !== $from && '' !== $to ) {
 						/* translators: 1: from date (YYYY-MM-DD), 2: to date (YYYY-MM-DD) */
-						printf( esc_html__( 'Showing events from %1$s to %2$s', 'variolab' ), esc_html( $from ), esc_html( $to ) );
+						printf( esc_html__( 'Showing events from %1$s to %2$s', 'variolab-ab-testing' ), esc_html( $from ), esc_html( $to ) );
 					} elseif ( '' !== $from ) {
 						/* translators: %s: from date (YYYY-MM-DD) */
-						printf( esc_html__( 'Showing events since %s', 'variolab' ), esc_html( $from ) );
+						printf( esc_html__( 'Showing events since %s', 'variolab-ab-testing' ), esc_html( $from ) );
 					} else {
 						/* translators: %s: to date (YYYY-MM-DD) */
-						printf( esc_html__( 'Showing events up to %s', 'variolab' ), esc_html( $to ) );
+						printf( esc_html__( 'Showing events up to %s', 'variolab-ab-testing' ), esc_html( $to ) );
 					}
 					?>
 				</span>

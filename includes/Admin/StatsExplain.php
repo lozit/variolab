@@ -44,7 +44,7 @@ final class StatsExplain {
 
 		// Edge : no comparisons at all (baseline-only experiment) — shouldn't show "No winner" but be safe.
 		if ( empty( $cmps ) || empty( $variants ) ) {
-			return __( 'Baseline experiment — there is no second variant to compare against.', 'variolab' );
+			return __( 'Baseline experiment — there is no second variant to compare against.', 'variolab-ab-testing' );
 		}
 
 		$impressions     = array_map( static fn( $v ) => (int) ( $v['impressions'] ?? 0 ), $variants );
@@ -58,7 +58,7 @@ final class StatsExplain {
 				if ( $days < self::MIN_DAYS_RUNNING_FOR_DECISION ) {
 					return sprintf(
 						/* translators: %d: number of days the experiment has been running */
-						__( 'Too early to decide (%d days). Most A/B tests on moderate-traffic sites need 2–4 weeks to reach reliable significance. Be patient.', 'variolab' ),
+						__( 'Too early to decide (%d days). Most A/B tests on moderate-traffic sites need 2–4 weeks to reach reliable significance. Be patient.', 'variolab-ab-testing' ),
 						$days
 					);
 				}
@@ -69,7 +69,7 @@ final class StatsExplain {
 		if ( $min_impressions < self::MIN_IMP_PER_VARIANT ) {
 			return sprintf(
 				/* translators: 1: smallest variant impressions, 2: typical threshold */
-				__( 'Sample too small (%1$d impressions on the least-seen variant, %2$d minimum recommended). With so few visitors a real gain cannot be told apart from random noise. Keep collecting or expand the traffic.', 'variolab' ),
+				__( 'Sample too small (%1$d impressions on the least-seen variant, %2$d minimum recommended). With so few visitors a real gain cannot be told apart from random noise. Keep collecting or expand the traffic.', 'variolab-ab-testing' ),
 				$min_impressions,
 				self::MIN_IMP_PER_VARIANT
 			);
@@ -90,7 +90,7 @@ final class StatsExplain {
 		if ( $best_p < $alpha * self::BORDERLINE_FACTOR ) {
 			return sprintf(
 				/* translators: 1: variant label, 2: p-value, 3: alpha threshold */
-				__( 'Variant %1$s is very close to the threshold (p=%2$.3f vs α=%3$.3f). A few more weeks of data should be enough to reach a verdict.', 'variolab' ),
+				__( 'Variant %1$s is very close to the threshold (p=%2$.3f vs α=%3$.3f). A few more weeks of data should be enough to reach a verdict.', 'variolab-ab-testing' ),
 				$best_label,
 				$best_p,
 				$alpha
@@ -112,7 +112,7 @@ final class StatsExplain {
 		if ( $relative < self::FLAT_EFFECT_THRESHOLD ) {
 			return sprintf(
 				/* translators: %s: relative spread percentage (e.g. "9.0%") */
-				__( 'No detectable difference between variants (all within ±%s of each other). This change probably has no effect — move on to the next test.', 'variolab' ),
+				__( 'No detectable difference between variants (all within ±%s of each other). This change probably has no effect — move on to the next test.', 'variolab-ab-testing' ),
 				number_format_i18n( $relative * 100, 1 ) . '%'
 			);
 		}
@@ -120,7 +120,7 @@ final class StatsExplain {
 		// (6) Generic fallback — observed difference, not enough evidence.
 		return sprintf(
 			/* translators: 1: best p-value, 2: alpha threshold */
-			__( 'A difference is observed but not sharp enough to call (best p=%1$.3f, threshold is p<%2$.3f). Keep the test running or grow the traffic.', 'variolab' ),
+			__( 'A difference is observed but not sharp enough to call (best p=%1$.3f, threshold is p<%2$.3f). Keep the test running or grow the traffic.', 'variolab-ab-testing' ),
 			$best_p,
 			$alpha
 		);

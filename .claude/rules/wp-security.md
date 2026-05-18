@@ -27,7 +27,7 @@ Placeholders: `%d` (int), `%f` (float), `%s` (string). For `IN (?)`: build the `
 Admin example:
 ```php
 <input type="text" name="abtest_goal" value="<?php echo esc_attr( $goal ); ?>" />
-<p><?php echo esc_html__( 'Goal URL', 'uplift-ab-testing' ); ?></p>
+<p><?php echo esc_html__( 'Goal URL', 'variolab-ab-testing' ); ?></p>
 ```
 
 ## Input sanitization (at intake)
@@ -48,7 +48,7 @@ wp_nonce_field( 'abtest_save_experiment', '_abtest_nonce' );
 
 // Handler:
 if ( ! current_user_can( 'manage_options' ) ) {
-    wp_die( esc_html__( 'Forbidden', 'uplift-ab-testing' ), 403 );
+    wp_die( esc_html__( 'Forbidden', 'variolab-ab-testing' ), 403 );
 }
 check_admin_referer( 'abtest_save_experiment', '_abtest_nonce' );
 ```

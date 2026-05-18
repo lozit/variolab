@@ -2,7 +2,7 @@
 <ruleset name="Variolab A/B Testing">
     <description>WPCS ruleset for the Variolab – A/B Testing plugin — relaxed cosmetic rules, strict security.</description>
 
-    <file>./variolab.php</file>
+    <file>./variolab-ab-testing.php</file>
     <file>./includes</file>
     <file>./uninstall.php</file>
 
@@ -59,7 +59,7 @@
     <rule ref="WordPress.WP.I18n">
         <properties>
             <property name="text_domain" type="array">
-                <element value="variolab"/>
+                <element value="variolab-ab-testing"/>
             </property>
         </properties>
     </rule>

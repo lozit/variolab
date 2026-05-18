@@ -70,6 +70,15 @@ final class Plugin {
 			self::pre_install_truncate_visitor_hash();
 		}
 
+		// 1.4.0 renames the CPT slug from `ab_experiment` to `abtest_experiment`
+		// (wp.org Plugin Review requires ≥4-char prefixes). Must run BEFORE the
+		// CPT registers on `init`, otherwise WP queries against the new slug
+		// won't find the old rows. Runs at plugins_loaded via this function.
+		// Idempotent — second run finds 0 rows to update.
+		if ( '' !== (string) $installed && version_compare( (string) $installed, '1.4.0', '<' ) ) {
+			self::pre_install_rename_post_type();
+		}
+
 		// Schema changes (CREATE/ALTER) — safe at plugins_loaded.
 		Schema::install();
 
@@ -101,6 +110,23 @@ final class Plugin {
 		}
 		$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET visitor_hash = SUBSTRING(visitor_hash, 1, %d)", Cookie::HASH_LENGTH ) );
 		// phpcs:enable
+	}
+
+	/**
+	 * Rename the CPT slug from `ab_experiment` (used through v0.13.0) to
+	 * `abtest_experiment` (v0.14.0+). wp.org Plugin Review requires ≥4-char
+	 * prefixes on CPT names, so `ab_` was rejected. Updates every post row
+	 * in one statement. Idempotent: a second run matches 0 rows.
+	 */
+	private static function pre_install_rename_post_type(): void {
+		global $wpdb;
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->posts} SET post_type = %s WHERE post_type = %s",
+				'abtest_experiment',
+				'ab_experiment'
+			)
+		);
 	}
 
 	/**
@@ -216,7 +242,7 @@ final class Plugin {
 	public static function duplicate_for_resume( int $original_id ) {
 		$original = get_post( $original_id );
 		if ( ! $original instanceof \WP_Post || Experiment::POST_TYPE !== $original->post_type ) {
-			return new \WP_Error( 'not_found', __( 'Original experiment not found.', 'variolab' ) );
+			return new \WP_Error( 'not_found', __( 'Original experiment not found.', 'variolab-ab-testing' ) );
 		}
 
 		$new_id = wp_insert_post(

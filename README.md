@@ -330,8 +330,8 @@ Used internally by the GA4 and Webhook integrations. Your own code can subscribe
 ## Architecture
 
 ```
-variolab/
-├── variolab.php                   # Bootstrap (plugin header, activation hook, autoloader)
+variolab-ab-testing/
+├── variolab-ab-testing.php        # Bootstrap (plugin header, activation hook, autoloader)
 ├── includes/
 │   ├── Plugin.php                  # Orchestrator, schema migration, components registration
 │   ├── Schema.php                  # wp_abtest_events table (dbDelta)

@@ -23,7 +23,7 @@ final class CsvExport {
 
 	public static function handle(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Forbidden', 'variolab' ), 403 );
+			wp_die( esc_html__( 'Forbidden', 'variolab-ab-testing' ), 403 );
 		}
 		check_admin_referer( self::NONCE );
 

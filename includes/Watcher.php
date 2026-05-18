@@ -69,7 +69,7 @@ final class Watcher {
 		if ( ! isset( $schedules[ self::CRON_INTERVAL ] ) ) {
 			$schedules[ self::CRON_INTERVAL ] = [
 				'interval' => 5 * MINUTE_IN_SECONDS,
-				'display'  => __( 'Every 5 minutes (A/B Testing)', 'variolab' ),
+				'display'  => __( 'Every 5 minutes (A/B Testing)', 'variolab-ab-testing' ),
 			];
 		}
 		return $schedules;

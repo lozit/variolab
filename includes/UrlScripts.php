@@ -100,16 +100,89 @@ final class UrlScripts {
 	}
 
 	/**
-	 * Concatenate all scripts at a given position into a single HTML string.
+	 * Print every script entry for the given URL+position, wrapped via
+	 * {@see wp_print_inline_script_tag()} — the WP-blessed inline-script
+	 * helper. Each entry's stored body is run through {@see parse_script_input()}
+	 * which silently strips any `<script ...>` / `</script>` the admin pasted,
+	 * extracting `src` / `async` / `defer` / `type` / `id` attributes if present
+	 * so the final tag matches what was originally pasted.
+	 *
+	 * Why not `echo`: passing through wp_print_inline_script_tag avoids tripping
+	 * `WordPress.Security.EscapeOutput.OutputNotEscaped` (we no longer raw-echo
+	 * variables) and signals intent to wp.org Plugin Check scanners.
 	 */
-	public static function render_for_position( string $url, string $position ): string {
+	public static function print_for_position( string $url, string $position ): void {
 		$scripts = self::get( $url );
-		$out     = '';
 		foreach ( $scripts as $s ) {
-			if ( $s['position'] === $position ) {
-				$out .= "\n" . $s['code'] . "\n";
+			if ( $s['position'] !== $position ) {
+				continue;
+			}
+			$parsed = self::parse_script_input( $s['code'] );
+			wp_print_inline_script_tag( $parsed['body'], $parsed['attrs'] );
+		}
+	}
+
+	/**
+	 * Normalize a stored script entry into a { body, attrs } shape compatible
+	 * with {@see wp_print_inline_script_tag()}.
+	 *
+	 * Cases handled:
+	 *   - Plain JS body (no wrapper):        body = input, attrs = []
+	 *   - `<script>JS</script>`:             body = JS, attrs = []
+	 *   - `<script async src="...">`:        body = '', attrs = [src, async]
+	 *   - `<script type="...">JSON</script>`: body = JSON, attrs = [type]
+	 *
+	 * Multi-`<script>` snippets degrade to "naive strip everything" — the admin
+	 * should split such snippets across multiple entries (one entry per script
+	 * tag) for clean attribute preservation.
+	 *
+	 * @return array{body:string, attrs:array<string,string|bool>}
+	 */
+	public static function parse_script_input( string $code ): array {
+		$code = trim( $code );
+
+		// Single `<script ...>...</script>` wrapper — extract attrs + body.
+		// `.*` is greedy so on multi-script input it would capture the inner
+		// `</script><script>...` sequence; we sanity-check the body doesn't
+		// still contain a `<script>` tag and fall through to the degraded
+		// strip mode below if it does.
+		if ( preg_match( '#^<script\b([^>]*)>(.*)</script>\s*$#is', $code, $m ) ) {
+			$body = $m[2];
+			if ( false === stripos( $body, '<script' ) && false === stripos( $body, '</script>' ) ) {
+				$attrs = self::parse_script_attrs( trim( $m[1] ) );
+				return [ 'body' => $body, 'attrs' => $attrs ];
 			}
 		}
-		return $out;
+
+		// Mixed / multi-script / orphan opening tag — strip every `<script ...>` and `</script>`
+		// from the input. Loses individual attributes (degraded mode) but stays safe.
+		if ( preg_match( '#</?script\b#i', $code ) ) {
+			$body = (string) preg_replace( '#<script\b[^>]*>|</script>#i', '', $code );
+			return [ 'body' => trim( $body ), 'attrs' => [] ];
+		}
+
+		// Plain JS body — passthrough.
+		return [ 'body' => $code, 'attrs' => [] ];
+	}
+
+	/**
+	 * Parse a `<script>`-opening-tag attribute string into a key/value array
+	 * suitable for wp_print_inline_script_tag's $attributes argument.
+	 */
+	private static function parse_script_attrs( string $attrs_str ): array {
+		$attrs = [];
+		// Key="value" or key='value' pairs.
+		if ( preg_match_all( '#(\w[\w-]*)\s*=\s*(["\'])([^"\']*)\2#', $attrs_str, $matches, PREG_SET_ORDER ) ) {
+			foreach ( $matches as $match ) {
+				$attrs[ strtolower( $match[1] ) ] = $match[3];
+			}
+		}
+		// Boolean attributes (async, defer, nomodule) appearing as bare words.
+		foreach ( [ 'async', 'defer', 'nomodule' ] as $bool_attr ) {
+			if ( preg_match( '#\b' . $bool_attr . '\b(?![=-])#i', $attrs_str ) && ! isset( $attrs[ $bool_attr ] ) ) {
+				$attrs[ $bool_attr ] = true;
+			}
+		}
+		return $attrs;
 	}
 }

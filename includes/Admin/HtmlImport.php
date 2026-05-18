@@ -49,10 +49,10 @@ final class HtmlImport {
 		);
 		?>
 		<div class="wrap abtest-wrap">
-			<h1><?php esc_html_e( 'Import HTML', 'variolab' ); ?></h1>
+			<h1><?php esc_html_e( 'Import HTML', 'variolab-ab-testing' ); ?></h1>
 
 			<p class="description">
-				<?php esc_html_e( 'Upload a complete HTML document (with its own DOCTYPE, head, body) and import it as a WordPress page rendered with no theme wrapper. Useful for landing-page templates designed outside WordPress.', 'variolab' ); ?>
+				<?php esc_html_e( 'Upload a complete HTML document (with its own DOCTYPE, head, body) and import it as a WordPress page rendered with no theme wrapper. Useful for landing-page templates designed outside WordPress.', 'variolab-ab-testing' ); ?>
 			</p>
 
 			<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( $action_url ); ?>" class="abtest-form abtest-import-form">
@@ -61,12 +61,12 @@ final class HtmlImport {
 
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><label for="abtest-html-file"><?php esc_html_e( 'HTML file', 'variolab' ); ?></label></th>
+						<th scope="row"><label for="abtest-html-file"><?php esc_html_e( 'HTML file', 'variolab-ab-testing' ); ?></label></th>
 						<td>
 							<div class="abtest-html-dropzone" data-max-bytes="<?php echo (int) self::max_bytes(); ?>">
 								<input type="file" id="abtest-html-file" name="html_file" accept=".html,.htm,.zip" required>
 								<p class="abtest-html-dropzone-hint">
-									<?php esc_html_e( 'Drop a .html or .zip file here, or click to browse.', 'variolab' ); ?>
+									<?php esc_html_e( 'Drop a .html or .zip file here, or click to browse.', 'variolab-ab-testing' ); ?>
 								</p>
 								<p class="abtest-html-dropzone-meta" hidden></p>
 							</div>
@@ -74,7 +74,7 @@ final class HtmlImport {
 								<?php
 								printf(
 									/* translators: %s: max size, human-readable */
-									esc_html__( 'Max %s. Accepted: .html, .htm, or .zip (extracts to wp-content/uploads/abtest-templates/{slug}/, rewriting relative asset paths so CSS/JS/images load).', 'variolab' ),
+									esc_html__( 'Max %s. Accepted: .html, .htm, or .zip (extracts to wp-content/uploads/abtest-templates/{slug}/, rewriting relative asset paths so CSS/JS/images load).', 'variolab-ab-testing' ),
 									esc_html( size_format( self::max_bytes() ) )
 								);
 								?>
@@ -82,35 +82,35 @@ final class HtmlImport {
 						</td>
 					</tr>
 					<tr class="abtest-html-preview-row" hidden>
-						<th scope="row"><?php esc_html_e( 'Preview', 'variolab' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Preview', 'variolab-ab-testing' ); ?></th>
 						<td>
-							<p class="description"><?php esc_html_e( 'Rendered as it will appear on the published page (sandboxed iframe — local scripts run in isolation, but external resources are blocked).', 'variolab' ); ?></p>
-							<iframe class="abtest-html-preview-frame" sandbox="allow-scripts" srcdoc="" loading="lazy" title="<?php esc_attr_e( 'HTML preview', 'variolab' ); ?>"></iframe>
+							<p class="description"><?php esc_html_e( 'Rendered as it will appear on the published page (sandboxed iframe — local scripts run in isolation, but external resources are blocked).', 'variolab-ab-testing' ); ?></p>
+							<iframe class="abtest-html-preview-frame" sandbox="allow-scripts" srcdoc="" loading="lazy" title="<?php esc_attr_e( 'HTML preview', 'variolab-ab-testing' ); ?>"></iframe>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="abtest-target"><?php esc_html_e( 'Target', 'variolab' ); ?></label></th>
+						<th scope="row"><label for="abtest-target"><?php esc_html_e( 'Target', 'variolab-ab-testing' ); ?></label></th>
 						<td>
 							<select id="abtest-target" name="target_page_id">
-								<option value="0"><?php esc_html_e( '— Create a new page —', 'variolab' ); ?></option>
+								<option value="0"><?php esc_html_e( '— Create a new page —', 'variolab-ab-testing' ); ?></option>
 								<?php foreach ( $pages as $page ) : ?>
 									<option value="<?php echo (int) $page->ID; ?>">
 										<?php echo esc_html( get_the_title( $page ) . ' (#' . $page->ID . ' · ' . $page->post_status . ')' ); ?>
 									</option>
 								<?php endforeach; ?>
 							</select>
-							<p class="description"><?php esc_html_e( 'Pick an existing page to overwrite, or leave on "Create a new page" to make a fresh one.', 'variolab' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Pick an existing page to overwrite, or leave on "Create a new page" to make a fresh one.', 'variolab-ab-testing' ); ?></p>
 						</td>
 					</tr>
 					<tr class="abtest-new-page-row">
-						<th scope="row"><label for="abtest-new-title"><?php esc_html_e( 'Page title (when creating new)', 'variolab' ); ?></label></th>
+						<th scope="row"><label for="abtest-new-title"><?php esc_html_e( 'Page title (when creating new)', 'variolab-ab-testing' ); ?></label></th>
 						<td>
-							<input type="text" id="abtest-new-title" name="new_title" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. Variant A — Landing v1', 'variolab' ); ?>">
+							<input type="text" id="abtest-new-title" name="new_title" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. Variant A — Landing v1', 'variolab-ab-testing' ); ?>">
 						</td>
 					</tr>
 				</table>
 
-				<?php submit_button( __( 'Import HTML', 'variolab' ) ); ?>
+				<?php submit_button( __( 'Import HTML', 'variolab-ab-testing' ) ); ?>
 			</form>
 
 			<?php self::render_watcher_panel( $action_url ); ?>
@@ -127,28 +127,28 @@ final class HtmlImport {
 		$last      = Watcher::last_run();
 		?>
 		<hr style="margin:32px 0;">
-		<h2><?php esc_html_e( 'Watch directory (auto-sync)', 'variolab' ); ?></h2>
+		<h2><?php esc_html_e( 'Watch directory (auto-sync)', 'variolab-ab-testing' ); ?></h2>
 		<p class="description">
 			<?php
 			printf(
 				/* translators: %s: full path to wp-content/uploads/abtest-templates/ */
-				esc_html__( 'Drop or edit HTML files in %1$s — every 5 minutes WP-Cron syncs changed files into pages with the Blank Canvas template. New folders create a page; edits to an existing %2$s update the matching page.', 'variolab' ),
+				esc_html__( 'Drop or edit HTML files in %1$s — every 5 minutes WP-Cron syncs changed files into pages with the Blank Canvas template. New folders create a page; edits to an existing %2$s update the matching page.', 'variolab-ab-testing' ),
 				'<code>' . esc_html( $watch_dir ) . '/{slug}/</code>',
 				'<code>index.html</code>'
 			);
 			?>
 		</p>
 		<p class="description">
-			<?php esc_html_e( 'Tip: combine with your IDE / SFTP / cloud sync (Dropbox, iCloud Drive…) so changes propagate without leaving the editor. The watcher only adds and updates — it never deletes pages.', 'variolab' ); ?>
+			<?php esc_html_e( 'Tip: combine with your IDE / SFTP / cloud sync (Dropbox, iCloud Drive…) so changes propagate without leaving the editor. The watcher only adds and updates — it never deletes pages.', 'variolab-ab-testing' ); ?>
 		</p>
 		<?php if ( null !== $last ) : ?>
 			<p>
-				<strong><?php esc_html_e( 'Last scan:', 'variolab' ); ?></strong>
+				<strong><?php esc_html_e( 'Last scan:', 'variolab-ab-testing' ); ?></strong>
 				<?php
 				$ago = human_time_diff( (int) $last['time'], time() );
 				printf(
 					/* translators: 1: time ago, 2: created count, 3: updated count, 4: skipped count */
-					esc_html__( '%1$s ago — %2$d created, %3$d updated, %4$d unchanged.', 'variolab' ),
+					esc_html__( '%1$s ago — %2$d created, %3$d updated, %4$d unchanged.', 'variolab-ab-testing' ),
 					esc_html( $ago ),
 					(int) ( $last['stats']['created'] ?? 0 ),
 					(int) ( $last['stats']['updated'] ?? 0 ),
@@ -163,14 +163,14 @@ final class HtmlImport {
 		<form method="post" action="<?php echo esc_url( $action_url ); ?>" style="margin-top:8px;">
 			<?php wp_nonce_field( self::SCAN_NONCE, '_abtest_scan_nonce' ); ?>
 			<input type="hidden" name="action" value="abtest_watch_scan">
-			<?php submit_button( __( 'Scan now', 'variolab' ), 'secondary', 'submit', false ); ?>
+			<?php submit_button( __( 'Scan now', 'variolab-ab-testing' ), 'secondary', 'submit', false ); ?>
 		</form>
 		<?php
 	}
 
 	public static function handle_scan_now(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Forbidden', 'variolab' ), 403 );
+			wp_die( esc_html__( 'Forbidden', 'variolab-ab-testing' ), 403 );
 		}
 		check_admin_referer( self::SCAN_NONCE, '_abtest_scan_nonce' );
 
@@ -178,7 +178,7 @@ final class HtmlImport {
 
 		$message = sprintf(
 			/* translators: 1: created, 2: updated, 3: skipped */
-			__( 'Scan complete: %1$d created, %2$d updated, %3$d unchanged.', 'variolab' ),
+			__( 'Scan complete: %1$d created, %2$d updated, %3$d unchanged.', 'variolab-ab-testing' ),
 			(int) $stats['created'],
 			(int) $stats['updated'],
 			(int) $stats['skipped']
@@ -206,13 +206,13 @@ final class HtmlImport {
 
 	public static function handle_upload(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Forbidden', 'variolab' ), 403 );
+			wp_die( esc_html__( 'Forbidden', 'variolab-ab-testing' ), 403 );
 		}
 		check_admin_referer( self::NONCE, '_abtest_import_nonce' );
 
 		// Validate upload.
 		if ( ! isset( $_FILES['html_file'] ) || ! is_array( $_FILES['html_file'] ) ) {
-			self::redirect_error( __( 'No file uploaded.', 'variolab' ) );
+			self::redirect_error( __( 'No file uploaded.', 'variolab-ab-testing' ) );
 		}
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		$file = $_FILES['html_file'];
@@ -223,13 +223,13 @@ final class HtmlImport {
 
 		$size = (int) ( $file['size'] ?? 0 );
 		if ( $size <= 0 ) {
-			self::redirect_error( __( 'Empty file.', 'variolab' ) );
+			self::redirect_error( __( 'Empty file.', 'variolab-ab-testing' ) );
 		}
 		if ( $size > self::max_bytes() ) {
 			self::redirect_error(
 				sprintf(
 					/* translators: 1: actual size, 2: limit */
-					__( 'File too large (%1$s). Max %2$s.', 'variolab' ),
+					__( 'File too large (%1$s). Max %2$s.', 'variolab-ab-testing' ),
 					size_format( $size ),
 					size_format( self::max_bytes() )
 				)
@@ -242,7 +242,7 @@ final class HtmlImport {
 			self::redirect_error(
 				sprintf(
 					/* translators: 1: comma-separated list of allowed extensions, 2: rejected extension */
-					__( 'Only %1$s files are accepted (got: .%2$s).', 'variolab' ),
+					__( 'Only %1$s files are accepted (got: .%2$s).', 'variolab-ab-testing' ),
 					'.' . implode( ', .', self::ALLOWED_EXTS ),
 					'' === $ext ? '(none)' : $ext
 				)
@@ -251,7 +251,7 @@ final class HtmlImport {
 
 		$tmp_name = isset( $file['tmp_name'] ) ? (string) $file['tmp_name'] : '';
 		if ( '' === $tmp_name || ! is_uploaded_file( $tmp_name ) ) {
-			self::redirect_error( __( 'Upload failed.', 'variolab' ) );
+			self::redirect_error( __( 'Upload failed.', 'variolab-ab-testing' ) );
 		}
 
 		// Real MIME check (finfo magic bytes) on top of the extension allowlist.
@@ -271,7 +271,7 @@ final class HtmlImport {
 			self::redirect_error(
 				sprintf(
 					/* translators: %s: rejected extension */
-					__( 'File MIME type does not match its .%s extension. Refused.', 'variolab' ),
+					__( 'File MIME type does not match its .%s extension. Refused.', 'variolab-ab-testing' ),
 					$ext
 				)
 			);
@@ -293,7 +293,7 @@ final class HtmlImport {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local upload tmp path, wp_remote_get does not apply
 			$contents = file_get_contents( $tmp_name );
 			if ( false === $contents ) {
-				self::redirect_error( __( 'Could not read uploaded file.', 'variolab' ) );
+				self::redirect_error( __( 'Could not read uploaded file.', 'variolab-ab-testing' ) );
 			}
 		}
 
@@ -304,7 +304,7 @@ final class HtmlImport {
 		}
 
 		if ( is_wp_error( $page_id ) || ! $page_id ) {
-			$msg = is_wp_error( $page_id ) ? $page_id->get_error_message() : __( 'Failed to save page.', 'variolab' );
+			$msg = is_wp_error( $page_id ) ? $page_id->get_error_message() : __( 'Failed to save page.', 'variolab-ab-testing' );
 			self::redirect_error( (string) $msg );
 		}
 
@@ -324,7 +324,7 @@ final class HtmlImport {
 		self::redirect_success(
 			sprintf(
 				/* translators: 1: page title, 2: page ID */
-				__( 'HTML imported into "%1$s" (#%2$d).', 'variolab' ),
+				__( 'HTML imported into "%1$s" (#%2$d).', 'variolab-ab-testing' ),
 				get_the_title( (int) $page_id ),
 				(int) $page_id
 			),
@@ -339,7 +339,7 @@ final class HtmlImport {
 		if ( '' === $title ) {
 			$title = sprintf(
 				/* translators: %s: timestamp at upload time */
-				__( 'HTML import — %s', 'variolab' ),
+				__( 'HTML import — %s', 'variolab-ab-testing' ),
 				current_time( 'Y-m-d H:i:s' )
 			);
 		}
@@ -363,7 +363,7 @@ final class HtmlImport {
 	private static function replace_existing( int $page_id, string $html ) {
 		$existing = get_post( $page_id );
 		if ( ! $existing instanceof \WP_Post ) {
-			return new \WP_Error( 'not_found', __( 'Target page not found.', 'variolab' ) );
+			return new \WP_Error( 'not_found', __( 'Target page not found.', 'variolab-ab-testing' ) );
 		}
 		$result = wp_update_post(
 			[
@@ -379,70 +379,123 @@ final class HtmlImport {
 	}
 
 	/**
+	 * Validate a zip entry path against path traversal, dotfiles, mac metadata,
+	 * and directory entries. Returns false for any unsafe / non-extractable entry.
+	 */
+	private static function zip_entry_is_safe( $entry ): bool {
+		if ( false === $entry || '' === $entry ) {
+			return false;
+		}
+		$entry = (string) $entry;
+		if (
+			str_starts_with( $entry, '/' ) ||
+			str_contains( $entry, '..' ) ||
+			str_starts_with( $entry, '__MACOSX/' ) ||
+			preg_match( '#(^|/)\.[^/]+#', $entry ) ||
+			str_ends_with( $entry, '/' )
+		) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Extract a .zip archive into uploads/abtest-templates/{slug}/, rewrite relative
 	 * asset URLs in the HTML (and CSS) to absolute URLs pointing at that folder, and
 	 * return the rewritten HTML.
 	 *
-	 * Security :
+	 * Security:
 	 *   - Skip dotfiles, __MACOSX/, anything starting with ../ or absolute paths.
-	 *   - Allow only specific extensions (html/htm/css/js/png/jpg/jpeg/gif/svg/webp/woff/woff2/ttf/ico/json/txt).
+	 *   - Only writes non-code assets to disk (css/png/jpg/jpeg/gif/svg/webp/avif/
+	 *     woff/woff2/ttf/otf/ico/json/txt/map). HTML and JS are NEVER written —
+	 *     wp.org Plugin Review policy forbids writing code-bearing files to the
+	 *     uploads area even though uploads itself is an allowed location.
+	 *   - The main index.html is read from the zip into memory (never on disk),
+	 *     rewritten, and stored in `post_content` (DB) instead. Local JS the
+	 *     template references via `<script src="./bundle.js">` will 404 at render
+	 *     time — admins can re-inject inline JS via the per-URL tracking scripts
+	 *     feature (Admin → A/B Tests → experiment edit form).
 	 *
 	 * @return string|\WP_Error Rewritten HTML on success, WP_Error on failure.
 	 */
 	private static function extract_zip_to_uploads( string $tmp_zip, string $slug ) {
 		if ( ! class_exists( 'ZipArchive' ) ) {
-			return new \WP_Error( 'no_zip', __( 'PHP ZipArchive extension is required to import .zip files.', 'variolab' ) );
+			return new \WP_Error( 'no_zip', __( 'PHP ZipArchive extension is required to import .zip files.', 'variolab-ab-testing' ) );
 		}
 
 		$zip = new \ZipArchive();
 		if ( true !== $zip->open( $tmp_zip ) ) {
-			return new \WP_Error( 'bad_zip', __( 'Could not open the .zip archive.', 'variolab' ) );
+			return new \WP_Error( 'bad_zip', __( 'Could not open the .zip archive.', 'variolab-ab-testing' ) );
 		}
 
 		$uploads = wp_upload_dir();
 		if ( ! empty( $uploads['error'] ) ) {
 			$zip->close();
-			return new \WP_Error( 'no_uploads', __( 'Could not access the uploads directory.', 'variolab' ) );
+			return new \WP_Error( 'no_uploads', __( 'Could not access the uploads directory.', 'variolab-ab-testing' ) );
 		}
 		$dest_dir = trailingslashit( $uploads['basedir'] ) . self::ASSETS_SUBDIR . '/' . $slug;
 		$dest_url = trailingslashit( $uploads['baseurl'] ) . self::ASSETS_SUBDIR . '/' . $slug;
 
 		if ( ! wp_mkdir_p( $dest_dir ) ) {
 			$zip->close();
-			return new \WP_Error( 'mkdir_failed', __( 'Could not create the assets directory.', 'variolab' ) );
+			return new \WP_Error( 'mkdir_failed', __( 'Could not create the assets directory.', 'variolab-ab-testing' ) );
 		}
 
-		$allowed_exts = [ 'html', 'htm', 'css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'avif', 'woff', 'woff2', 'ttf', 'otf', 'ico', 'json', 'txt', 'map' ];
-		$index_html_path = '';
-		$index_html_relpath = '';
+		// Asset extensions written to disk. Deliberately excludes html/htm/js per
+		// wp.org policy (no code-bearing files in uploads).
+		$allowed_asset_exts = [ 'css', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'avif', 'woff', 'woff2', 'ttf', 'otf', 'ico', 'json', 'txt', 'map' ];
 
+		$index_relpath = '';
+
+		// Pass 1: locate the preferred index entry (prefer "index.html" at root,
+		// else the first .html/.htm encountered). Read entries metadata only.
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- ZipArchive::numFiles is a PHP core property, camelCase by design
 		for ( $i = 0; $i < $zip->numFiles; $i++ ) {
 			$entry = $zip->getNameIndex( $i );
-			if ( false === $entry || '' === $entry ) {
-				continue;
-			}
-			// Reject path traversal, absolute paths, dotfiles, mac metadata.
-			if (
-				str_starts_with( $entry, '/' ) ||
-				str_contains( $entry, '..' ) ||
-				str_starts_with( $entry, '__MACOSX/' ) ||
-				preg_match( '#(^|/)\.[^/]+#', $entry )
-			) {
-				continue;
-			}
-			// Skip directories (zip entries ending with /).
-			if ( str_ends_with( $entry, '/' ) ) {
+			if ( ! self::zip_entry_is_safe( $entry ) ) {
 				continue;
 			}
 			$ext = strtolower( pathinfo( $entry, PATHINFO_EXTENSION ) );
-			if ( ! in_array( $ext, $allowed_exts, true ) ) {
+			if ( ! in_array( $ext, [ 'html', 'htm' ], true ) ) {
 				continue;
+			}
+			if ( 'index.html' === $entry || 'index.htm' === $entry ) {
+				$index_relpath = $entry;
+				break; // exact root index — preferred, stop searching.
+			}
+			if ( '' === $index_relpath ) {
+				$index_relpath = $entry;
+			}
+		}
+
+		if ( '' === $index_relpath ) {
+			$zip->close();
+			return new \WP_Error( 'no_html', __( 'No .html file found inside the archive.', 'variolab-ab-testing' ) );
+		}
+
+		// Read the index HTML into memory directly from the zip — never touches disk.
+		$html_content = $zip->getFromName( $index_relpath );
+		if ( false === $html_content ) {
+			$zip->close();
+			return new \WP_Error( 'read_html', __( 'Could not read the index HTML from the archive.', 'variolab-ab-testing' ) );
+		}
+
+		// Pass 2: extract non-code assets (CSS, images, fonts, etc.) to disk.
+		// HTML and JS entries are deliberately skipped.
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- ZipArchive::numFiles is a PHP core property, camelCase by design
+		for ( $i = 0; $i < $zip->numFiles; $i++ ) {
+			$entry = $zip->getNameIndex( $i );
+			if ( ! self::zip_entry_is_safe( $entry ) ) {
+				continue;
+			}
+			$ext = strtolower( pathinfo( (string) $entry, PATHINFO_EXTENSION ) );
+			if ( ! in_array( $ext, $allowed_asset_exts, true ) ) {
+				continue; // skips .html, .htm, .js, anything not on the allowlist.
 			}
 
 			$out_path = $dest_dir . '/' . $entry;
 			wp_mkdir_p( dirname( $out_path ) );
-			$stream = $zip->getStream( $entry );
+			$stream = $zip->getStream( (string) $entry );
 			if ( false === $stream ) {
 				continue;
 			}
@@ -456,39 +509,16 @@ final class HtmlImport {
 			}
 			fclose( $stream );
 			fclose( $out_handle );
-
-			// Track the index.html : prefer one named exactly "index.html" at root,
-			// else the first .html/.htm encountered.
-			if ( in_array( $ext, [ 'html', 'htm' ], true ) ) {
-				if ( 'index.html' === $entry || 'index.htm' === $entry ) {
-					$index_html_path    = $out_path;
-					$index_html_relpath = $entry;
-				} elseif ( '' === $index_html_path ) {
-					$index_html_path    = $out_path;
-					$index_html_relpath = $entry;
-				}
-			}
 		}
 		$zip->close();
-
-		if ( '' === $index_html_path ) {
-			return new \WP_Error( 'no_html', __( 'No .html file found inside the archive.', 'variolab' ) );
-		}
-
-		// Read the index HTML, rewrite relative asset paths to absolute URLs.
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local extracted file path, wp_remote_get does not apply
-		$html = file_get_contents( $index_html_path );
-		if ( false === $html ) {
-			return new \WP_Error( 'read_html', __( 'Could not read the index HTML file from the archive.', 'variolab' ) );
-		}
 
 		// Determine the base URL of the index relative to the assets folder root,
 		// so paths like "css/style.css" inside a nested index work. dirname() returns
 		// "." when the index sits at the zip root — collapse that to nothing.
-		$index_dir          = dirname( $index_html_relpath );
+		$index_dir          = dirname( $index_relpath );
 		$base_url_for_index = trailingslashit( $dest_url ) . ( '.' === $index_dir ? '' : $index_dir . '/' );
 
-		$html = self::rewrite_relative_urls( $html, $base_url_for_index );
+		$html = self::rewrite_relative_urls( $html_content, $base_url_for_index );
 
 		// Also rewrite linked CSS files (image URLs inside `url(...)`). glob() with
 		// `**` is shell-only — walk recursively instead so nested CSS gets rewritten.
@@ -599,16 +629,16 @@ final class HtmlImport {
 		switch ( $code ) {
 			case UPLOAD_ERR_INI_SIZE:
 			case UPLOAD_ERR_FORM_SIZE:
-				return __( 'File too large (server upload limit).', 'variolab' );
+				return __( 'File too large (server upload limit).', 'variolab-ab-testing' );
 			case UPLOAD_ERR_PARTIAL:
-				return __( 'Upload was interrupted.', 'variolab' );
+				return __( 'Upload was interrupted.', 'variolab-ab-testing' );
 			case UPLOAD_ERR_NO_FILE:
-				return __( 'No file selected.', 'variolab' );
+				return __( 'No file selected.', 'variolab-ab-testing' );
 			case UPLOAD_ERR_NO_TMP_DIR:
 			case UPLOAD_ERR_CANT_WRITE:
-				return __( 'Server could not save the upload.', 'variolab' );
+				return __( 'Server could not save the upload.', 'variolab-ab-testing' );
 			default:
-				return __( 'Upload error.', 'variolab' );
+				return __( 'Upload error.', 'variolab-ab-testing' );
 		}
 	}
 

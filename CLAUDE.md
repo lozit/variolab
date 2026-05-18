@@ -24,7 +24,7 @@ Standalone WordPress plugin for whole-page A/B testing : internal DB tracking, p
 
 ## Structure
 ```
-variolab.php               # bootstrap (plugin header + autoload)
+variolab-ab-testing.php    # bootstrap (plugin header + autoload)
 includes/                  # plugin classes (PSR-4)
 includes/Admin/            # wp-admin UI
 assets/js/                 # tracker.js frontend

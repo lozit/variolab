@@ -4,7 +4,7 @@ Tags: ab testing, split testing, conversion, analytics
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.1
-Stable tag: 0.13.0
+Stable tag: 0.14.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -138,6 +138,14 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.14.0 =
+* **wp.org Plugin Review round 2 — all findings addressed.**
+* **Slug** `variolab` → `variolab-ab-testing` (matches the slug wp.org reserved on resubmission). Text domain mass-updated across every `__()` / `_e()` call, main file `variolab.php` → `variolab-ab-testing.php`, `composer.json` / `package.json` package names, `phpcs.xml.dist` text-domain element + file ref, `tests/Integration/bootstrap.php` require path, `.github/workflows/{ci,release}.yml` build folder + zip filename + header-version grep.
+* **HtmlImport hardening**: zip extraction no longer writes `.html` / `.htm` / `.js` files to the uploads directory (wp.org policy: no code-bearing files in uploads even though the area itself is allowed). The main `index.html` is read directly from the zip into memory and stored in `post_content` instead — never touches disk. CSS, images, fonts continue to extract normally. Local JS the template referenced via `<script src="./bundle.js">` will 404 at render time; admins can re-inject inline JS via the per-URL tracking-scripts feature.
+* **Per-URL tracking scripts refactor**: `UrlScripts::print_for_position()` now wraps each entry via `wp_print_inline_script_tag()` — the WP-blessed inline-script helper — instead of raw `echo`. The new `UrlScripts::parse_script_input()` silently strips `<script ...>` / `</script>` wrappers the admin pastes, extracting `src` / `async` / `defer` / `type` / `id` attributes for fidelity. 11 unit tests cover plain JS / single wrapper / multi-script degraded mode / orphan tags / boolean attributes.
+* **CPT slug** `ab_experiment` → `abtest_experiment` (wp.org requires ≥4-char prefixes; `ab_` was too short). **Menu slug** `ab-testing` → `abtest-experiments`. New idempotent migration `Plugin::pre_install_rename_post_type()` runs at upgrade (DB schema v1.3.0 → v1.4.0) renaming every existing `post_type` row in one statement before the new CPT registers on `init`. Uninstall handler accepts both new and legacy slugs so old installs still get cleaned up.
+* Internal `Abtest\` namespace, `abtest_*` hook / cookie / option / table prefixes (already 6-char), and REST namespace `abtest/v1` stay untouched — no breaking change for existing data.
 
 = 0.13.0 =
 * **Renamed plugin** to **Variolab – A/B Testing** (slug `variolab`). The wp.org Plugin Review Team flagged "Uplift" on two cumulative grounds: (1) it is the standard industry term for the A/B-testing lift metric (non-distinctive — every VWO/Statsig/Insider/etc. doc uses "uplift" to mean conversion-rate lift), and (2) UPLIFT® is a live USPTO trademark (Reg. 4973441, UPLIFT INC., San Francisco) in the same "Advertising, Business & Retail Services" class as the plugin. Variolab is an invented term (vario + lab) with no wp.org / USPTO / SaaS hit at name-pick time.

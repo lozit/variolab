@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class Experiment {
 
-	public const POST_TYPE = 'ab_experiment';
+	public const POST_TYPE = 'abtest_experiment';
 
 	public const META_TEST_URL          = '_abtest_test_url';
 	public const META_VARIANTS          = '_abtest_variants';
@@ -44,8 +44,8 @@ final class Experiment {
 
 	public static function register(): void {
 		$labels = [
-			'name'          => __( 'A/B Tests', 'variolab' ),
-			'singular_name' => __( 'A/B Test', 'variolab' ),
+			'name'          => __( 'A/B Tests', 'variolab-ab-testing' ),
+			'singular_name' => __( 'A/B Test', 'variolab-ab-testing' ),
 		];
 
 		register_post_type(

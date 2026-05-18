@@ -115,7 +115,7 @@ jobs:
         # Same exclusion list as release.yml so what we scan = what ships.
         # If you update one, update the other.
         run: |
-          mkdir -p build/variolab
+          mkdir -p build/variolab-ab-testing
           rsync -av \
             --exclude='.git' \
             --exclude='.github' \
@@ -145,12 +145,12 @@ jobs:
             --exclude='wp-tests-config.php' \
             --exclude='phpunit.xml*' \
             --exclude='phpcs.xml*' \
-            ./ build/variolab/
+            ./ build/variolab-ab-testing/
 
       - name: Run WordPress Plugin Check
         uses: wordpress/plugin-check-action@v1
         with:
-          build-dir: './build/variolab'
+          build-dir: './build/variolab-ab-testing'
           wp-version: 'latest'
           # Codes we knowingly suppress, with rationale :
           #   - WordPress.WP.AlternativeFunctions.rand_*       : mt_rand/srand for variant pick (speed > crypto, see Cookie.php)

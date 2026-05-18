@@ -305,30 +305,27 @@ final class Router {
 
 	/**
 	 * Output admin-curated tracking scripts (Adwords / FB Pixel / Lemlist) at the
-	 * `wp_body_open` slot. Raw output is intentional — the feature is precisely to
-	 * let admins inject pixel/JS code that the visitor's browser will execute.
-	 * Trust model gate is at intake: Admin\Admin::handle_save() requires
-	 * `manage_options` + nonce + `unfiltered_html` before persisting any code body
-	 * to UrlScripts::set(). No untrusted path reaches this output.
+	 * `wp_body_open` slot. Goes through {@see UrlScripts::print_for_position()}
+	 * which wraps each entry via wp_print_inline_script_tag() — the WP-blessed
+	 * inline-script helper. Trust model gate is at intake:
+	 * Admin\Admin::handle_save() requires `manage_options` + nonce +
+	 * `unfiltered_html` before persisting any code body.
 	 */
 	public function print_scripts_after_body_open(): void {
 		if ( '' === $this->current_test_url ) {
 			return;
 		}
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-curated raw JS/HTML; cap-gated at intake (unfiltered_html), see docblock above.
-		echo UrlScripts::render_for_position( $this->current_test_url, UrlScripts::POSITION_AFTER_BODY_OPEN );
+		UrlScripts::print_for_position( $this->current_test_url, UrlScripts::POSITION_AFTER_BODY_OPEN );
 	}
 
 	/**
 	 * Same as {@see print_scripts_after_body_open()} but rendered just before `</body>`.
-	 * Trust model gate at intake (see that method's docblock).
 	 */
 	public function print_scripts_before_body_close(): void {
 		if ( '' === $this->current_test_url ) {
 			return;
 		}
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-curated raw JS/HTML; cap-gated at intake (unfiltered_html), see docblock above.
-		echo UrlScripts::render_for_position( $this->current_test_url, UrlScripts::POSITION_BEFORE_BODY_CLOSE );
+		UrlScripts::print_for_position( $this->current_test_url, UrlScripts::POSITION_BEFORE_BODY_CLOSE );
 	}
 
 	private function should_bypass(): bool {
@@ -395,20 +392,20 @@ final class Router {
 				}
 
 				$label_map = [
-					'A'        => __( 'Variant A', 'variolab' ),
-					'B'        => __( 'Variant B', 'variolab' ),
-					'original' => __( 'Original page', 'variolab' ),
+					'A'        => __( 'Variant A', 'variolab-ab-testing' ),
+					'B'        => __( 'Variant B', 'variolab-ab-testing' ),
+					'original' => __( 'Original page', 'variolab-ab-testing' ),
 				];
 				$current_label = $label_map[ $current_view ] ?? $current_view;
 
-				$mode_suffix = $has_variant_b ? '' : ' · ' . __( 'baseline', 'variolab' );
+				$mode_suffix = $has_variant_b ? '' : ' · ' . __( 'baseline', 'variolab-ab-testing' );
 
 				$bar->add_node(
 					[
 						'id'    => 'abtest-preview',
 						'title' => sprintf(
 							/* translators: 1: experiment title, 2: current variant label, 3: mode suffix */
-							esc_html__( 'A/B: %1$s — viewing %2$s%3$s', 'variolab' ),
+							esc_html__( 'A/B: %1$s — viewing %2$s%3$s', 'variolab-ab-testing' ),
 							esc_html( get_the_title( $experiment ) ),
 							esc_html( $current_label ),
 							esc_html( $mode_suffix )
@@ -419,13 +416,13 @@ final class Router {
 				);
 
 				$variants = [
-					'a' => [ 'label' => __( 'View Variant A', 'variolab' ), 'view' => 'A' ],
+					'a' => [ 'label' => __( 'View Variant A', 'variolab-ab-testing' ), 'view' => 'A' ],
 				];
 				if ( $has_variant_b ) {
-					$variants['b'] = [ 'label' => __( 'View Variant B', 'variolab' ), 'view' => 'B' ];
+					$variants['b'] = [ 'label' => __( 'View Variant B', 'variolab-ab-testing' ), 'view' => 'B' ];
 				}
 				if ( $has_underlying ) {
-					$variants['original'] = [ 'label' => __( 'View original page', 'variolab' ), 'view' => 'original' ];
+					$variants['original'] = [ 'label' => __( 'View original page', 'variolab-ab-testing' ), 'view' => 'original' ];
 				}
 
 				foreach ( $variants as $key => $opt ) {
@@ -446,7 +443,7 @@ final class Router {
 					[
 						'parent' => 'abtest-preview',
 						'id'     => 'abtest-preview-edit',
-						'title'  => esc_html__( 'Edit experiment', 'variolab' ),
+						'title'  => esc_html__( 'Edit experiment', 'variolab-ab-testing' ),
 						'href'   => admin_url( 'admin.php?page=ab-testing&action=edit&experiment=' . $experiment->ID ),
 					]
 				);
