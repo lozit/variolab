@@ -206,6 +206,10 @@ final class Admin {
 
 		$errors = $this->validate_multi( $title, $test_url, $variants_clean, $goal_type, $goal_value, $status, $id );
 		if ( ! empty( $errors ) ) {
+			// Preserve typed fields so the next render re-hydrates them. Nonce
+			// already verified above so reading $_POST here is safe.
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- check_admin_referer ran at line 180
+			self::stash_form_state( $id, self::form_state_from_post( $_POST ) );
 			$this->redirect_with_notice( 'error', implode( ' | ', $errors ), $id ? [ 'action' => 'edit', 'experiment' => $id ] : [ 'action' => 'new' ] );
 		}
 
@@ -223,6 +227,8 @@ final class Admin {
 		}
 
 		if ( ! $id || $id < 1 ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- check_admin_referer ran at line 180
+			self::stash_form_state( 0, self::form_state_from_post( $_POST ) );
 			$this->redirect_with_notice( 'error', __( 'Failed to save the experiment.', 'variolab-ab-testing' ), [ 'action' => 'new' ] );
 		}
 
@@ -741,6 +747,115 @@ final class Admin {
 
 	public static function nonce_action(): string {
 		return self::NONCE;
+	}
+
+	/**
+	 * Sticky-form state. When the experiment-edit form fails validation we
+	 * redirect back to the form (matches WP-admin conventions and avoids POST
+	 * resubmits on F5), but the user shouldn't lose what they typed. We stash
+	 * the submitted fields in a per-user transient keyed by experiment ID and
+	 * pop it on the next render — the form is re-hydrated from the stash and
+	 * the transient is consumed (one-shot read).
+	 *
+	 * Why a transient and not a session cookie:
+	 * - WordPress doesn't use PHP sessions by default; introducing one for the
+	 *   sake of one form would be invasive.
+	 * - Transient keyed by user_id × experiment_id naturally scopes the stash
+	 *   (user A's typo doesn't leak to user B, new-experiment stash doesn't
+	 *   hydrate an unrelated edit screen).
+	 * - 5-minute TTL is long enough to survive the round-trip, short enough
+	 *   to not accumulate state across sessions.
+	 */
+	private const FORM_STATE_KEY_PREFIX = 'abtest_form_state_';
+
+	public static function stash_form_state( int $experiment_id, array $state ): void {
+		$user_id = get_current_user_id();
+		if ( $user_id <= 0 ) {
+			return;
+		}
+		set_transient(
+			self::FORM_STATE_KEY_PREFIX . $user_id . '_' . $experiment_id,
+			$state,
+			5 * MINUTE_IN_SECONDS
+		);
+	}
+
+	public static function pop_form_state( int $experiment_id ): ?array {
+		$user_id = get_current_user_id();
+		if ( $user_id <= 0 ) {
+			return null;
+		}
+		$key   = self::FORM_STATE_KEY_PREFIX . $user_id . '_' . $experiment_id;
+		$state = get_transient( $key );
+		if ( ! is_array( $state ) ) {
+			return null;
+		}
+		delete_transient( $key );
+		return $state;
+	}
+
+	/**
+	 * Extract just the form fields we need to round-trip on a validation
+	 * failure from a raw `$_POST` array. Sanitization mirrors what
+	 * `handle_save()` does on a successful submit — the stash holds values
+	 * already safe for re-render. The `url_scripts[*][code]` body is kept
+	 * verbatim (admin-trusted, wrapped at output via wp_print_inline_script_tag).
+	 *
+	 * @param array<string,mixed> $post Raw `$_POST` (NOT pre-unslashed — this
+	 *                                  helper handles wp_unslash() inline).
+	 */
+	public static function form_state_from_post( array $post ): array {
+		$state = [];
+
+		foreach ( [ 'title', 'test_url', 'goal_value', 'target_countries', 'schedule_start_at', 'schedule_end_at' ] as $field ) {
+			if ( isset( $post[ $field ] ) ) {
+				$state[ $field ] = sanitize_text_field( wp_unslash( $post[ $field ] ) );
+			}
+		}
+		foreach ( [ 'goal_type', 'status' ] as $field ) {
+			if ( isset( $post[ $field ] ) ) {
+				$state[ $field ] = sanitize_key( wp_unslash( $post[ $field ] ) );
+			}
+		}
+		$state['url_noindex'] = ! empty( $post['url_noindex'] );
+
+		if ( isset( $post['variants'] ) && is_array( $post['variants'] ) ) {
+			$variants = [];
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- per-field sanitization below
+			foreach ( wp_unslash( $post['variants'] ) as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$variants[] = [ 'post_id' => isset( $row['post_id'] ) ? absint( $row['post_id'] ) : 0 ];
+			}
+			$state['variants'] = $variants;
+		}
+
+		if ( isset( $post['target_devices'] ) && is_array( $post['target_devices'] ) ) {
+			$state['target_devices'] = array_values(
+				array_filter(
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_key applied below
+					array_map( 'sanitize_key', wp_unslash( $post['target_devices'] ) )
+				)
+			);
+		}
+
+		if ( isset( $post['url_scripts'] ) && is_array( $post['url_scripts'] ) ) {
+			$scripts = [];
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- position is keyed; code body is admin-trusted (cap-gated upstream + wrapped at output)
+			foreach ( wp_unslash( $post['url_scripts'] ) as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$scripts[] = [
+					'position' => isset( $row['position'] ) ? sanitize_key( (string) $row['position'] ) : '',
+					'code'     => isset( $row['code'] ) ? (string) $row['code'] : '',
+				];
+			}
+			$state['url_scripts'] = $scripts;
+		}
+
+		return $state;
 	}
 
 	public static function menu_slug(): string {
