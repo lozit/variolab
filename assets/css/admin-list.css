@@ -1,0 +1,887 @@
+/*
+ * Variolab — A/B Tests list page (admin list redesign v1)
+ * ========================================================
+ *
+ * Loaded only on /wp-admin/admin.php?page=abtest-experiments&action=list
+ * (see Admin::enqueue_assets). Depends on admin-tokens.css for the
+ * --vlab-* design tokens + @font-face.
+ *
+ * Class-name convention: every component selector is prefixed `vlab-`
+ * to keep this stylesheet self-contained — no collision with WP admin,
+ * other plugins, or the legacy abtest-* classes still used elsewhere
+ * in this plugin (admin.css, kept untouched on Edit/Settings/Import).
+ *
+ * Adapted from variolab-template/AB Tests - Branded.html (inline
+ * <style> block, lines 9-640). Tweaks-panel-specific rules
+ * (`body.compact`, `body.subtle`, `#tweaks-root`) dropped — Variolab
+ * ships a single fixed look. Body-level resets re-scoped under
+ * `.vlab-page` so they don't leak into the wp-admin chrome.
+ */
+
+/* ----- Scope shell -------------------------------------------------- */
+.vlab-page,
+.vlab-page * {
+	box-sizing: border-box;
+}
+
+.vlab-page {
+	font-family: var(--vlab-font-body);
+	background: var(--vlab-bg);
+	color: var(--vlab-text);
+	font-size: 14px;
+	line-height: 1.45;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	max-width: 1240px;
+	margin: 16px 20px 80px 0;
+	padding: 28px 32px 80px;
+	border-radius: 8px;
+}
+
+.vlab-page a {
+	color: var(--vlab-primary);
+	text-decoration: none;
+}
+.vlab-page a:hover {
+	color: var(--vlab-primary-hover);
+	text-decoration: underline;
+}
+.vlab-page button {
+	font-family: inherit;
+}
+
+/* ----- Header ------------------------------------------------------- */
+.vlab-page-header {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 24px;
+	margin-bottom: 24px;
+}
+.vlab-page-header-l {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.vlab-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 5px 11px 5px 9px;
+	font-family: var(--vlab-font-mono);
+	font-size: 10.5px;
+	font-weight: 500;
+	letter-spacing: var(--vlab-tracking-pill);
+	text-transform: uppercase;
+	background: var(--vlab-brand-ink);
+	color: var(--vlab-brand-cream);
+	border-radius: 999px;
+	align-self: flex-start;
+}
+.vlab-pill::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	background: var(--vlab-brand-orange);
+}
+.vlab-page h1.vlab-page-title {
+	font-family: var(--vlab-font-display);
+	font-size: 36px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1;
+	color: var(--vlab-brand-ink);
+	margin: 0;
+	padding: 0;
+}
+.vlab-page-title .vlab-dot {
+	color: var(--vlab-brand-orange);
+}
+
+.vlab-header-actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+/* ----- Buttons ------------------------------------------------------ */
+.vlab-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 13px;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.3;
+	border-radius: 4px;
+	border: 1px solid var(--vlab-border);
+	background: var(--vlab-panel);
+	color: var(--vlab-text);
+	cursor: pointer;
+	transition: background 120ms, border-color 120ms, color 120ms;
+	text-decoration: none;
+}
+.vlab-btn:hover {
+	background: var(--vlab-panel-soft);
+	border-color: var(--vlab-text-faint);
+	text-decoration: none;
+}
+.vlab-btn--primary {
+	background: var(--vlab-brand-orange);
+	border-color: var(--vlab-brand-orange);
+	color: #fff;
+}
+.vlab-btn--primary:hover {
+	background: var(--vlab-brand-orange-deep);
+	border-color: var(--vlab-brand-orange-deep);
+	color: #fff;
+}
+.vlab-btn--ghost {
+	background: transparent;
+	border-color: transparent;
+	color: var(--vlab-text-muted);
+}
+.vlab-btn--ghost:hover {
+	background: var(--vlab-panel-soft);
+	color: var(--vlab-text);
+	border-color: var(--vlab-border);
+}
+
+/* ----- KPI strip ---------------------------------------------------- */
+.vlab-kpi-strip {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 0;
+	padding: 18px 24px;
+	background: var(--vlab-panel);
+	border: 1px solid var(--vlab-border);
+	border-radius: 6px;
+	margin-bottom: 18px;
+	overflow: hidden;
+}
+.vlab-kpi-strip::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 180px;
+	background-image: radial-gradient(circle, var(--vlab-brand-slate-soft) 0.8px, transparent 1.2px);
+	background-size: 14px 14px;
+	background-position: 0 0;
+	opacity: 0.35;
+	pointer-events: none;
+	mask-image: linear-gradient(to right, transparent, #000 60%);
+	-webkit-mask-image: linear-gradient(to right, transparent, #000 60%);
+}
+.vlab-kpi {
+	padding: 0 18px;
+	border-left: 1px solid var(--vlab-border-soft);
+	position: relative;
+	z-index: 1;
+}
+.vlab-kpi:first-child {
+	border-left: 0;
+	padding-left: 0;
+}
+.vlab-kpi-label {
+	font-family: var(--vlab-font-mono);
+	font-size: 10.5px;
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--vlab-text-muted);
+	margin-bottom: 6px;
+}
+.vlab-kpi-value {
+	font-family: var(--vlab-font-display);
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1;
+	color: var(--vlab-brand-ink);
+}
+.vlab-kpi-value .vlab-unit {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--vlab-text-muted);
+	margin-left: 3px;
+}
+.vlab-kpi-value .vlab-dot {
+	color: var(--vlab-brand-orange);
+}
+.vlab-kpi-sub {
+	margin-top: 5px;
+	font-size: 12px;
+	color: var(--vlab-text-muted);
+}
+.vlab-kpi-running {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--vlab-status-running-fg);
+	font-weight: 500;
+}
+.vlab-kpi-running::before {
+	content: '';
+	width: 7px;
+	height: 7px;
+	border-radius: 999px;
+	background: var(--vlab-status-running-fg);
+	box-shadow: 0 0 0 3px rgba( 21, 87, 36, 0.18 );
+	animation: vlab-pulse 2s ease-in-out infinite;
+}
+@keyframes vlab-pulse {
+	0%, 100% { box-shadow: 0 0 0 3px rgba( 21, 87, 36, 0.18 ); }
+	50%      { box-shadow: 0 0 0 5px rgba( 21, 87, 36, 0.08 ); }
+}
+
+/* ----- Toolbar (filters + date) ------------------------------------- */
+.vlab-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 10px 14px;
+	background: var(--vlab-panel);
+	border: 1px solid var(--vlab-border);
+	border-radius: 6px;
+	margin-bottom: 18px;
+	flex-wrap: wrap;
+}
+.vlab-toolbar form {
+	display: contents;
+}
+.vlab-filter-chips {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+}
+.vlab-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 11px;
+	font-size: 12.5px;
+	font-weight: 500;
+	border-radius: 999px;
+	border: 1px solid transparent;
+	color: var(--vlab-text-muted);
+	cursor: pointer;
+	background: transparent;
+	text-decoration: none;
+	transition: background 120ms, color 120ms, border-color 120ms;
+}
+.vlab-chip:hover {
+	background: var(--vlab-panel-soft);
+	color: var(--vlab-text);
+	text-decoration: none;
+}
+.vlab-chip.is-active {
+	background: var(--vlab-brand-ink);
+	color: var(--vlab-brand-cream);
+	border-color: var(--vlab-brand-ink);
+}
+.vlab-chip-count {
+	font-family: var(--vlab-font-mono);
+	font-size: 10.5px;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: rgba( 0, 0, 0, 0.06 );
+	color: inherit;
+	opacity: 0.85;
+}
+.vlab-chip.is-active .vlab-chip-count {
+	background: rgba( 248, 112, 24, 0.85 );
+	color: #fff;
+	opacity: 1;
+}
+
+.vlab-toolbar-r {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+.vlab-date-range {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 8px;
+	background: var(--vlab-panel-soft);
+	border: 1px solid var(--vlab-border);
+	border-radius: 4px;
+}
+.vlab-date-range input[type='date'] {
+	border: none;
+	background: transparent;
+	font-family: inherit;
+	font-size: 12.5px;
+	color: var(--vlab-text);
+	padding: 2px 0;
+	width: 130px;
+}
+.vlab-date-range input[type='date']:focus {
+	outline: none;
+}
+.vlab-date-range .vlab-sep {
+	color: var(--vlab-text-faint);
+	font-size: 12px;
+	padding: 0 2px;
+}
+.vlab-preset-chips {
+	display: flex;
+	gap: 2px;
+	align-items: center;
+}
+.vlab-preset {
+	padding: 4px 9px;
+	font-size: 12px;
+	font-weight: 500;
+	border-radius: 4px;
+	color: var(--vlab-text-muted);
+	cursor: pointer;
+	border: none;
+	background: transparent;
+	text-decoration: none;
+}
+.vlab-preset:hover {
+	background: var(--vlab-panel-soft);
+	color: var(--vlab-text);
+	text-decoration: none;
+}
+.vlab-preset.is-active {
+	background: var(--vlab-primary-soft);
+	color: var(--vlab-brand-orange-deep);
+}
+
+/* ----- URL block ---------------------------------------------------- */
+.vlab-url-block {
+	background: var(--vlab-panel);
+	border: 1px solid var(--vlab-border);
+	border-radius: 6px;
+	margin-bottom: 18px;
+	overflow: hidden;
+}
+.vlab-url-header {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 14px 18px 14px 16px;
+	border-bottom: 1px solid var(--vlab-border-soft);
+	flex-wrap: wrap;
+}
+.vlab-url-name {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 12px 4px 10px;
+	background: var(--vlab-brand-ink);
+	border-radius: 4px;
+	font-family: var(--vlab-font-mono);
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--vlab-brand-cream);
+	text-decoration: none;
+}
+.vlab-url-name::before {
+	content: '';
+	width: 5px;
+	height: 5px;
+	border-radius: 999px;
+	background: var(--vlab-brand-orange);
+}
+.vlab-url-name:hover {
+	text-decoration: none;
+	color: var(--vlab-brand-cream);
+	background: var(--vlab-brand-ink-2);
+}
+.vlab-url-meta {
+	color: var(--vlab-text-muted);
+	font-size: 13px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-wrap: wrap;
+}
+.vlab-url-meta .vlab-num {
+	color: var(--vlab-text);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+.vlab-url-meta .vlab-sep {
+	color: var(--vlab-text-faint);
+}
+.vlab-url-actions {
+	margin-left: auto;
+}
+
+/* ----- Experiment rows ---------------------------------------------- */
+.vlab-exp-list {
+	display: flex;
+	flex-direction: column;
+}
+.vlab-exp-row {
+	display: grid;
+	grid-template-columns: 240px 1fr 220px;
+	gap: 20px;
+	padding: 16px 18px 16px 0;
+	border-top: 1px solid var(--vlab-border-soft);
+	position: relative;
+}
+.vlab-exp-row:first-child {
+	border-top: none;
+}
+.vlab-exp-row::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 3px;
+	background: var(--vlab-row-accent, transparent);
+}
+.vlab-exp-row[data-status='running'] { --vlab-row-accent: #28a745; }
+.vlab-exp-row[data-status='paused']  { --vlab-row-accent: #dba617; }
+.vlab-exp-row[data-status='ended']   { --vlab-row-accent: #9ba0a6; }
+.vlab-exp-row[data-status='draft']   { --vlab-row-accent: #c3c4c7; }
+
+.vlab-exp-row-l {
+	padding-left: 16px;
+}
+.vlab-exp-title {
+	font-family: var(--vlab-font-display);
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--vlab-brand-ink);
+	margin: 0 0 4px;
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+}
+.vlab-exp-title a {
+	color: inherit;
+}
+.vlab-exp-title a:hover {
+	color: var(--vlab-brand-orange-deep);
+	text-decoration: none;
+}
+.vlab-exp-meta {
+	color: var(--vlab-text-muted);
+	font-size: 12px;
+	line-height: 1.4;
+}
+.vlab-exp-status-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+/* Status pill */
+.vlab-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 8px 2px 6px;
+	border-radius: 3px;
+	font-family: var(--vlab-font-mono);
+	font-size: 10.5px;
+	font-weight: 500;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+.vlab-status::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	background: currentColor;
+}
+.vlab-status--running { background: var(--vlab-status-running-bg); color: var(--vlab-status-running-fg); }
+.vlab-status--paused  { background: var(--vlab-status-paused-bg);  color: var(--vlab-status-paused-fg); }
+.vlab-status--ended   { background: var(--vlab-status-ended-bg);   color: var(--vlab-status-ended-fg); }
+.vlab-status--draft   { background: var(--vlab-status-draft-bg);   color: var(--vlab-status-draft-fg); }
+.vlab-status--running::before { animation: vlab-dot-pulse 2s ease-in-out infinite; }
+@keyframes vlab-dot-pulse {
+	0%, 100% { opacity: 1; }
+	50%      { opacity: 0.4; }
+}
+
+/* Variants stack */
+.vlab-variants {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+}
+.vlab-variant {
+	display: grid;
+	grid-template-columns: 22px minmax(140px, 1.4fr) 110px 1fr;
+	align-items: center;
+	gap: 12px;
+	font-size: 13px;
+	min-width: 0;
+}
+.vlab-vtag {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 999px;
+	font-family: var(--vlab-font-mono);
+	font-weight: 700;
+	font-size: 11px;
+	color: #fff;
+	flex-shrink: 0;
+}
+.vlab-vtag--a { background: var(--vlab-variant-a-tag); }
+.vlab-vtag--b { background: var(--vlab-variant-b-tag); }
+.vlab-vtag--c { background: var(--vlab-variant-c-tag); }
+.vlab-vtag--d { background: var(--vlab-variant-d-tag); }
+
+.vlab-variant-title {
+	font-weight: 500;
+	color: var(--vlab-brand-ink);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-width: 0;
+}
+.vlab-variant-counts {
+	font-family: var(--vlab-font-mono);
+	font-size: 12px;
+	color: var(--vlab-text-muted);
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.vlab-variant-counts .vlab-rate {
+	color: var(--vlab-brand-ink);
+	font-weight: 500;
+}
+.vlab-variant-right {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.vlab-baseline-tag {
+	font-style: italic;
+	color: var(--vlab-text-muted);
+	font-size: 11.5px;
+}
+.vlab-lift {
+	font-family: var(--vlab-font-mono);
+	font-weight: 600;
+	font-size: 12.5px;
+	font-variant-numeric: tabular-nums;
+	padding: 1px 6px;
+	border-radius: 3px;
+}
+.vlab-lift--pos { color: var(--vlab-lift-pos-fg); background: rgba( 40, 167, 69, 0.10 ); }
+.vlab-lift--neg { color: var(--vlab-lift-neg-fg); background: rgba( 220, 53, 69, 0.10 ); }
+.vlab-ci-line {
+	font-family: var(--vlab-font-mono);
+	font-size: 11px;
+	color: var(--vlab-text-faint);
+	font-variant-numeric: tabular-nums;
+}
+.vlab-sig-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 6px;
+	background: var(--vlab-badge-sig-bg);
+	color: var(--vlab-badge-sig-fg);
+	border-radius: 3px;
+	font-family: var(--vlab-font-mono);
+	font-size: 10.5px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+/* Right column: best + actions */
+.vlab-exp-right {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 8px;
+	justify-content: space-between;
+}
+.vlab-best-result {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 4px;
+}
+.vlab-winner-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px 4px 8px;
+	background: var(--vlab-badge-sig-bg);
+	color: var(--vlab-badge-sig-fg);
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+}
+.vlab-winner-badge .vlab-vtag {
+	width: 16px;
+	height: 16px;
+	background: var(--vlab-badge-sig-fg);
+	color: var(--vlab-badge-sig-bg);
+	font-size: 9px;
+}
+.vlab-no-winner {
+	font-size: 11.5px;
+	color: var(--vlab-text-muted);
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	border-bottom: 1px dotted var(--vlab-text-faint);
+	cursor: help;
+}
+.vlab-no-winner .vlab-help {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 13px;
+	height: 13px;
+	border-radius: 999px;
+	background: var(--vlab-border);
+	color: var(--vlab-text-muted);
+	font-size: 9px;
+	font-weight: 600;
+	margin-left: 2px;
+}
+.vlab-baseline-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	background: var(--vlab-badge-baseline-bg);
+	color: var(--vlab-badge-baseline-fg);
+	border-radius: 999px;
+	font-size: 11.5px;
+	font-weight: 500;
+}
+
+/* Actions */
+.vlab-actions {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+.vlab-action-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	font-size: 12px;
+	font-weight: 500;
+	border-radius: 4px;
+	border: none;
+	background: transparent;
+	color: var(--vlab-text-muted);
+	cursor: pointer;
+	text-decoration: none;
+}
+.vlab-action-btn:hover {
+	background: var(--vlab-panel-soft);
+	color: var(--vlab-text);
+	text-decoration: none;
+}
+.vlab-action-btn--primary {
+	color: var(--vlab-brand-orange-deep);
+	font-weight: 600;
+}
+.vlab-action-btn--primary:hover {
+	background: var(--vlab-brand-orange-soft);
+	color: var(--vlab-brand-orange-deep);
+}
+.vlab-action-btn--resume {
+	color: var(--vlab-status-running-fg);
+	font-weight: 600;
+}
+.vlab-action-btn--resume:hover {
+	background: var(--vlab-status-running-bg);
+}
+.vlab-action-btn--danger {
+	color: var(--vlab-delete-fg);
+}
+.vlab-action-btn--danger:hover {
+	background: rgba( 220, 53, 69, 0.08 );
+	color: var(--vlab-delete-fg);
+}
+
+/* ----- Chart / sparkline ------------------------------------------- */
+.vlab-chart-section {
+	padding: 18px 22px 20px;
+	border-top: 1px solid var(--vlab-border-soft);
+	background: var(--vlab-panel);
+}
+.vlab-chart-title {
+	font-family: var(--vlab-font-mono);
+	font-size: 10.5px;
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--vlab-text-muted);
+	margin: 0 0 12px;
+}
+.vlab-chart-wrap {
+	height: 220px;
+	width: 100%;
+	position: relative;
+	margin-bottom: 14px;
+}
+.vlab-sparkline {
+	width: 100%;
+	height: 100%;
+	display: block;
+	overflow: visible;
+}
+.vlab-sparkline .vlab-spark-grid {
+	stroke: var(--vlab-border-soft);
+	stroke-width: 1;
+	fill: none;
+	shape-rendering: crispEdges;
+}
+.vlab-sparkline .vlab-spark-axis {
+	fill: var(--vlab-text-faint);
+	font-family: var(--vlab-font-mono);
+	font-size: 10px;
+}
+.vlab-sparkline .vlab-spark-line {
+	fill: none;
+	stroke-width: 2;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+.vlab-chart-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 14px;
+	font-size: 11.5px;
+	color: var(--vlab-text-muted);
+}
+.vlab-leg-exp {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+.vlab-leg-mark {
+	display: inline-block;
+	width: 14px;
+	height: 0;
+	border-top: 2px solid;
+}
+.vlab-leg-mark--dashed {
+	border-top-style: dashed;
+}
+
+/* ----- Archived (native <details>) ---------------------------------- */
+.vlab-archived {
+	margin-bottom: 12px;
+	border: 1px dashed var(--vlab-border);
+	border-radius: 6px;
+	background: transparent;
+}
+.vlab-archived > summary {
+	list-style: none;
+	cursor: pointer;
+	padding: 12px 18px;
+	color: var(--vlab-text-muted);
+	font-size: 13px;
+	font-weight: 500;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	transition: background 120ms;
+}
+.vlab-archived > summary::-webkit-details-marker {
+	display: none;
+}
+.vlab-archived > summary::before {
+	content: '▸';
+	color: var(--vlab-text-faint);
+	font-size: 12px;
+	transition: transform 200ms;
+	display: inline-block;
+}
+.vlab-archived[open] > summary::before {
+	transform: rotate(90deg);
+}
+.vlab-archived > summary:hover {
+	background: var(--vlab-panel);
+	color: var(--vlab-text);
+}
+.vlab-archived-count {
+	margin-left: auto;
+	font-family: var(--vlab-font-mono);
+	font-size: 11px;
+	padding: 2px 8px;
+	background: var(--vlab-panel-soft);
+	border-radius: 999px;
+	color: var(--vlab-text-muted);
+}
+.vlab-archived[open] > .vlab-archived-body {
+	border-top: 1px solid var(--vlab-border-soft);
+	background: var(--vlab-panel);
+}
+
+/* ----- Empty state -------------------------------------------------- */
+.vlab-empty {
+	background: var(--vlab-panel);
+	border: 1px dashed var(--vlab-border);
+	border-radius: 6px;
+	padding: 32px 24px;
+	color: var(--vlab-text-muted);
+	text-align: center;
+}
+.vlab-empty p {
+	margin: 0;
+}
+
+/* ----- Responsive (≤720px) ------------------------------------------ */
+@media (max-width: 720px) {
+	.vlab-page {
+		padding: 18px 14px 60px;
+	}
+	.vlab-exp-row {
+		grid-template-columns: 1fr;
+	}
+	.vlab-exp-right {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.vlab-kpi-strip {
+		grid-template-columns: repeat(2, 1fr);
+	}
+	.vlab-kpi-strip::after {
+		display: none;
+	}
+	.vlab-kpi {
+		border-left: none;
+		border-top: 1px solid var(--vlab-border-soft);
+		padding: 12px 0 0;
+	}
+	.vlab-kpi:nth-child(-n+2) {
+		border-top: none;
+		padding-top: 0;
+	}
+	.vlab-variant {
+		grid-template-columns: 22px 1fr;
+		gap: 8px;
+	}
+	.vlab-variant-counts,
+	.vlab-variant-right {
+		grid-column: 1 / -1;
+		margin-left: 30px;
+	}
+}

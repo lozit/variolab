@@ -93,11 +93,17 @@ final class Admin {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : 'list';
 
-		// Chart.js + our chart bootstrap, only on the main list view.
-		// Chart.js is vendored locally under assets/js/vendor/ so we don't violate
-		// the WordPress.org plugin guideline against remote-loading code at runtime.
-		// See assets/js/vendor/README.md for source / license / update instructions.
+		// List-page redesign stylesheet (v0.15.0). Depends on the shared design
+		// tokens enqueued above. Chart.js / url-charts.js stay registered here
+		// for one commit longer — they become no-ops against the new SVG shell
+		// and get removed in the follow-up commit that adds list-interactions.js.
 		if ( 'list' === $action ) {
+			wp_enqueue_style(
+				'vlab-admin-list',
+				ABTEST_PLUGIN_URL . 'assets/css/admin-list.css',
+				[ 'vlab-admin-tokens' ],
+				ABTEST_VERSION
+			);
 			wp_enqueue_script(
 				'abtest-chartjs',
 				ABTEST_PLUGIN_URL . 'assets/js/vendor/chart.umd.min.js',
