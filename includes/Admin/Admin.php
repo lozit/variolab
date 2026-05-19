@@ -93,10 +93,10 @@ final class Admin {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : 'list';
 
-		// List-page redesign stylesheet (v0.15.0). Depends on the shared design
-		// tokens enqueued above. Chart.js / url-charts.js stay registered here
-		// for one commit longer — they become no-ops against the new SVG shell
-		// and get removed in the follow-up commit that adds list-interactions.js.
+		// List-page redesign assets (v0.15.0). admin-list.css depends on
+		// the shared admin-tokens.css. list-interactions.js renders inline
+		// SVG sparklines from a sibling JSON blob — replaces the old
+		// Chart.js stack (vendor file removed in this commit).
 		if ( 'list' === $action ) {
 			wp_enqueue_style(
 				'vlab-admin-list',
@@ -105,16 +105,9 @@ final class Admin {
 				ABTEST_VERSION
 			);
 			wp_enqueue_script(
-				'abtest-chartjs',
-				ABTEST_PLUGIN_URL . 'assets/js/vendor/chart.umd.min.js',
+				'vlab-list-interactions',
+				ABTEST_PLUGIN_URL . 'assets/js/list-interactions.js',
 				[],
-				'4.4.1',
-				true
-			);
-			wp_enqueue_script(
-				'abtest-url-charts',
-				ABTEST_PLUGIN_URL . 'assets/js/url-charts.js',
-				[ 'abtest-chartjs' ],
 				ABTEST_VERSION,
 				true
 			);
