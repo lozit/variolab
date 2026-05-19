@@ -225,6 +225,91 @@ final class Stats {
 	}
 
 	/**
+	 * Aggregate KPIs across a list of experiments — drives the list page's
+	 * top "KPI strip" (Active tests / Impressions / Conversions / Overall
+	 * rate / Winners shipped). Pure PHP fold on top of the existing batched
+	 * SQL helper {@see raw_counts_for_experiments()}; no new query.
+	 *
+	 * @param int[]  $experiment_ids
+	 * @param string $from YYYY-MM-DD, '' = no lower bound
+	 * @param string $to   YYYY-MM-DD, '' = no upper bound
+	 *
+	 * @return array{
+	 *     active:int, running:int, paused:int, draft:int, ended:int,
+	 *     impressions:int, conversions:int, rate:?float,
+	 *     winners:int, exp_count:int
+	 * }
+	 *   `active` = running + paused.
+	 *   `rate`   = conversions/impressions when impressions > 0, else null
+	 *              (caller renders the null as "—" rather than "0%").
+	 *   `winners` = ended experiments whose `compute_multi()['best']` is
+	 *               non-null (i.e. a variant beat the baseline significantly).
+	 */
+	public static function overview_kpis( array $experiment_ids, string $from = '', string $to = '' ): array {
+		$ids = array_values( array_unique( array_map( 'intval', $experiment_ids ) ) );
+		$ids = array_values( array_filter( $ids, static fn( $id ) => $id > 0 ) );
+
+		$base = [
+			'active'      => 0,
+			'running'     => 0,
+			'paused'      => 0,
+			'draft'       => 0,
+			'ended'       => 0,
+			'impressions' => 0,
+			'conversions' => 0,
+			'rate'        => null,
+			'winners'     => 0,
+			'exp_count'   => count( $ids ),
+		];
+
+		if ( empty( $ids ) ) {
+			return $base;
+		}
+
+		$counts = self::raw_counts_for_experiments( $ids, $from, $to );
+
+		foreach ( $ids as $id ) {
+			$status = Experiment::get_status( $id );
+			switch ( $status ) {
+				case Experiment::STATUS_RUNNING:
+					++$base['running'];
+					break;
+				case Experiment::STATUS_PAUSED:
+					++$base['paused'];
+					break;
+				case Experiment::STATUS_DRAFT:
+					++$base['draft'];
+					break;
+				case Experiment::STATUS_ENDED:
+					++$base['ended'];
+					break;
+			}
+
+			$exp_counts = $counts[ $id ] ?? self::empty_variant_counts();
+			foreach ( $exp_counts as $variant_data ) {
+				$base['impressions'] += (int) ( $variant_data['impressions'] ?? 0 );
+				$base['conversions'] += (int) ( $variant_data['conversions'] ?? 0 );
+			}
+
+			// "Winners shipped": ended experiments whose multi-variant test picked a winner.
+			if ( Experiment::STATUS_ENDED === $status ) {
+				$labels = Experiment::get_variant_labels( $id );
+				$multi  = self::compute_multi( $exp_counts, $labels );
+				if ( ! empty( $multi['best'] ) ) {
+					++$base['winners'];
+				}
+			}
+		}
+
+		$base['active'] = $base['running'] + $base['paused'];
+		$base['rate']   = $base['impressions'] > 0
+			? $base['conversions'] / $base['impressions']
+			: null;
+
+		return $base;
+	}
+
+	/**
 	 * Multi-variant stats (the real engine — used by all callers, including the
 	 * legacy A/B keys returned by `compute()` for back-compat).
 	 *
