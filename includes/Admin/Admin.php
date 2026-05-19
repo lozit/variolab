@@ -75,10 +75,18 @@ final class Admin {
 		if ( false === strpos( $hook, self::MENU_SLUG ) ) {
 			return;
 		}
+		// Design tokens (CSS custom properties + @font-face) — loaded on every
+		// plugin admin screen so any stylesheet downstream can consume them.
+		wp_enqueue_style(
+			'vlab-admin-tokens',
+			ABTEST_PLUGIN_URL . 'assets/css/admin-tokens.css',
+			[],
+			ABTEST_VERSION
+		);
 		wp_enqueue_style(
 			'abtest-admin',
 			ABTEST_PLUGIN_URL . 'assets/css/admin.css',
-			[],
+			[ 'vlab-admin-tokens' ],
 			ABTEST_VERSION
 		);
 
