@@ -109,10 +109,9 @@ v1 only swaps the entire page (the variant must be a separate post). Block-level
 
 == Screenshots ==
 
-1. A/B Tests admin list — experiments grouped by URL with per-variant stats and winner badges
-2. Import HTML page — drag-and-drop upload (.html / .htm / .zip with assets) plus the Watch Directory panel for IDE sync
-3. Settings — privacy / consent gating (GDPR) and Google Analytics 4 Measurement Protocol integration
-4. Settings — generic webhooks (Zapier / Make / n8n / Slack) and REST API documentation
+1. A/B Tests admin list — KPI strip (active tests, impressions, conversions, overall rate, winners shipped), status filter chips (All / Draft / Running / Paused / Ended), date range with 7d / 30d / All-time presets, experiments grouped by URL with per-variant stats + lift + confidence interval + significance badges, archived ended tests collapsed into a details panel, daily conversion-rate sparkline per URL with start/end markers
+2. Import HTML page — drag-and-drop upload of .html / .htm / .zip files (extracted to wp-content/uploads/abtest-templates/{slug}/ with relative-asset URL rewriting), plus the Watch directory panel for IDE / SFTP / cloud-sync workflows
+3. Settings — privacy & consent gate (GDPR), Google Analytics 4 Measurement Protocol integration, generic webhooks (Zapier / Make / Mixpanel / Segment / Slack / n8n), and REST API documentation with a copy-paste curl example
 
 == External services ==
 

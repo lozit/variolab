@@ -40,7 +40,7 @@ Built around three core ideas:
 ### Tracking & Stats
 
 <p align="center">
-  <img src="./.wordpress-org/screenshot-1.png" alt="A/B Tests admin list — experiments grouped by URL with per-variant stats and winner badges" width="800">
+  <img src="./.wordpress-org/screenshot-1.png" alt="A/B Tests admin list — branded dashboard with KPI strip, status filter chips, date range presets, URL blocks with per-variant stats + lift + 95% CI + significance badges, and a daily conversion-rate SVG sparkline per URL with start/end markers" width="800">
 </p>
 
 - Internal events table (impressions + conversions) — full ownership of your data
@@ -48,7 +48,7 @@ Built around three core ideas:
 - Two-proportion **z-test** for statistical significance
 - **95% confidence interval** for the lift (Wald)
 - **Date range filter** (custom from/to + presets: last 7/30 days, all time)
-- **Chart.js timeline** per URL — see how conversion evolved across iterations
+- **Inline SVG sparkline** per URL — see how each variant's daily conversion rate evolved across iterations, with dashed vertical markers at every experiment's start/end date
 - Group view of experiments by URL (default hides URLs without a running experiment)
 - **Contextual help** built into wp-admin — top-right "Help" tab on the A/B Tests pages explains p-value, α, Bonferroni correction, and what to do when "no winner" shows. Designed for non-statisticians.
 - **"No winner" tooltip** auto-explains the reason on hover (too early, sample too small, no real effect, borderline) so you know whether to wait, stop, or move on.
@@ -80,10 +80,7 @@ Built around three core ideas:
 ### Integrations
 
 <p align="center">
-  <img src="./.wordpress-org/screenshot-3.png" alt="Settings — privacy / consent gating (GDPR) and Google Analytics 4 Measurement Protocol integration" width="700">
-</p>
-<p align="center">
-  <img src="./.wordpress-org/screenshot-4.png" alt="Settings — generic webhooks (Zapier / Make / n8n / Slack) with optional HMAC signature, and the REST API documentation" width="700">
+  <img src="./.wordpress-org/screenshot-3.png" alt="Settings — privacy / consent gating (GDPR), Google Analytics 4 Measurement Protocol, generic webhooks (Zapier / Make / Slack / n8n) with optional HMAC signature, and the REST API documentation with a curl example" width="700">
 </p>
 
 - **Google Analytics 4** via Measurement Protocol (server-side, fire-and-forget)
@@ -359,12 +356,20 @@ variolab-ab-testing/
 ├── templates/
 │   └── blank-canvas.php            # Raw HTML passthrough (no theme wrapper)
 ├── assets/
-│   ├── js/
-│   │   ├── tracker.js              # Frontend conversion fire (URL/selector match)
-│   │   ├── url-charts.js           # Chart.js timeline init
-│   │   ├── url-scripts-editor.js   # Add/remove rows in URL scripts editor
-│   │   └── webhooks-editor.js      # Add/remove rows in webhooks editor
-│   └── css/admin.css
+│   ├── css/
+│   │   ├── admin-tokens.css        # Design tokens (CSS custom properties + @font-face)
+│   │   ├── admin-shell.css         # Brand shell: cream canvas + brandline header + .vlab-btn
+│   │   ├── admin-list.css          # List-page redesign: KPI strip / chips / URL blocks / sparkline
+│   │   └── admin.css               # Legacy form-table styles (Edit / Settings / Import)
+│   ├── fonts/                      # Inter Tight + JetBrains Mono (WOFF2 latin subset, SIL OFL 1.1)
+│   ├── img/icon-128.png            # Brandline icon used in render_brand_header()
+│   └── js/
+│       ├── tracker.js              # Frontend conversion fire (URL/selector match)
+│       ├── list-interactions.js    # Inline SVG sparkline renderer
+│       ├── url-scripts-editor.js   # Add/remove rows in URL scripts editor
+│       ├── variants-editor.js      # Multi-variant row add/remove
+│       ├── webhooks-editor.js      # Add/remove rows in webhooks editor
+│       └── html-import-editor.js   # Drag-drop + iframe preview
 └── tests/
     ├── bootstrap.php
     └── Unit/
