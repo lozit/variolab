@@ -257,7 +257,8 @@ final class ExperimentsList {
 		?>
 		<div class="vlab-toolbar">
 			<nav class="vlab-filter-chips" role="tablist" aria-label="<?php esc_attr_e( 'Filter experiments by status', 'variolab-ab-testing' ); ?>">
-				<?php foreach ( self::chip_statuses() as $status_key ) :
+				<?php
+				foreach ( self::chip_statuses() as $status_key ) :
 					$chip_url = $preset_url(
 						array_filter(
 							[
@@ -391,17 +392,15 @@ final class ExperimentsList {
 		$exp_count   = count( $exps );
 		$color_map   = self::build_color_map( $exps );
 		$full_url    = '' !== $url ? home_url( $url ) : '';
-		$add_to_url  = add_query_arg(
-			array_filter(
-				[
-					'page'     => Admin::menu_slug(),
-					'action'   => 'new',
-					'test_url' => '' !== $url ? $url : null,
-				],
-				static fn( $v ) => null !== $v
-			),
-			admin_url( 'admin.php' )
+		$add_args   = array_filter(
+			[
+				'page'     => Admin::menu_slug(),
+				'action'   => 'new',
+				'test_url' => '' !== $url ? $url : null,
+			],
+			static fn( $v ) => null !== $v
 		);
+		$add_to_url = add_query_arg( $add_args, admin_url( 'admin.php' ) );
 		?>
 		<section class="vlab-url-block">
 			<header class="vlab-url-header">
