@@ -155,8 +155,8 @@ final class ExperimentEdit {
 			}
 		}
 		?>
-		<div class="wrap abtest-wrap">
-			<h1><?php echo esc_html( $is_new ? __( 'New A/B Test', 'variolab-ab-testing' ) : __( 'Edit A/B Test', 'variolab-ab-testing' ) ); ?></h1>
+		<div class="wrap vlab-page abtest-wrap">
+			<?php Admin::render_brand_header( $is_new ? __( 'New A/B Test', 'variolab-ab-testing' ) : __( 'Edit A/B Test', 'variolab-ab-testing' ) ); ?>
 
 			<?php if ( $full_url ) : ?>
 				<div class="notice notice-info inline abtest-test-url-banner">

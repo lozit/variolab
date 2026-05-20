@@ -124,27 +124,20 @@ final class ExperimentsList {
 	}
 
 	private static function render_page_header( string $new_url, string $csv_url ): void {
+		ob_start();
 		?>
-		<header class="vlab-page-header">
-			<div class="vlab-page-header-l">
-				<span class="vlab-pill">
-					<?php
-					/* translators: %s: plugin version (e.g. 0.15.0) */
-					printf( esc_html__( 'A/B Testing · v%s', 'variolab-ab-testing' ), esc_html( ABTEST_VERSION ) );
-					?>
-				</span>
-				<h1 class="vlab-page-title"><?php esc_html_e( 'A/B Tests', 'variolab-ab-testing' ); ?><span class="vlab-dot">.</span></h1>
-			</div>
-			<div class="vlab-header-actions">
-				<a href="<?php echo esc_url( $csv_url ); ?>" class="vlab-btn vlab-btn--ghost" title="<?php esc_attr_e( 'Download all visible experiments as CSV (respects current filters).', 'variolab-ab-testing' ); ?>">
-					<?php esc_html_e( 'Export CSV', 'variolab-ab-testing' ); ?>
-				</a>
-				<a href="<?php echo esc_url( $new_url ); ?>" class="vlab-btn vlab-btn--primary">
-					<?php esc_html_e( '+ Add new test', 'variolab-ab-testing' ); ?>
-				</a>
-			</div>
-		</header>
+		<a href="<?php echo esc_url( $csv_url ); ?>" class="vlab-btn" title="<?php esc_attr_e( 'Download all visible experiments as CSV (respects current filters).', 'variolab-ab-testing' ); ?>">
+			<svg class="vlab-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8m0 0l-3-3m3 3l3-3M2 13h12"/></svg>
+			<?php esc_html_e( 'Export CSV', 'variolab-ab-testing' ); ?>
+		</a>
+		<a href="<?php echo esc_url( $new_url ); ?>" class="vlab-btn vlab-btn--primary">
+			<svg class="vlab-ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>
+			<?php esc_html_e( 'Add new test', 'variolab-ab-testing' ); ?>
+		</a>
 		<?php
+		$actions = (string) ob_get_clean();
+
+		Admin::render_brand_header( __( 'A/B Tests', 'variolab-ab-testing' ), $actions );
 	}
 
 	private static function render_kpi_strip( array $kpis ): void {
@@ -312,6 +305,56 @@ final class ExperimentsList {
 		<?php
 	}
 
+	/**
+	 * Palette of distinct line / tag colors. One color per (experiment,variant)
+	 * pair within a URL block, assigned in iteration order. Cycles if the
+	 * block has more than count($palette) pairs (rare — 12 pairs = 6 A/B
+	 * experiments or 3 quad-variant experiments on the same URL).
+	 *
+	 * @return string[]
+	 */
+	private static function color_palette(): array {
+		return [
+			'#F87018', // brand orange
+			'#2271b1', // WP blue
+			'#00a32a', // green
+			'#dba617', // amber
+			'#956eff', // violet
+			'#dc3545', // red
+			'#0a4b78', // deep blue
+			'#e24a90', // pink
+			'#155724', // forest green
+			'#856404', // brown
+			'#1993fd', // sky
+			'#50575e', // slate
+		];
+	}
+
+	/**
+	 * Build a stable color map for one URL block. Keyed by `"$experiment_id|$variant"`,
+	 * value = hex string. Used both by the variant-tag inline `background-color`
+	 * style and injected into the sparkline JSON so the chart lines match.
+	 *
+	 * @param \WP_Post[] $exps Experiments grouped on this URL.
+	 * @return array<string,string>
+	 */
+	private static function build_color_map( array $exps ): array {
+		$palette = self::color_palette();
+		$count   = count( $palette );
+		$map     = [];
+		$index   = 0;
+		foreach ( $exps as $exp ) {
+			$exp_id   = (int) $exp->ID;
+			$variants = Experiment::get_variants( $exp_id );
+			foreach ( $variants as $v ) {
+				$label = (string) $v['label'];
+				$map[ $exp_id . '|' . $label ] = $palette[ $index % $count ];
+				++$index;
+			}
+		}
+		return $map;
+	}
+
 	private static function render_url_block( string $url, array $exps, array $counts, array $running_by_url, string $status_filter, string $from, string $to ): void {
 		// Partition experiments by status family for the current filter view.
 		$inline  = []; // Running / Paused / Draft (shown inline)
@@ -346,6 +389,7 @@ final class ExperimentsList {
 
 		$totals      = self::totals_for_group( $exps, $counts );
 		$exp_count   = count( $exps );
+		$color_map   = self::build_color_map( $exps );
 		$full_url    = '' !== $url ? home_url( $url ) : '';
 		$add_to_url  = add_query_arg(
 			array_filter(
@@ -394,7 +438,7 @@ final class ExperimentsList {
 					if ( $running_other && (int) $running_other->ID === (int) $experiment->ID ) {
 						$running_other = null;
 					}
-					self::render_experiment_row( $experiment, $counts, $running_other );
+					self::render_experiment_row( $experiment, $counts, $running_other, $color_map );
 					?>
 				<?php endforeach; ?>
 			</div>
@@ -407,26 +451,26 @@ final class ExperimentsList {
 					</summary>
 					<div class="vlab-archived-body vlab-exp-list">
 						<?php foreach ( $ended as $experiment ) : ?>
-							<?php self::render_experiment_row( $experiment, $counts, null ); ?>
+							<?php self::render_experiment_row( $experiment, $counts, null, $color_map ); ?>
 						<?php endforeach; ?>
 					</div>
 				</details>
 			<?php elseif ( ! empty( $ended ) ) : ?>
 				<?php foreach ( $ended as $experiment ) : ?>
 					<div class="vlab-exp-list">
-						<?php self::render_experiment_row( $experiment, $counts, null ); ?>
+						<?php self::render_experiment_row( $experiment, $counts, null, $color_map ); ?>
 					</div>
 				<?php endforeach; ?>
 			<?php endif; ?>
 
 			<?php if ( '' !== $url ) : ?>
-				<?php self::render_url_sparkline( $url, $exps, $from, $to ); ?>
+				<?php self::render_url_sparkline( $url, $exps, $color_map, $from, $to ); ?>
 			<?php endif; ?>
 		</section>
 		<?php
 	}
 
-	private static function render_experiment_row( \WP_Post $experiment, array $counts, ?\WP_Post $running_other = null ): void {
+	private static function render_experiment_row( \WP_Post $experiment, array $counts, ?\WP_Post $running_other = null, array $color_map = [] ): void {
 		$exp_id        = (int) $experiment->ID;
 		$status        = Experiment::get_status( $exp_id );
 		$variant_specs = Experiment::get_variants( $exp_id );
@@ -480,7 +524,7 @@ final class ExperimentsList {
 			</div>
 
 			<div>
-				<?php self::render_variants_stack( $variant_specs, $multi ); ?>
+				<?php self::render_variants_stack( $variant_specs, $multi, $color_map, $exp_id ); ?>
 			</div>
 
 			<div class="vlab-exp-right">
@@ -495,7 +539,7 @@ final class ExperimentsList {
 		<?php
 	}
 
-	private static function render_variants_stack( array $variant_specs, array $multi ): void {
+	private static function render_variants_stack( array $variant_specs, array $multi, array $color_map = [], int $exp_id = 0 ): void {
 		if ( empty( $variant_specs ) ) {
 			echo '<em class="vlab-exp-meta">—</em>';
 			return;
@@ -509,9 +553,11 @@ final class ExperimentsList {
 				$pid   = (int) $v['post_id'];
 				$row   = $multi['variants'][ $label ] ?? [ 'impressions' => 0, 'conversions' => 0, 'rate' => 0 ];
 				$cmp   = $multi['comparisons'][ $label ] ?? null;
+				$color = $color_map[ $exp_id . '|' . $label ] ?? '';
+				$style = '' !== $color ? ' style="background-color:' . esc_attr( $color ) . ';"' : '';
 				?>
 				<div class="vlab-variant">
-					<span class="vlab-vtag vlab-vtag--<?php echo esc_attr( strtolower( $label ) ); ?>"><?php echo esc_html( $label ); ?></span>
+					<span class="vlab-vtag vlab-vtag--<?php echo esc_attr( strtolower( $label ) ); ?>"<?php echo $style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $style is pre-built from esc_attr'd hex color ?>><?php echo esc_html( $label ); ?></span>
 					<span class="vlab-variant-title" title="<?php echo esc_attr( (string) get_the_title( $pid ) ); ?>"><?php echo esc_html( get_the_title( $pid ) ?: '—' ); ?></span>
 					<span class="vlab-variant-counts">
 						<?php
@@ -627,7 +673,7 @@ final class ExperimentsList {
 		<?php
 	}
 
-	private static function render_url_sparkline( string $url, array $exps, string $from = '', string $to = '' ): void {
+	private static function render_url_sparkline( string $url, array $exps, array $color_map = [], string $from = '', string $to = '' ): void {
 		$breakdown = Stats::daily_breakdown_for_url( $url, $from, $to );
 		if ( empty( $breakdown['days'] ) || empty( $breakdown['series'] ) ) {
 			return;
@@ -638,6 +684,41 @@ final class ExperimentsList {
 		}
 		$breakdown['titles'] = $titles;
 
+		// Inject the (experiment, variant) color into each series so the chart
+		// line matches the variant tag rendered above it in the experiment row.
+		foreach ( $breakdown['series'] as $key => $series_data ) {
+			$map_key = (int) $series_data['experiment_id'] . '|' . (string) $series_data['variant'];
+			if ( isset( $color_map[ $map_key ] ) ) {
+				$breakdown['series'][ $key ]['color'] = $color_map[ $map_key ];
+			}
+		}
+
+		// Vertical change markers — one per experiment start / end date so the
+		// admin can see at a glance when a test rolled in or out on this URL.
+		// Dates outside the chart range silently drop (no DOM noise).
+		$markers = [];
+		foreach ( $exps as $exp ) {
+			$exp_id  = (int) $exp->ID;
+			$title   = (string) get_the_title( $exp );
+			$started = (string) get_post_meta( $exp_id, Experiment::META_STARTED_AT, true );
+			$ended   = (string) get_post_meta( $exp_id, Experiment::META_ENDED_AT, true );
+			if ( '' !== $started ) {
+				$markers[] = [
+					'date'  => substr( $started, 0, 10 ),
+					'kind'  => 'start',
+					'title' => $title,
+				];
+			}
+			if ( '' !== $ended ) {
+				$markers[] = [
+					'date'  => substr( $ended, 0, 10 ),
+					'kind'  => 'end',
+					'title' => $title,
+				];
+			}
+		}
+		$breakdown['markers'] = $markers;
+
 		$shell_id = 'vlab-spark-' . md5( $url );
 		?>
 		<div class="vlab-chart-section">
@@ -647,14 +728,6 @@ final class ExperimentsList {
 					<title><?php esc_html_e( 'Daily conversion rate per variant', 'variolab-ab-testing' ); ?></title>
 				</svg>
 				<script type="application/json" class="vlab-sparkline-data" data-target="<?php echo esc_attr( $shell_id ); ?>"><?php echo wp_json_encode( $breakdown ); ?></script>
-			</div>
-			<div class="vlab-chart-legend">
-				<?php foreach ( $exps as $exp ) : ?>
-					<span class="vlab-leg-exp">
-						<span class="vlab-leg-mark" style="border-top-color: var(--vlab-variant-b-tag);"></span>
-						<?php echo esc_html( (string) get_the_title( $exp ) ); ?>
-					</span>
-				<?php endforeach; ?>
 			</div>
 		</div>
 		<?php

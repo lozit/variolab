@@ -63,19 +63,19 @@
 			return;
 		}
 
-		// Compute Y scale (rate ratios are in 0..1; render as percent).
-		var maxRate = 0;
+		// Compute Y scale. Stats::daily_breakdown_for_url() already returns
+		// rates in PERCENT (0..100, not 0..1), so no further scaling here.
+		var maxPct = 0;
 		seriesList.forEach( function ( s ) {
 			( s.rates || [] ).forEach( function ( r ) {
-				if ( typeof r === 'number' && r > maxRate ) {
-					maxRate = r;
+				if ( typeof r === 'number' && r > maxPct ) {
+					maxPct = r;
 				}
 			} );
 		} );
-		if ( maxRate <= 0 ) {
-			maxRate = 0.01; // floor so a flat-zero line still draws
+		if ( maxPct <= 0 ) {
+			maxPct = 1; // floor (in %), so a flat-zero series still draws a baseline
 		}
-		var maxPct = maxRate * 100;
 
 		// Layout (viewBox is 800 x 220; we stretch horizontally with preserveAspectRatio).
 		var W = 800;
@@ -115,7 +115,30 @@
 			escapeXml( data.days[ n - 1 ] ) + '</text>'
 		);
 
-		// One polyline per series.
+		// Vertical experiment-transition markers (start / end). Drawn before the
+		// polylines so the lines render on top — markers stay in the background.
+		// Each marker carries a <title> for hover/screen-reader context.
+		if ( data.markers && data.markers.length ) {
+			data.markers.forEach( function ( m ) {
+				var idx = data.days.indexOf( m.date );
+				if ( idx < 0 ) {
+					return;
+				}
+				var mx = ML + idx * xStep;
+				var label = ( m.kind === 'start' ? 'Started: ' : 'Ended: ' ) + ( m.title || '' );
+				parts.push(
+					'<line class="vlab-spark-marker" x1="' + mx.toFixed( 1 ) + '" y1="' + MT + '"' +
+					' x2="' + mx.toFixed( 1 ) + '" y2="' + ( H - MB ) + '"' +
+					' vector-effect="non-scaling-stroke">' +
+					'<title>' + escapeXml( label ) + '</title>' +
+					'</line>'
+				);
+			} );
+		}
+
+		// One polyline per series. Color comes from the server-computed palette
+		// (the `color` field is injected in render_url_sparkline so the chart
+		// stays in sync with the variant tag colors in the experiment rows).
 		seriesList.forEach( function ( s ) {
 			var points = [];
 			( s.rates || [] ).forEach( function ( r, i ) {
@@ -123,17 +146,19 @@
 					return; // skip null/missing days; polyline jumps gracefully
 				}
 				var x = ML + i * xStep;
-				var pct = r * 100;
-				var y = MT + chartH * ( 1 - pct / maxPct );
+				var y = MT + chartH * ( 1 - r / maxPct );
 				points.push( x.toFixed( 1 ) + ',' + y.toFixed( 1 ) );
 			} );
 			if ( points.length === 0 ) {
 				return;
 			}
+			// A = solid baseline, every other variant (B/C/D) = dashed so the
+			// baseline is visually anchored on a per-experiment basis even when
+			// the chart packs many overlapping lines.
+			var dash = ( s.variant === 'A' ) ? '' : ' stroke-dasharray="6 4"';
 			parts.push(
 				'<polyline class="vlab-spark-line" points="' + points.join( ' ' ) +
-				'" stroke="' + variantColor( s.variant ) + '"' +
-				dashAttr( s.variant ) +
+				'" stroke="' + ( s.color || '#888' ) + '"' + dash +
 				' vector-effect="non-scaling-stroke"/>'
 			);
 		} );
@@ -144,38 +169,6 @@
 		var inner = svg.querySelector( 'title' );
 		var titleMarkup = inner ? inner.outerHTML : '';
 		svg.innerHTML = titleMarkup + parts.join( '' );
-	}
-
-	function variantColor( variant ) {
-		// Mirrors the --vlab-variant-*-tag tokens; hard-coded so we don't pay a
-		// getComputedStyle round-trip per series.
-		switch ( variant ) {
-			case 'A':
-				return '#50575e';
-			case 'B':
-				return '#2271b1';
-			case 'C':
-				return '#00a32a';
-			case 'D':
-				return '#dba617';
-			default:
-				return '#6c7280';
-		}
-	}
-
-	function dashAttr( variant ) {
-		// A solid, B dashed, C dotted, D loose-dashed — same primitive as the
-		// old Chart.js renderer (it dashed B only).
-		switch ( variant ) {
-			case 'B':
-				return ' stroke-dasharray="6 4"';
-			case 'C':
-				return ' stroke-dasharray="2 3"';
-			case 'D':
-				return ' stroke-dasharray="10 4 2 4"';
-			default:
-				return '';
-		}
 	}
 
 	function fmtPct( value ) {

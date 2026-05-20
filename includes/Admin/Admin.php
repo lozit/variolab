@@ -83,10 +83,17 @@ final class Admin {
 			[],
 			ABTEST_VERSION
 		);
+		// Shared shell — cream bg, .vlab-page, brand header + buttons.
+		wp_enqueue_style(
+			'vlab-admin-shell',
+			ABTEST_PLUGIN_URL . 'assets/css/admin-shell.css',
+			[ 'vlab-admin-tokens' ],
+			ABTEST_VERSION
+		);
 		wp_enqueue_style(
 			'abtest-admin',
 			ABTEST_PLUGIN_URL . 'assets/css/admin.css',
-			[ 'vlab-admin-tokens' ],
+			[ 'vlab-admin-shell' ],
 			ABTEST_VERSION
 		);
 
@@ -101,7 +108,7 @@ final class Admin {
 			wp_enqueue_style(
 				'vlab-admin-list',
 				ABTEST_PLUGIN_URL . 'assets/css/admin-list.css',
-				[ 'vlab-admin-tokens' ],
+				[ 'vlab-admin-shell' ],
 				ABTEST_VERSION
 			);
 			wp_enqueue_script(
@@ -754,6 +761,37 @@ final class Admin {
 
 	public static function nonce_action(): string {
 		return self::NONCE;
+	}
+
+	/**
+	 * Render the shared brand header — Variolab icon + wordmark + version pill
+	 * over a page title. Used by every plugin admin screen for visual cohesion.
+	 *
+	 * @param string $title           Page-specific h1 text (already translated by the caller).
+	 * @param string $right_actions   Optional pre-rendered HTML (escaped by caller) for the
+	 *                                right-aligned actions slot (e.g. Export CSV + Add new
+	 *                                buttons on the list page).
+	 */
+	public static function render_brand_header( string $title, string $right_actions = '' ): void {
+		$brand_home = admin_url( 'admin.php?page=' . self::MENU_SLUG );
+		$icon_src   = ABTEST_PLUGIN_URL . 'assets/img/icon-128.png';
+		?>
+		<header class="vlab-page-header">
+			<div class="vlab-page-header-l">
+				<a class="vlab-brandline" href="<?php echo esc_url( $brand_home ); ?>" title="<?php esc_attr_e( 'Variolab', 'variolab-ab-testing' ); ?>">
+					<img class="vlab-icon-img" src="<?php echo esc_url( $icon_src ); ?>" alt="<?php esc_attr_e( 'Variolab', 'variolab-ab-testing' ); ?>" width="28" height="28">
+					<span class="vlab-wordmark">Variolab<span class="vlab-dot">.</span></span>
+					<span class="vlab-version">v<?php echo esc_html( ABTEST_VERSION ); ?></span>
+				</a>
+				<h1 class="vlab-page-title"><?php echo esc_html( $title ); ?><span class="vlab-dot">.</span></h1>
+			</div>
+			<?php if ( '' !== $right_actions ) : ?>
+				<div class="vlab-header-actions">
+					<?php echo $right_actions; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-escaped by caller ?>
+				</div>
+			<?php endif; ?>
+		</header>
+		<?php
 	}
 
 	/**

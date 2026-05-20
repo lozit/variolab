@@ -3,151 +3,20 @@
  * ========================================================
  *
  * Loaded only on /wp-admin/admin.php?page=abtest-experiments&action=list
- * (see Admin::enqueue_assets). Depends on admin-tokens.css for the
- * --vlab-* design tokens + @font-face.
+ * (see Admin::enqueue_assets). Depends on:
+ *   - admin-tokens.css for the --vlab-* design tokens + @font-face
+ *   - admin-shell.css  for .vlab-page / .vlab-page-header / .vlab-brandline
+ *                      / .vlab-btn — shared by every plugin admin screen
+ *
+ * Adapted from variolab-template/AB Tests - Branded.html. Tweaks-panel-
+ * specific rules (body.compact / body.subtle / #tweaks-root) dropped —
+ * Variolab ships a single fixed look.
  *
  * Class-name convention: every component selector is prefixed `vlab-`
- * to keep this stylesheet self-contained — no collision with WP admin,
+ * to keep the stylesheet self-contained — no collision with WP admin,
  * other plugins, or the legacy abtest-* classes still used elsewhere
  * in this plugin (admin.css, kept untouched on Edit/Settings/Import).
- *
- * Adapted from variolab-template/AB Tests - Branded.html (inline
- * <style> block, lines 9-640). Tweaks-panel-specific rules
- * (`body.compact`, `body.subtle`, `#tweaks-root`) dropped — Variolab
- * ships a single fixed look. Body-level resets re-scoped under
- * `.vlab-page` so they don't leak into the wp-admin chrome.
  */
-
-/* ----- Scope shell -------------------------------------------------- */
-.vlab-page,
-.vlab-page * {
-	box-sizing: border-box;
-}
-
-.vlab-page {
-	font-family: var(--vlab-font-body);
-	background: var(--vlab-bg);
-	color: var(--vlab-text);
-	font-size: 14px;
-	line-height: 1.45;
-	-webkit-font-smoothing: antialiased;
-	text-rendering: optimizeLegibility;
-	max-width: 1240px;
-	margin: 16px 20px 80px 0;
-	padding: 28px 32px 80px;
-	border-radius: 8px;
-}
-
-.vlab-page a {
-	color: var(--vlab-primary);
-	text-decoration: none;
-}
-.vlab-page a:hover {
-	color: var(--vlab-primary-hover);
-	text-decoration: underline;
-}
-.vlab-page button {
-	font-family: inherit;
-}
-
-/* ----- Header ------------------------------------------------------- */
-.vlab-page-header {
-	display: flex;
-	align-items: flex-end;
-	justify-content: space-between;
-	gap: 24px;
-	margin-bottom: 24px;
-}
-.vlab-page-header-l {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-}
-.vlab-pill {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 5px 11px 5px 9px;
-	font-family: var(--vlab-font-mono);
-	font-size: 10.5px;
-	font-weight: 500;
-	letter-spacing: var(--vlab-tracking-pill);
-	text-transform: uppercase;
-	background: var(--vlab-brand-ink);
-	color: var(--vlab-brand-cream);
-	border-radius: 999px;
-	align-self: flex-start;
-}
-.vlab-pill::before {
-	content: '';
-	width: 6px;
-	height: 6px;
-	border-radius: 999px;
-	background: var(--vlab-brand-orange);
-}
-.vlab-page h1.vlab-page-title {
-	font-family: var(--vlab-font-display);
-	font-size: 36px;
-	font-weight: 700;
-	letter-spacing: -0.02em;
-	line-height: 1;
-	color: var(--vlab-brand-ink);
-	margin: 0;
-	padding: 0;
-}
-.vlab-page-title .vlab-dot {
-	color: var(--vlab-brand-orange);
-}
-
-.vlab-header-actions {
-	display: flex;
-	gap: 8px;
-	align-items: center;
-	flex-shrink: 0;
-}
-
-/* ----- Buttons ------------------------------------------------------ */
-.vlab-btn {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	padding: 7px 13px;
-	font-size: 13px;
-	font-weight: 500;
-	line-height: 1.3;
-	border-radius: 4px;
-	border: 1px solid var(--vlab-border);
-	background: var(--vlab-panel);
-	color: var(--vlab-text);
-	cursor: pointer;
-	transition: background 120ms, border-color 120ms, color 120ms;
-	text-decoration: none;
-}
-.vlab-btn:hover {
-	background: var(--vlab-panel-soft);
-	border-color: var(--vlab-text-faint);
-	text-decoration: none;
-}
-.vlab-btn--primary {
-	background: var(--vlab-brand-orange);
-	border-color: var(--vlab-brand-orange);
-	color: #fff;
-}
-.vlab-btn--primary:hover {
-	background: var(--vlab-brand-orange-deep);
-	border-color: var(--vlab-brand-orange-deep);
-	color: #fff;
-}
-.vlab-btn--ghost {
-	background: transparent;
-	border-color: transparent;
-	color: var(--vlab-text-muted);
-}
-.vlab-btn--ghost:hover {
-	background: var(--vlab-panel-soft);
-	color: var(--vlab-text);
-	border-color: var(--vlab-border);
-}
 
 /* ----- KPI strip ---------------------------------------------------- */
 .vlab-kpi-strip {
@@ -761,6 +630,13 @@
 	stroke-width: 2;
 	stroke-linejoin: round;
 	stroke-linecap: round;
+}
+.vlab-sparkline .vlab-spark-marker {
+	stroke: var(--vlab-text-faint);
+	stroke-width: 1;
+	stroke-dasharray: 2 4;
+	opacity: 0.65;
+	fill: none;
 }
 .vlab-chart-legend {
 	display: flex;

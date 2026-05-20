@@ -26,8 +26,8 @@ final class Settings {
 		$plugin_cfg  = (array) get_option( 'abtest_settings', [] );
 		$req_consent = ! empty( $plugin_cfg['require_consent'] );
 		?>
-		<div class="wrap abtest-wrap">
-			<h1><?php esc_html_e( 'Settings', 'variolab-ab-testing' ); ?></h1>
+		<div class="wrap vlab-page abtest-wrap">
+			<?php Admin::render_brand_header( __( 'Settings', 'variolab-ab-testing' ) ); ?>
 
 			<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="abtest-form">
 				<?php wp_nonce_field( self::NONCE, '_abtest_settings_nonce' ); ?>
