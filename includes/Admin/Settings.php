@@ -170,12 +170,13 @@ final class Settings {
 			<tr>
 				<th scope="row"><?php esc_html_e( 'Example (curl)', 'variolab-ab-testing' ); ?></th>
 				<td>
-					<pre class="abtest-api-example"><?php
-						printf(
-							"curl -u 'admin:xxxx xxxx xxxx xxxx xxxx xxxx' \\\n     '%s?status=running&from=2026-04-01'",
-							esc_html( $endpoint )
-						);
-					?></pre>
+					<?php
+					$curl_example = sprintf(
+						"curl -u 'admin:xxxx xxxx xxxx xxxx xxxx xxxx' \\\n     '%s?status=running&from=2026-04-01'",
+						$endpoint
+					);
+					?>
+					<pre class="abtest-api-example"><?php echo esc_html( $curl_example ); ?></pre>
 					<p class="description">
 						<?php esc_html_e( 'Replace "admin" with your WP username and the password with the Application Password (with or without spaces — both are accepted).', 'variolab-ab-testing' ); ?>
 					</p>
