@@ -75,32 +75,46 @@ final class Admin {
 		if ( false === strpos( $hook, self::MENU_SLUG ) ) {
 			return;
 		}
+		// Design tokens (CSS custom properties + @font-face) — loaded on every
+		// plugin admin screen so any stylesheet downstream can consume them.
+		wp_enqueue_style(
+			'vlab-admin-tokens',
+			ABTEST_PLUGIN_URL . 'assets/css/admin-tokens.css',
+			[],
+			ABTEST_VERSION
+		);
+		// Shared shell — cream bg, .vlab-page, brand header + buttons.
+		wp_enqueue_style(
+			'vlab-admin-shell',
+			ABTEST_PLUGIN_URL . 'assets/css/admin-shell.css',
+			[ 'vlab-admin-tokens' ],
+			ABTEST_VERSION
+		);
 		wp_enqueue_style(
 			'abtest-admin',
 			ABTEST_PLUGIN_URL . 'assets/css/admin.css',
-			[],
+			[ 'vlab-admin-shell' ],
 			ABTEST_VERSION
 		);
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : 'list';
 
-		// Chart.js + our chart bootstrap, only on the main list view.
-		// Chart.js is vendored locally under assets/js/vendor/ so we don't violate
-		// the WordPress.org plugin guideline against remote-loading code at runtime.
-		// See assets/js/vendor/README.md for source / license / update instructions.
+		// List-page redesign assets (v0.15.0). admin-list.css depends on
+		// the shared admin-tokens.css. list-interactions.js renders inline
+		// SVG sparklines from a sibling JSON blob — replaces the old
+		// Chart.js stack (vendor file removed in this commit).
 		if ( 'list' === $action ) {
-			wp_enqueue_script(
-				'abtest-chartjs',
-				ABTEST_PLUGIN_URL . 'assets/js/vendor/chart.umd.min.js',
-				[],
-				'4.4.1',
-				true
+			wp_enqueue_style(
+				'vlab-admin-list',
+				ABTEST_PLUGIN_URL . 'assets/css/admin-list.css',
+				[ 'vlab-admin-shell' ],
+				ABTEST_VERSION
 			);
 			wp_enqueue_script(
-				'abtest-url-charts',
-				ABTEST_PLUGIN_URL . 'assets/js/url-charts.js',
-				[ 'abtest-chartjs' ],
+				'vlab-list-interactions',
+				ABTEST_PLUGIN_URL . 'assets/js/list-interactions.js',
+				[],
 				ABTEST_VERSION,
 				true
 			);
@@ -206,6 +220,10 @@ final class Admin {
 
 		$errors = $this->validate_multi( $title, $test_url, $variants_clean, $goal_type, $goal_value, $status, $id );
 		if ( ! empty( $errors ) ) {
+			// Preserve typed fields so the next render re-hydrates them. Nonce
+			// already verified above so reading $_POST here is safe.
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- check_admin_referer ran at line 180
+			self::stash_form_state( $id, self::form_state_from_post( $_POST ) );
 			$this->redirect_with_notice( 'error', implode( ' | ', $errors ), $id ? [ 'action' => 'edit', 'experiment' => $id ] : [ 'action' => 'new' ] );
 		}
 
@@ -223,6 +241,8 @@ final class Admin {
 		}
 
 		if ( ! $id || $id < 1 ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- check_admin_referer ran at line 180
+			self::stash_form_state( 0, self::form_state_from_post( $_POST ) );
 			$this->redirect_with_notice( 'error', __( 'Failed to save the experiment.', 'variolab-ab-testing' ), [ 'action' => 'new' ] );
 		}
 
@@ -741,6 +761,146 @@ final class Admin {
 
 	public static function nonce_action(): string {
 		return self::NONCE;
+	}
+
+	/**
+	 * Render the shared brand header — Variolab icon + wordmark + version pill
+	 * over a page title. Used by every plugin admin screen for visual cohesion.
+	 *
+	 * @param string $title           Page-specific h1 text (already translated by the caller).
+	 * @param string $right_actions   Optional pre-rendered HTML (escaped by caller) for the
+	 *                                right-aligned actions slot (e.g. Export CSV + Add new
+	 *                                buttons on the list page).
+	 */
+	public static function render_brand_header( string $title, string $right_actions = '' ): void {
+		$brand_home = admin_url( 'admin.php?page=' . self::MENU_SLUG );
+		$icon_src   = ABTEST_PLUGIN_URL . 'assets/img/icon-128.png';
+		?>
+		<header class="vlab-page-header">
+			<div class="vlab-page-header-l">
+				<a class="vlab-brandline" href="<?php echo esc_url( $brand_home ); ?>" title="<?php esc_attr_e( 'Variolab', 'variolab-ab-testing' ); ?>">
+					<img class="vlab-icon-img" src="<?php echo esc_url( $icon_src ); ?>" alt="<?php esc_attr_e( 'Variolab', 'variolab-ab-testing' ); ?>" width="28" height="28">
+					<span class="vlab-wordmark">Variolab<span class="vlab-dot">.</span></span>
+					<span class="vlab-version">v<?php echo esc_html( ABTEST_VERSION ); ?></span>
+				</a>
+				<h1 class="vlab-page-title"><?php echo esc_html( $title ); ?><span class="vlab-dot">.</span></h1>
+			</div>
+			<?php if ( '' !== $right_actions ) : ?>
+				<div class="vlab-header-actions">
+					<?php echo $right_actions; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-escaped by caller ?>
+				</div>
+			<?php endif; ?>
+		</header>
+		<?php
+	}
+
+	/**
+	 * Sticky-form state. When the experiment-edit form fails validation we
+	 * redirect back to the form (matches WP-admin conventions and avoids POST
+	 * resubmits on F5), but the user shouldn't lose what they typed. We stash
+	 * the submitted fields in a per-user transient keyed by experiment ID and
+	 * pop it on the next render — the form is re-hydrated from the stash and
+	 * the transient is consumed (one-shot read).
+	 *
+	 * Why a transient and not a session cookie:
+	 * - WordPress doesn't use PHP sessions by default; introducing one for the
+	 *   sake of one form would be invasive.
+	 * - Transient keyed by user_id × experiment_id naturally scopes the stash
+	 *   (user A's typo doesn't leak to user B, new-experiment stash doesn't
+	 *   hydrate an unrelated edit screen).
+	 * - 5-minute TTL is long enough to survive the round-trip, short enough
+	 *   to not accumulate state across sessions.
+	 */
+	private const FORM_STATE_KEY_PREFIX = 'abtest_form_state_';
+
+	public static function stash_form_state( int $experiment_id, array $state ): void {
+		$user_id = get_current_user_id();
+		if ( $user_id <= 0 ) {
+			return;
+		}
+		set_transient(
+			self::FORM_STATE_KEY_PREFIX . $user_id . '_' . $experiment_id,
+			$state,
+			5 * MINUTE_IN_SECONDS
+		);
+	}
+
+	public static function pop_form_state( int $experiment_id ): ?array {
+		$user_id = get_current_user_id();
+		if ( $user_id <= 0 ) {
+			return null;
+		}
+		$key   = self::FORM_STATE_KEY_PREFIX . $user_id . '_' . $experiment_id;
+		$state = get_transient( $key );
+		if ( ! is_array( $state ) ) {
+			return null;
+		}
+		delete_transient( $key );
+		return $state;
+	}
+
+	/**
+	 * Extract just the form fields we need to round-trip on a validation
+	 * failure from a raw `$_POST` array. Sanitization mirrors what
+	 * `handle_save()` does on a successful submit — the stash holds values
+	 * already safe for re-render. The `url_scripts[*][code]` body is kept
+	 * verbatim (admin-trusted, wrapped at output via wp_print_inline_script_tag).
+	 *
+	 * @param array<string,mixed> $post Raw `$_POST` (NOT pre-unslashed — this
+	 *                                  helper handles wp_unslash() inline).
+	 */
+	public static function form_state_from_post( array $post ): array {
+		$state = [];
+
+		foreach ( [ 'title', 'test_url', 'goal_value', 'target_countries', 'schedule_start_at', 'schedule_end_at' ] as $field ) {
+			if ( isset( $post[ $field ] ) ) {
+				$state[ $field ] = sanitize_text_field( wp_unslash( $post[ $field ] ) );
+			}
+		}
+		foreach ( [ 'goal_type', 'status' ] as $field ) {
+			if ( isset( $post[ $field ] ) ) {
+				$state[ $field ] = sanitize_key( wp_unslash( $post[ $field ] ) );
+			}
+		}
+		$state['url_noindex'] = ! empty( $post['url_noindex'] );
+
+		if ( isset( $post['variants'] ) && is_array( $post['variants'] ) ) {
+			$variants = [];
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- per-field sanitization below
+			foreach ( wp_unslash( $post['variants'] ) as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$variants[] = [ 'post_id' => isset( $row['post_id'] ) ? absint( $row['post_id'] ) : 0 ];
+			}
+			$state['variants'] = $variants;
+		}
+
+		if ( isset( $post['target_devices'] ) && is_array( $post['target_devices'] ) ) {
+			$state['target_devices'] = array_values(
+				array_filter(
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_key applied below
+					array_map( 'sanitize_key', wp_unslash( $post['target_devices'] ) )
+				)
+			);
+		}
+
+		if ( isset( $post['url_scripts'] ) && is_array( $post['url_scripts'] ) ) {
+			$scripts = [];
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- position is keyed; code body is admin-trusted (cap-gated upstream + wrapped at output)
+			foreach ( wp_unslash( $post['url_scripts'] ) as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$scripts[] = [
+					'position' => isset( $row['position'] ) ? sanitize_key( (string) $row['position'] ) : '',
+					'code'     => isset( $row['code'] ) ? (string) $row['code'] : '',
+				];
+			}
+			$state['url_scripts'] = $scripts;
+		}
+
+		return $state;
 	}
 
 	public static function menu_slug(): string {

@@ -48,8 +48,8 @@ final class HtmlImport {
 			]
 		);
 		?>
-		<div class="wrap abtest-wrap">
-			<h1><?php esc_html_e( 'Import HTML', 'variolab-ab-testing' ); ?></h1>
+		<div class="wrap vlab-page abtest-wrap">
+			<?php Admin::render_brand_header( __( 'Import HTML', 'variolab-ab-testing' ) ); ?>
 
 			<p class="description">
 				<?php esc_html_e( 'Upload a complete HTML document (with its own DOCTYPE, head, body) and import it as a WordPress page rendered with no theme wrapper. Useful for landing-page templates designed outside WordPress.', 'variolab-ab-testing' ); ?>

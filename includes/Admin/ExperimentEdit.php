@@ -99,6 +99,38 @@ final class ExperimentEdit {
 		$goal         = $is_new ? [ 'type' => Experiment::GOAL_URL, 'value' => '' ] : Experiment::get_goal( $experiment_id );
 		$status       = $is_new ? Experiment::STATUS_DRAFT : Experiment::get_status( $experiment_id );
 
+		// Sticky form: hydrate from the transient stash set by Admin::handle_save()
+		// when validation failed on the previous submit. One-shot read — the stash
+		// is consumed and deleted by pop_form_state(). Stash values OVERRIDE the
+		// DB/query-string defaults above (the user's last typed values win).
+		$stash = Admin::pop_form_state( $experiment_id );
+		if ( null !== $stash ) {
+			if ( isset( $stash['title'] ) ) {
+				$title = (string) $stash['title'];
+			}
+			if ( isset( $stash['test_url'] ) ) {
+				$test_path = Experiment::normalize_path( (string) $stash['test_url'] );
+			}
+			if ( isset( $stash['goal_type'] ) || isset( $stash['goal_value'] ) ) {
+				$goal = [
+					'type'  => isset( $stash['goal_type'] ) ? (string) $stash['goal_type'] : $goal['type'],
+					'value' => isset( $stash['goal_value'] ) ? (string) $stash['goal_value'] : $goal['value'],
+				];
+			}
+			if ( isset( $stash['status'] ) ) {
+				$status = (string) $stash['status'];
+			}
+			if ( isset( $stash['variants'] ) && is_array( $stash['variants'] ) ) {
+				$variants = $stash['variants'];
+				// Recompute control/variant IDs from the stashed array for downstream code.
+				$control_id = isset( $variants[0]['post_id'] ) ? (int) $variants[0]['post_id'] : 0;
+				$variant_id = isset( $variants[1]['post_id'] ) ? (int) $variants[1]['post_id'] : 0;
+			}
+			if ( array_key_exists( 'url_noindex', $stash ) ) {
+				$url_noindex = (bool) $stash['url_noindex'];
+			}
+		}
+
 		// Variant pages may be in `private` status — list those too so admins can pick / re-pick them.
 		$pages = get_posts(
 			[
@@ -123,8 +155,8 @@ final class ExperimentEdit {
 			}
 		}
 		?>
-		<div class="wrap abtest-wrap">
-			<h1><?php echo esc_html( $is_new ? __( 'New A/B Test', 'variolab-ab-testing' ) : __( 'Edit A/B Test', 'variolab-ab-testing' ) ); ?></h1>
+		<div class="wrap vlab-page abtest-wrap">
+			<?php Admin::render_brand_header( $is_new ? __( 'New A/B Test', 'variolab-ab-testing' ) : __( 'Edit A/B Test', 'variolab-ab-testing' ) ); ?>
 
 			<?php if ( $full_url ) : ?>
 				<div class="notice notice-info inline abtest-test-url-banner">
@@ -255,6 +287,13 @@ final class ExperimentEdit {
 					// datetime-local needs YYYY-MM-DDTHH:MM (no seconds, no timezone).
 					$start_input    = '' !== $schedule_start ? str_replace( ' ', 'T', substr( $schedule_start, 0, 16 ) ) : '';
 					$end_input      = '' !== $schedule_end ? str_replace( ' ', 'T', substr( $schedule_end, 0, 16 ) ) : '';
+					// Sticky-form override (stash format is already datetime-local).
+					if ( isset( $stash['schedule_start_at'] ) ) {
+						$start_input = (string) $stash['schedule_start_at'];
+					}
+					if ( isset( $stash['schedule_end_at'] ) ) {
+						$end_input = (string) $stash['schedule_end_at'];
+					}
 					?>
 					<tr>
 						<th scope="row"><label for="abtest-schedule-start"><?php esc_html_e( 'Auto-start at (optional)', 'variolab-ab-testing' ); ?></label></th>
@@ -273,6 +312,23 @@ final class ExperimentEdit {
 					<?php
 					$target_devices   = $is_new ? [] : Experiment::get_target_devices( $experiment_id );
 					$target_countries = $is_new ? [] : Experiment::get_target_countries( $experiment_id );
+					// Sticky-form override.
+					if ( isset( $stash['target_devices'] ) && is_array( $stash['target_devices'] ) ) {
+						$target_devices = $stash['target_devices'];
+					}
+					if ( isset( $stash['target_countries'] ) ) {
+						// Stash holds the raw comma-separated string; expand to the canonical
+						// uppercase-ISO array shape so the rendering code below sees a uniform input.
+						$codes = preg_split( '/[\s,;]+/', (string) $stash['target_countries'] ) ?: [];
+						$target_countries = [];
+						foreach ( $codes as $code ) {
+							$norm = strtoupper( trim( $code ) );
+							if ( preg_match( '/^[A-Z]{2}$/', $norm ) ) {
+								$target_countries[] = $norm;
+							}
+						}
+						$target_countries = array_values( array_unique( $target_countries ) );
+					}
 					?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Device targeting (optional)', 'variolab-ab-testing' ); ?></th>
@@ -312,6 +368,10 @@ final class ExperimentEdit {
 					$url_scripts = \Abtest\UrlScripts::get( $test_path );
 				} else {
 					$url_scripts = [];
+				}
+				// Sticky-form override (admin-typed entries beat the DB snapshot).
+				if ( isset( $stash['url_scripts'] ) && is_array( $stash['url_scripts'] ) ) {
+					$url_scripts = $stash['url_scripts'];
 				}
 				?>
 				<h2 class="abtest-section-title"><?php esc_html_e( 'Tracking scripts', 'variolab-ab-testing' ); ?></h2>

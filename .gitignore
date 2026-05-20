@@ -13,7 +13,17 @@ package-lock.json
 # Local test artifacts (HTML imports, sample files)
 /test.html
 /test-*.html
-/tools/
+
+# Design reference / mockups (local-only, not committed)
+/variolab-template/
+
+# Local dev tooling — gitignored as a folder, but specific scripts are
+# explicitly allowed so the repo stays reproducible.
+/tools/*
+!/tools/build-fonts.sh
+
+# Per-machine PHP language server config
+/.phpactor.json
 
 # PHPUnit
 .phpunit.result.cache

@@ -1,0 +1,123 @@
+/*
+ * Variolab — design tokens (CSS custom properties)
+ * ================================================
+ *
+ * Loaded on every plugin admin screen via Admin::enqueue_assets().
+ * The list page redesign (admin-list.css) consumes these tokens; other
+ * admin screens (Edit, Settings, HtmlImport) continue to use the
+ * legacy admin.css and ignore the tokens — both stylesheets coexist.
+ *
+ * Naming: every token is prefixed --vlab-* so it never collides with
+ * a theme's or another plugin's CSS variables. Grouped by intent.
+ *
+ * Fonts are bundled locally under assets/fonts/*.woff2 — Latin subset,
+ * SIL OFL 1.1, ~200 KB total. See tools/build-fonts.sh.
+ */
+
+@font-face {
+	font-family: 'Inter Tight';
+	src: url('../fonts/inter-tight.woff2') format('woff2');
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Inter Tight';
+	src: url('../fonts/inter-tight-italic.woff2') format('woff2');
+	font-weight: 100 900;
+	font-style: italic;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'JetBrains Mono';
+	src: url('../fonts/jetbrains-mono.woff2') format('woff2');
+	font-weight: 100 800;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'JetBrains Mono';
+	src: url('../fonts/jetbrains-mono-italic.woff2') format('woff2');
+	font-weight: 100 800;
+	font-style: italic;
+	font-display: swap;
+}
+
+:root {
+	/* Brand palette — orange accent, ink type, cream canvas. */
+	--vlab-brand-orange:        #F87018;
+	--vlab-brand-orange-deep:   #C86018;
+	--vlab-brand-orange-soft:   #FCE6D2;
+	--vlab-brand-ink:           #0C1420;
+	--vlab-brand-ink-2:         #1A2230;
+	--vlab-brand-slate:         #6C7280;
+	--vlab-brand-slate-soft:    #A1A6B0;
+	--vlab-brand-cream:         #FAFAF8;
+	--vlab-brand-cream-2:       #F4F2EC;
+	--vlab-brand-line:          #E8E5DC;
+
+	/* Admin chrome — Variolab-branded warm neutrals. */
+	--vlab-primary:             #F87018;     /* primary action — branded orange */
+	--vlab-primary-hover:       #C86018;
+	--vlab-primary-soft:        #FCE6D2;
+	--vlab-text:                #0C1420;
+	--vlab-text-muted:          #6C7280;
+	--vlab-text-faint:          #A1A6B0;
+	--vlab-bg:                  #EFECE4;     /* page canvas (cream-tinted) */
+	--vlab-panel:               #FAFAF8;     /* cards, KPI cards, table rows */
+	--vlab-panel-soft:          #F4F2EC;     /* filter strips, code blocks */
+	--vlab-border:              #D8D4C8;
+	--vlab-border-soft:         #E8E5DC;
+	--vlab-code-bg:             #0C1420;
+	--vlab-code-fg:             #FAFAF8;
+
+	/* Status colors — mirror admin.css's existing pill colors. */
+	--vlab-status-draft-bg:     #f0f0f1;
+	--vlab-status-draft-fg:     #50575e;
+	--vlab-status-running-bg:   #d4edda;
+	--vlab-status-running-fg:   #155724;
+	--vlab-status-paused-bg:    #fff3cd;
+	--vlab-status-paused-fg:    #856404;
+	--vlab-status-ended-bg:     #d1ecf1;
+	--vlab-status-ended-fg:     #0c5460;
+
+	/* Variant tags A/B/C/D. */
+	--vlab-variant-a-tag:       #50575e;     /* baseline / slate */
+	--vlab-variant-b-tag:       #2271b1;     /* WP-blue */
+	--vlab-variant-c-tag:       #00a32a;     /* green */
+	--vlab-variant-d-tag:       #dba617;     /* amber */
+
+	/* Lift + significance + delete colors. */
+	--vlab-lift-pos-fg:         #155724;
+	--vlab-lift-neg-fg:         #842029;
+	--vlab-delete-fg:           #b32d2e;
+	--vlab-badge-sig-bg:        #d4edda;
+	--vlab-badge-sig-fg:        #155724;
+	--vlab-badge-nosig-bg:      #f0f0f1;
+	--vlab-badge-nosig-fg:      #50575e;
+	--vlab-badge-baseline-bg:   #e7f3ff;
+	--vlab-badge-baseline-fg:   #0a4b78;
+
+	/* Type — families. */
+	--vlab-font-display: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--vlab-font-body:    'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--vlab-font-mono:    'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+	/* Type — scale (admin product surface). */
+	--vlab-fs-h1:      clamp(28px, 3vw, 40px);
+	--vlab-fs-h2:      24px;
+	--vlab-fs-h3:      18px;
+	--vlab-fs-lead:    16px;
+	--vlab-fs-body:    14px;
+	--vlab-fs-small:   13px;
+	--vlab-fs-micro:   12px;
+	--vlab-fs-badge:   12px;        /* mono pill */
+
+	--vlab-lh-tight:   0.95;
+	--vlab-lh-snug:    1.15;
+	--vlab-lh-normal:  1.5;
+	--vlab-lh-prose:   1.65;
+
+	--vlab-tracking-pill:  0.12em;  /* uppercase mono badge */
+	--vlab-tracking-tight: -0.02em; /* display headings */
+}
