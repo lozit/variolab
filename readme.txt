@@ -4,7 +4,7 @@ Tags: ab testing, split testing, conversion, analytics
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.1
-Stable tag: 0.14.0
+Stable tag: 0.15.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -138,6 +138,15 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.0 =
+* **List page redesign.** New branded dashboard at A/B Tests: header with Variolab brandline (icon + wordmark + version pill); 5-card KPI strip (Active tests / Impressions / Conversions / Overall rate / Winners shipped) driven by a new `Stats::overview_kpis()` aggregator; toolbar with 5 status chips (All / Draft / Running / Paused / Ended) + date range with 7d/30d/All-time presets; URL blocks rendered as cards with per-experiment 3-column CSS grid; ended experiments collapse into a native `<details>` per URL block. Cream canvas (#EFECE4) replaces the wp-admin gray across every plugin admin screen (scoped via `body.toplevel_page_abtest-experiments`).
+* **Inline SVG sparklines, Chart.js dropped.** Replaces the ~205 KB vendored Chart.js + the `assets/js/url-charts.js` wrapper with a ~200-LOC vanilla `list-interactions.js` that renders an SVG polyline per (experiment, variant) using a 12-hex rotating palette so the chart line color matches the variant tag color in the row above. Variant A renders solid, B/C/D dashed. Dashed light-gray vertical markers show each experiment's start + end dates with hover tooltip.
+* **Shared brand shell across all admin pages.** New `Admin::render_brand_header( $title )` helper applied to List / Edit / Settings / Import; the legacy form-table styles on Edit / Settings / Import are preserved by the dual `wrap vlab-page abtest-wrap` class so the form submission paths are unchanged.
+* **Inter Tight + JetBrains Mono variable fonts bundled** as WOFF2 with a Latin Unicode subset (~200 KB total via `pyftsubset`). SIL OFL 1.1 license files shipped alongside.
+* New `?status_filter=all|draft|running|paused|ended` query arg replaces the old `?show=`. The legacy parameter is translated silently for one release so bookmarks keep working.
+* New CSS architecture: `admin-tokens.css` (design tokens + `@font-face`, everywhere) → `admin-shell.css` (cream bg + brandline + buttons, everywhere) → `admin-list.css` (list-specific, list page only). The legacy `admin.css` is kept verbatim for the other pages.
+* Internal naming preserved: `Abtest\` PHP namespace, `abtest_*` hook / cookie / option / table prefixes, REST namespace `abtest/v1`, custom table `wp_abtest_events`. No DB / cookie / option breaking change.
 
 = 0.14.0 =
 * **wp.org Plugin Review round 2 — all findings addressed.**
