@@ -388,18 +388,18 @@ final class ExperimentsList {
 			return;
 		}
 
-		$totals      = self::totals_for_group( $exps, $counts );
-		$exp_count   = count( $exps );
-		$color_map   = self::build_color_map( $exps );
-		$full_url    = '' !== $url ? home_url( $url ) : '';
-		$add_args   = array_filter(
-			[
-				'page'     => Admin::menu_slug(),
-				'action'   => 'new',
-				'test_url' => '' !== $url ? $url : null,
-			],
-			static fn( $v ) => null !== $v
-		);
+		$totals    = self::totals_for_group( $exps, $counts );
+		$exp_count = count( $exps );
+		$color_map = self::build_color_map( $exps );
+		$full_url  = '' !== $url ? home_url( $url ) : '';
+
+		$add_args = [
+			'page'   => Admin::menu_slug(),
+			'action' => 'new',
+		];
+		if ( '' !== $url ) {
+			$add_args['test_url'] = $url;
+		}
 		$add_to_url = add_query_arg( $add_args, admin_url( 'admin.php' ) );
 		?>
 		<section class="vlab-url-block">
