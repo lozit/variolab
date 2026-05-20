@@ -21,6 +21,7 @@ package-lock.json
 # explicitly allowed so the repo stays reproducible.
 /tools/*
 !/tools/build-fonts.sh
+!/tools/optimize-screenshots.sh
 
 # Per-machine PHP language server config
 /.phpactor.json
