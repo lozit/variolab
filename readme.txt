@@ -1,5 +1,5 @@
 === Variolab – A/B Testing ===
-Contributors: guillaumeferrari, lozit
+Contributors: lozit
 Tags: ab testing, split testing, conversion, analytics
 Requires at least: 6.0
 Tested up to: 6.9
