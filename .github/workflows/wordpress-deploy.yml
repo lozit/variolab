@@ -1,0 +1,38 @@
+name: Deploy to WordPress.org
+
+# Deploys the plugin to the wp.org SVN repo (trunk + tag + assets) whenever a
+# version tag is pushed — the same trigger as release.yml, so a single
+# `git push origin vX.Y.Z` produces BOTH a GitHub Release and a wp.org deploy.
+#
+# Requires two repository secrets (Settings -> Secrets and variables -> Actions):
+#   SVN_USERNAME  — the wordpress.org account (e.g. lozit)
+#   SVN_PASSWORD  — that account's wordpress.org login password
+#
+# What ships to trunk is governed by .distignore (kept in sync with release.yml).
+# Banners / icons / screenshots are read from .wordpress-org/ and pushed to SVN assets/.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  deploy:
+    name: Deploy to wp.org SVN
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Derive version from tag (strip leading "v")
+        id: version
+        # Git tags are vX.Y.Z but the wp.org Stable tag (and SVN tag dir) is X.Y.Z.
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to WordPress.org
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: variolab-ab-testing
+          VERSION: ${{ steps.version.outputs.version }}

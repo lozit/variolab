@@ -1,0 +1,49 @@
+# Files & folders excluded from the WordPress.org SVN build.
+# Read by 10up/action-wordpress-plugin-deploy when building trunk/.
+# Mirrors the rsync --exclude list in .github/workflows/release.yml — keep them in sync.
+
+# VCS & dev tooling
+/.git
+/.github
+/.claude
+/.gitignore
+/.gitattributes
+/.distignore
+
+# wp.org marketing assets — deployed to SVN assets/ by the action, never into trunk
+/.wordpress-org
+
+# Dependencies & build artifacts
+/node_modules
+/vendor
+/build
+/dist
+*.zip
+
+# Tests, tasks, docs, internal
+/tests
+/tasks
+/docs
+/SECURITY.md
+/CLAUDE.md
+/tools
+
+# Local dev env & caches
+/.wp-env.json
+/.phpunit.result.cache
+/.phpactor.json
+/wp-tests-config.php
+
+# Package manifests & lint/test configs
+/composer.json
+/composer.lock
+/package.json
+/package-lock.json
+*.dist
+*.lock
+phpcs.xml*
+phpunit.xml*
+
+# OS cruft & local scratch files
+.DS_Store
+test*.html
