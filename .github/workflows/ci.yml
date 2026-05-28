@@ -138,6 +138,8 @@ jobs:
             --exclude='CLAUDE.md' \
             --exclude='.wp-env.json' \
             --exclude='.gitignore' \
+            --exclude='.gitattributes' \
+            --exclude='.distignore' \
             --exclude='.phpunit.result.cache' \
             --exclude='*.zip' \
             --exclude='test*.html' \
