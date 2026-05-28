@@ -1,6 +1,7 @@
 # Variolab – A/B Testing
 
 [![CI](https://github.com/lozit/variolab/actions/workflows/ci.yml/badge.svg)](https://github.com/lozit/variolab/actions/workflows/ci.yml)
+[![WordPress.org](https://img.shields.io/wordpress/plugin/v/variolab-ab-testing?label=wordpress.org)](https://wordpress.org/plugins/variolab-ab-testing/)
 [![Security Audit](https://img.shields.io/badge/security%20audit-10%2F10-brightgreen)](./docs/security/latest.md)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](./LICENSE)
 [![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-777BB4.svg)](#)
@@ -92,10 +93,19 @@ Built around three core ideas:
 ## Quick start
 
 ### Install
+
+**From WordPress.org (recommended)** — https://wordpress.org/plugins/variolab-ab-testing/
+
+1. wp-admin → **Plugins → Add New**
+2. Search for `Variolab` (or `A/B testing`)
+3. **Install Now** → **Activate**
+
+**From source** (dev builds, unreleased changes)
+
 1. Clone this repo into `wp-content/plugins/`:
    ```bash
    cd wp-content/plugins
-   git clone https://github.com/<you>/variolab.git
+   git clone https://github.com/lozit/variolab.git variolab-ab-testing
    ```
 2. Activate **Variolab – A/B Testing** in wp-admin → Plugins.
 
