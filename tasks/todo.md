@@ -90,6 +90,11 @@
 
 **Plugin approved by the wp.org Plugin Review Team and live at https://wordpress.org/plugins/variolab-ab-testing/** First release (v0.15.0) published manually to the SVN repo (`https://plugins.svn.wordpress.org/variolab-ab-testing`, r3550427, committer `lozit`): `trunk/` + `tags/0.15.0/` (54 files each) + `assets/` (2 banners, 2 icons, 3 screenshots from `.wordpress-org/`). Future versions auto-deploy via the GitHub Action (see the deploy-action item above).
 
+Post-launch hygiene (2026-05-28):
+- Dropped non-existent wp.org user `guillaumeferrari` from `Contributors:` (wp.org import warning); SVN r3551314 updated `trunk/readme.txt` + `tags/0.15.0/readme.txt`.
+- Bumped `Tested up to: 6.9 → 7.0` after WordPress 7.0 released (Plugin Check started failing on the 2026-05-20 push). `.wp-env.json` stays at 6.9.4 until Dependabot's pending `wp-phpunit ^6.9 → ^7.0` PR merges.
+- Added `--exclude='.distignore'` + `--exclude='.gitattributes'` to both `release.yml` and `ci.yml` rsync — the `.distignore` added in `c1a9d7c` was leaking into the build folder and tripping Plugin Check's "Hidden files not permitted". CI green again on `6cc2db6`.
+
 The official `wordpress/plugin-check-action@v1` was added to CI in v0.11.1, scoped to the built artifact in v0.11.2, and confirmed green in v0.11.3. The items below were suppressed via `ignore-codes` with justification — **all accepted as-is by the review team** (the suppression + rationale held; none required a code change):
 
 - [x] **🚨 BLOCKER — Rename the plugin** ✅ DONE in v0.12.0 → v0.13.0 (final name "Variolab – A/B Testing") — see the rename items above for the full diff scope.
