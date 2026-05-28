@@ -52,7 +52,7 @@ final class HtmlImport {
 			<?php Admin::render_brand_header( __( 'Import HTML', 'variolab-ab-testing' ) ); ?>
 
 			<p class="description">
-				<?php esc_html_e( 'Upload a complete HTML document (with its own DOCTYPE, head, body) and import it as a WordPress page rendered with no theme wrapper. Useful for landing-page templates designed outside WordPress.', 'variolab-ab-testing' ); ?>
+				<?php esc_html_e( 'Upload a complete HTML document (with its own DOCTYPE, head, body) and import it as a WordPress page rendered with no theme wrapper. Built for landing pages designed outside WordPress — AI-generated exports (Claude, v0, Lovable, Cursor, bolt.new), hand-coded landings, or mockup-tool extracts.', 'variolab-ab-testing' ); ?>
 			</p>
 
 			<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( $action_url ); ?>" class="abtest-form abtest-import-form">

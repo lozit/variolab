@@ -11,7 +11,9 @@
   <img src="./.wordpress-org/banner-1544x500.png" alt="Variolab – A/B Testing — self-hosted A/B testing for WordPress" width="900">
 </p>
 
-Variolab is a self-hosted A/B testing plugin for WordPress. Test landing pages, compare conversion rates, and pipe events to your analytics stack — all on your own database, no third-party dependency required.
+Variolab is a self-hosted A/B testing plugin for WordPress. Test landing pages — including the ones your AI tool just generated as a `.html` file — compare conversion rates, and pipe events to your analytics stack, all on your own database, no third-party dependency required.
+
+> **Got HTML from Claude, v0, Lovable, Cursor, or bolt.new?** Drop the file (or a `.zip` with assets) into wp-admin → **A/B Tests → Import HTML** — Variolab renders it byte-perfect with zero theme wrapper, then A/B-tests it against any existing page on your site. See [HTML import & Blank Canvas](#html-import--blank-canvas) below.
 
 Built around three core ideas:
 
@@ -62,6 +64,8 @@ Built around three core ideas:
 
 ### HTML import & Blank Canvas
 
+Built for the AI era of landing pages. Drop a `.html` (or `.zip` with assets) from any source — **Claude, v0, Lovable, Cursor, bolt.new**, hand-coded HTML, mockup-tool extracts — and Variolab renders it byte-perfect with zero WordPress wrapper. Test it against any existing page in a real 50/50 cookie-split.
+
 <p align="center">
   <img src="./.wordpress-org/screenshot-2.png" alt="Import HTML page — drag-and-drop upload (.html / .htm / .zip) plus the Watch Directory panel for IDE sync" width="700">
 </p>
@@ -69,7 +73,7 @@ Built around three core ideas:
 - Upload a complete HTML document (`.html`/`.htm`) → creates a page rendered byte-perfect with **zero WordPress wrapper** (no theme chrome, no `wp_head`)
 - **`.zip` upload with assets** — bundle CSS/JS/images alongside `index.html`; the importer extracts to `wp-content/uploads/abtest-templates/{slug}/`, rewrites relative `href`/`src`/`srcset`/`url()` to absolute URLs, and hardens against path traversal (extension allowlist, no `../`, no dotfiles)
 - **Watch directory** — drop or edit `index.html` files in `wp-content/uploads/abtest-templates/{slug}/` (via your IDE, SFTP, Dropbox, iCloud Drive…); WP-Cron syncs changed files into pages every 5 minutes (or hit the *Scan now* button). Hash-based change detection. Additive only — never deletes pages.
-- Designed for landing pages built outside WordPress (custom HTML/CSS, bundlers, mockup tools)
+- Designed for landing pages built outside WordPress — AI-generated exports (Claude / v0 / Lovable / Cursor / bolt.new), bundler output, mockup-tool extracts
 - Replace existing variant page with one click
 - Preserves `\n`, `/`, JSON-encoded payloads (uses `wp_slash()` to survive WP's slash dance)
 
@@ -117,6 +121,8 @@ Built around three core ideas:
 5. **Variant B** *(optional)* : leave empty to start in **baseline mode** (measures conversion on A only); add a B later for the actual A/B
 6. **Goal** : URL visited (e.g. `/thank-you/`) or CSS selector clicked (e.g. `.cta-buy`)
 7. Click **Save & Start** → the test is live
+
+**Or import an HTML landing first:** wp-admin → **A/B Tests → Import HTML** → drop your `.html` (or `.zip` with assets) → choose *"— Create a new page —"*. The imported page becomes a candidate to pick as Variant A or B in step 4/5 above.
 
 Visit your test URL in a private window — your visitors will see Variant A or B based on a persistent cookie, and impressions/conversions land in the dashboard.
 

@@ -1,6 +1,6 @@
 === Variolab – A/B Testing ===
 Contributors: lozit
-Tags: ab testing, split testing, conversion, analytics
+Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
@@ -8,17 +8,21 @@ Stable tag: 0.15.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Lightweight A/B testing for pages: internal tracking, persistent-cookie 50/50 split, GDPR-friendly. No third-party dependency.
+A/B test WordPress pages or AI-generated HTML landings. Internal tracking, 50/50 cookie split, GDPR-friendly, no third-party dependency.
 
 == Description ==
 
-Run A/B tests by pointing the plugin at two existing pages — one as the control (Variant A), one as the variant (Variant B). Visitors are split 50/50 via a persistent cookie; once assigned, they always see the same variant.
+Run A/B tests on WordPress pages or on HTML landings you've imported — including the ones your AI tool just generated. Drop a .html (or a .zip with CSS/JS/images) into wp-admin → A/B Tests → Import HTML; Variolab renders the page byte-perfect with zero WordPress wrapper, then runs a real 50/50 cookie-split test against any existing page on your site. Claude, v0, Lovable, Cursor, bolt.new exports all work out of the box.
+
+The classic two-page path works too: point the plugin at two existing pages — one as the control (Variant A), one as the variant (Variant B). Visitors are split 50/50 via a persistent cookie; once assigned, they always see the same variant.
 
 Tracking is fully internal: impressions and conversions land in a custom database table, and the wp-admin dashboard shows conversion rates, lift, and a basic statistical significance indicator (two-proportion z-test).
 
 Security-audited internally before every release (situated checklist + OWASP grid). See SECURITY.md on GitHub for the disclosure policy and the latest audit report (`docs/security/latest.md`).
 
 = Features =
+* HTML / ZIP import for landing pages built outside WordPress — drop a .html or a .zip with assets; pages render byte-perfect with zero theme wrapper. Ideal for AI-generated landings (Claude, v0, Lovable, Cursor, bolt.new), hand-coded HTML, or mockup-tool extracts.
+* Watch directory — keep editing the HTML in your IDE / Cursor / SFTP / cloud sync; WP-Cron picks up changes every 5 minutes (hash-based, additive only).
 * Page-level A/B tests (entire page as variant — no Gutenberg surgery needed)
 * Persistent cookie split (httponly, samesite=Lax)
 * Internal tracking — no third-party dependency, no data leaving your site
@@ -110,7 +114,7 @@ v1 only swaps the entire page (the variant must be a separate post). Block-level
 == Screenshots ==
 
 1. A/B Tests admin list — KPI strip (active tests, impressions, conversions, overall rate, winners shipped), status filter chips (All / Draft / Running / Paused / Ended), date range with 7d / 30d / All-time presets, experiments grouped by URL with per-variant stats + lift + confidence interval + significance badges, archived ended tests collapsed into a details panel, daily conversion-rate sparkline per URL with start/end markers
-2. Import HTML page — drag-and-drop upload of .html / .htm / .zip files (extracted to wp-content/uploads/abtest-templates/{slug}/ with relative-asset URL rewriting), plus the Watch directory panel for IDE / SFTP / cloud-sync workflows
+2. Import HTML page — drop a .html or .zip (with CSS/JS/images) from any source: Claude / v0 / Lovable / Cursor / bolt.new exports, hand-coded landings, mockup-tool extracts. Variolab extracts to wp-content/uploads/abtest-templates/{slug}/, rewrites relative href / src / srcset / url() to the extracted assets, and renders the page with zero WordPress wrapper. Watch directory panel lets you keep editing the HTML in your IDE / Cursor / SFTP / cloud sync — WP-Cron picks up changes every 5 minutes.
 3. Settings — privacy & consent gate (GDPR), Google Analytics 4 Measurement Protocol integration, generic webhooks (Zapier / Make / Mixpanel / Segment / Slack / n8n), and REST API documentation with a copy-paste curl example
 
 == External services ==
