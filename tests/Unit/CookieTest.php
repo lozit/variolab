@@ -90,4 +90,29 @@ final class CookieTest extends TestCase {
 		$b = Cookie::visitor_hash();
 		$this->assertNotSame( $a, $b );
 	}
+
+	public function test_visitor_hash_seeds_dedicated_salt_from_auth_salt(): void {
+		unset( $GLOBALS['__abtest_options'][ Cookie::HASH_SALT_OPTION ] );
+		$_SERVER['REMOTE_ADDR']     = '203.0.113.9';
+		$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0';
+
+		$hash = Cookie::visitor_hash();
+
+		// The salt option is seeded from wp_salt('auth') on first use, so the
+		// existing wp_salt-based hash keeps matching (no one-time dedup reset).
+		$this->assertSame( wp_salt( 'auth' ), get_option( Cookie::HASH_SALT_OPTION ) );
+		$expected = substr( hash( 'sha256', '203.0.113.9|Mozilla/5.0|' . wp_salt( 'auth' ) ), 0, Cookie::HASH_LENGTH );
+		$this->assertSame( $expected, $hash );
+	}
+
+	public function test_visitor_hash_uses_stored_salt_decoupled_from_auth_keys(): void {
+		// Simulate a site whose salt was already seeded, then an AUTH_SALT rotation:
+		// the stored salt must win, so the hash stays stable (dedup is not reset).
+		$GLOBALS['__abtest_options'][ Cookie::HASH_SALT_OPTION ] = 'fixed-dedicated-salt';
+		$_SERVER['REMOTE_ADDR']     = '203.0.113.9';
+		$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0';
+
+		$expected = substr( hash( 'sha256', '203.0.113.9|Mozilla/5.0|fixed-dedicated-salt' ), 0, Cookie::HASH_LENGTH );
+		$this->assertSame( $expected, Cookie::visitor_hash() );
+	}
 }

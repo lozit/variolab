@@ -13,6 +13,7 @@ $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}abtest_events" ); // phpcs:ig
 
 delete_option( 'abtest_db_version' );
 delete_option( 'abtest_settings' );
+delete_option( 'abtest_hash_salt' );
 
 // Cover both the current CPT slug (`abtest_experiment` since v0.14.0 / DB v1.4.0)
 // and the legacy one (`ab_experiment`, used through v0.13.0) so uninstalling an

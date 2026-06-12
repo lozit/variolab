@@ -110,6 +110,15 @@ if ( ! function_exists( 'update_option' ) ) {
 		return true;
 	}
 }
+if ( ! function_exists( 'add_option' ) ) {
+	function add_option( string $key, $value = '', $deprecated = '', $autoload = 'yes' ): bool {
+		if ( array_key_exists( $key, $GLOBALS['__abtest_options'] ) ) {
+			return false;
+		}
+		$GLOBALS['__abtest_options'][ $key ] = $value;
+		return true;
+	}
+}
 if ( ! function_exists( 'delete_option' ) ) {
 	function delete_option( string $key ): bool {
 		unset( $GLOBALS['__abtest_options'][ $key ] );

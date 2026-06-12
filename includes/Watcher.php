@@ -120,6 +120,12 @@ final class Watcher {
 		}
 
 		foreach ( $folders as $folder ) {
+			// $slug is the raw on-disk folder name, used intentionally as-is for both
+			// the asset base URL (which must point at the real folder under uploads/)
+			// and the META_SLUG create/update lookup. Both sides use the same raw
+			// value, so there is no desync; sanitising it would break asset URLs.
+			// wp_insert_post() still sanitises post_name internally. basename() also
+			// strips any path component, so no traversal. (Audit 2026-06-12, Low-G1.)
 			$slug  = basename( $folder );
 			$index = self::find_index_html( $folder );
 			if ( '' === $index ) {

@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.7
+Stable tag: 0.15.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.8 =
+* **Visitor-dedup salt decoupled from WordPress auth keys.** The de-duplication hash used `wp_salt('auth')`, so rotating your site's authentication keys silently reset visitor de-duplication (re-counting returning visitors). It now uses a dedicated salt seeded once from the current auth salt — existing counts are preserved (no reset on update), and future key rotations no longer disturb your stats. Last clean-up item from the 2026-06-12 internal security audit.
 
 = 0.15.7 =
 * **Make the HTML-import trust boundary explicit (defence-in-depth).** Imported pages are rendered with no theme wrapper, so any markup they contain runs as-is. The plugin now records, at import time, whether the importer was allowed to store raw HTML/JS (the `unfiltered_html` capability) and, when rendering, re-filters anything that wasn't through WordPress's standard sanitizer. Single-site admins and existing imported pages are unaffected; the feature also remains available to multisite site administrators (their content is simply sanitized as WordPress already does on save). Closes the last actionable item from the 2026-06-12 internal security audit.

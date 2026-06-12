@@ -34,7 +34,7 @@ No tooling regression. Integration coverage grew from 15 → 36 tests over the r
 
 ## 🏆 Overall Score : **10 / 10**
 
-Both Medium findings that capped the previous audit at 8/10 are closed and independently verified. Zero Critical/High/Medium. The 4 residual Lows are all non-blocking: two deferred with a written rationale (the fix would cause a worse regression), one informational (naturally-bounded query cost), one already mitigated by the M1 fix.
+Both Medium findings that capped the previous audit at 8/10 are closed and independently verified. Zero Critical/High/Medium. **v0.15.8 closes out the 4 residual Lows**: E1 (auth-key-salt coupling) is fixed via a dedicated salt seeded from `wp_salt('auth')`; G1, B1, and D are formally accepted-by-design with the rationale now recorded in code (their naive "fixes" each cause a worse regression — broken asset URLs, more tracking surface, truncated aggregates respectively).
 
 ## 🚦 Verdict
 
@@ -72,17 +72,17 @@ Both Medium findings that capped the previous audit at 8/10 are closed and indep
 
 ## 🔵 Residual Low findings (all non-blocking)
 
-**[🔵 Low] `visitor_hash` salt couples dedup continuity to auth-key rotation** — *deferred*
-- `includes/Cookie.php:89` — Surface E. Salted with `wp_salt('auth')` (unforgeable, good); rotating `AUTH_KEY`/`AUTH_SALT` resets dedup once. A dedicated stored salt would fix the future case but **causes exactly that one-time dedup reset on the upgrade that introduces it** — not worth it without a migration. Left as-is.
+**[🔵 Low] `visitor_hash` salt couples dedup continuity to auth-key rotation** — ✅ FIXED in v0.15.8
+- `includes/Cookie.php` — Surface E. Introduced a dedicated `abtest_hash_salt` option, **seeded once from `wp_salt('auth')`** on first use (`Cookie::hash_salt()`). Existing hashes keep matching (no one-time dedup reset — the deferral blocker), and a later `AUTH_KEY`/`AUTH_SALT` rotation no longer disturbs dedup. Deleted on uninstall. Covered by 2 new unit tests (seed-from-auth-salt + decoupled-from-rotation).
 
-**[🔵 Low] Watcher slug taken raw from on-disk folder name** — *deferred*
-- `includes/Watcher.php:123` — Surface G. `basename()` (no traversal); store + lookup both use the same raw basename via `META_SLUG`, so no real desync. Sanitising would **break asset URLs** (the asset base URL is built from the slug to point at the real on-disk folder). Not a security issue; left as-is.
+**[🔵 Low] Watcher slug taken raw from on-disk folder name** — ✅ accepted by design (documented in code, v0.15.8)
+- `includes/Watcher.php` — Surface G. `basename()` (no traversal); store + lookup use the same raw basename via `META_SLUG` (no desync), and `wp_insert_post()` sanitises `post_name` internally. Sanitising the slug ourselves would **break asset URLs** (the asset base URL points at the real on-disk folder). Not a security issue — left as-is with a code comment recording the rationale.
 
-**[🔵 Low] Conversion dedup hash is coarse IP+UA** — *mitigated by M1*
-- `includes/Cookie.php:89` — Surface B. An attacker varying the UA mints distinct hashes, but post-M1 each conversion now also requires a matching server-side impression, which is the real gate. Residual impact is negligible.
+**[🔵 Low] Conversion dedup hash is coarse IP+UA** — ✅ accepted by design (mitigated by M1; documented in code, v0.15.8)
+- `includes/Cookie.php` — Surface B. IP+UA granularity is intentional (GDPR-minimal). Post-M1 a conversion also requires a matching server-side impression, so the hash is no longer the sole dedup gate; strengthening the fingerprint would only add tracking surface for no real gain. Rationale now in the `visitor_hash()` docblock.
 
-**[🔵 Low] Unbounded aggregate SELECTs (no `LIMIT`)** — *informational*
-- `includes/Stats.php:58,185`; `includes/Admin/CsvExport.php:217` — Surface D. `GROUP BY` keeps the result set naturally small; covered by existing indexes. Not a DoS vector.
+**[🔵 Low] Unbounded aggregate SELECTs (no `LIMIT`)** — ✅ accepted by design (documented in code, v0.15.8)
+- `includes/Stats.php`; `includes/Admin/CsvExport.php` — Surface D. `GROUP BY` keeps the result set bounded by (#days × #variants × #event_types); a `LIMIT` would risk truncating valid aggregates. Not a DoS vector. Rationale now in a code comment at the query.
 
 ---
 

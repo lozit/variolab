@@ -76,8 +76,22 @@ final class Cookie {
 	public const HASH_LENGTH = 16;
 
 	/**
-	 * Stable visitor hash for dedup. SHA-256 salted with wp_salt('auth') —
-	 * non-reversible across sites — then truncated to HASH_LENGTH hex chars.
+	 * Option holding the dedicated, stable salt for {@see visitor_hash()}.
+	 * See {@see hash_salt()} for why it is seeded from wp_salt('auth').
+	 */
+	public const HASH_SALT_OPTION = 'abtest_hash_salt';
+
+	/**
+	 * Stable visitor hash for dedup. SHA-256 salted with a dedicated stored salt —
+	 * non-reversible, single-site — then truncated to HASH_LENGTH hex chars.
+	 *
+	 * Granularity is intentionally coarse (IP + User-Agent only): it is GDPR-minimal
+	 * (no cookie, no fingerprinting beyond what the request already carries) and not
+	 * meant to be an unforgeable identity. An attacker varying the UA can mint fresh
+	 * hashes, but since v0.15.3 a conversion also requires a matching server-side
+	 * impression ({@see Tracker::has_impression()}), so the hash is no longer the
+	 * sole dedup gate — strengthening the fingerprint would only add tracking surface
+	 * for no real security gain. (Audit 2026-06-12, Low-B1: accepted by design.)
 	 */
 	public static function visitor_hash(): string {
 		$ip = isset( $_SERVER['REMOTE_ADDR'] )
@@ -86,7 +100,26 @@ final class Cookie {
 		$ua = isset( $_SERVER['HTTP_USER_AGENT'] )
 			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
 			: '';
-		return substr( hash( 'sha256', $ip . '|' . $ua . '|' . wp_salt( 'auth' ) ), 0, self::HASH_LENGTH );
+		return substr( hash( 'sha256', $ip . '|' . $ua . '|' . self::hash_salt() ), 0, self::HASH_LENGTH );
+	}
+
+	/**
+	 * Dedicated salt for the visitor hash, decoupled from WordPress's auth keys.
+	 *
+	 * Seeded once from wp_salt('auth') on first use, so every visitor_hash already
+	 * stored (which used wp_salt('auth') directly) keeps matching — no one-time dedup
+	 * reset on upgrade. Once stored, the salt is stable, so a later AUTH_KEY/AUTH_SALT
+	 * rotation (incident response, host key rotation) no longer silently resets dedup
+	 * and re-counts every visitor. (Audit 2026-06-12, Low-E1.)
+	 */
+	private static function hash_salt(): string {
+		$salt = get_option( self::HASH_SALT_OPTION );
+		if ( is_string( $salt ) && '' !== $salt ) {
+			return $salt;
+		}
+		$salt = wp_salt( 'auth' );
+		add_option( self::HASH_SALT_OPTION, $salt );
+		return $salt;
 	}
 
 	/**

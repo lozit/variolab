@@ -54,6 +54,10 @@ final class Stats {
 
 		// $table comes from Schema::events_table() (plugin-controlled), $where_extra from
 		// our own date_range_clause() (whitelist of two SQL fragments). Safe to interpolate.
+		// No LIMIT by design: this is a GROUP BY aggregate, so the result set is bounded
+		// by (#days x #variants x #event_types) for one URL — a few hundred rows even
+		// after years, not row-count. A LIMIT would risk truncating valid aggregates.
+		// (Audit 2026-06-12, Low-D: accepted.)
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(

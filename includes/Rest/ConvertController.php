@@ -92,6 +92,13 @@ final class ConvertController {
 		// rejected — neutralising forged-conversion stat inflation. Because every
 		// real conversion now requires a preceding impression, an attacker who does
 		// load the page inflates impressions in lock-step, keeping the rate honest.
+		//
+		// Trade-off (accepted): the visitor hash is IP+UA based, so a legitimate
+		// visitor whose IP or User-Agent changes between the impression (page render)
+		// and this conversion POST — mobile Wi-Fi/cellular handoff, CGNAT, a browser
+		// update — hashes differently and is turned away here. This fails *closed*
+		// (under-counts, never inflates) and the page is unaffected; the common
+		// same-session case is fine since running experiments bypass page cache.
 		if ( ! Tracker::instance()->has_impression( $experiment_id, $variant, $visitor ) ) {
 			return new \WP_REST_Response( [ 'logged' => false, 'reason' => 'no_impression' ], 409 );
 		}
