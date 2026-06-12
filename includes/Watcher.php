@@ -127,6 +127,18 @@ final class Watcher {
 				continue;
 			}
 
+			// Anti symlink-escape: find_index_html() walks the folder with a
+			// RecursiveDirectoryIterator, which follows symlinks by default. Refuse
+			// any index whose real path resolves outside the watch directory, so a
+			// symlink planted under uploads/ can't make us read+import an arbitrary
+			// file from elsewhere on disk.
+			$real_index = realpath( $index );
+			$real_base  = realpath( $base_dir );
+			if ( false === $real_index || false === $real_base || ! str_starts_with( $real_index, trailingslashit( $real_base ) ) ) {
+				$stats['errors'][] = sprintf( 'index outside watch dir: %s', $slug );
+				continue;
+			}
+
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file path, wp_remote_get does not apply
 			$html = file_get_contents( $index );
 			if ( false === $html ) {

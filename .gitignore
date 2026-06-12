@@ -45,9 +45,13 @@ Thumbs.db
 # Secrets — defense-in-depth (none of these files exist today, just preventive)
 .env
 .env.*
-wp-tests-config.php
 *.local.php
 *.key
 *.pem
 *.p12
 secrets.json
+
+# Note: wp-tests-config.php is intentionally TRACKED (the integration-test
+# bootstrap requires it and it holds only wp-env's public defaults, no real
+# secret). It used to be listed above, which was misleading — a committed file
+# is never actually ignored. Keep it tracked; never put a real credential in it.

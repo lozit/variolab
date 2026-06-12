@@ -221,7 +221,7 @@ final class Settings {
 				<label>
 					<?php esc_html_e( 'Secret (optional)', 'variolab-ab-testing' ); ?>
 					<input type="text" name="webhooks[<?php echo (int) $index; ?>][secret]" value="<?php echo esc_attr( $hook['secret'] ?? '' ); ?>" class="large-text code" autocomplete="off">
-					<small><?php esc_html_e( 'When set, requests include X-Abtest-Signature: sha256=<HMAC of body using this secret>. Lets your endpoint verify authenticity.', 'variolab-ab-testing' ); ?></small>
+					<small><?php esc_html_e( 'When set, requests include X-Abtest-Signature: sha256=<HMAC of body using this secret>. Lets your endpoint verify authenticity — compare it with a constant-time function (e.g. PHP hash_equals()), never ==.', 'variolab-ab-testing' ); ?></small>
 				</label>
 				<label>
 					<?php esc_html_e( 'Fire on:', 'variolab-ab-testing' ); ?>

@@ -7,7 +7,7 @@
 
 > First full code-path audit since the v0.14.0 wp.org round-2 review. The v0.15.0/0.15.1/0.15.2 deltas (list redesign, `UrlScripts::render_for_position()` fatal fix, `wp-header-end` notice reposition) were all UI/render-path changes; this audit re-walks every surface end to end, not just the deltas.
 >
-> **Patch trail since this audit** — v0.15.3 fixes M1 (forged conversions), v0.15.4 fixes M2 (webhook SSRF); both Medium findings closed (see the marked entries below). **v0.15.5 — no security delta vs v0.15.4**: drops a `__()` from the `cron_schedules` display label so the text domain no longer loads before `init` (kills a WP 6.7+ `_load_textdomain_just_in_time` notice). Pure i18n-timing fix, no input surface / capability / data-flow change.
+> **Patch trail since this audit** — v0.15.3 fixes M1 (forged conversions), v0.15.4 fixes M2 (webhook SSRF); both Medium findings closed (see the marked entries below). **v0.15.5 — no security delta vs v0.15.4**: drops a `__()` from the `cron_schedules` display label so the text domain no longer loads before `init` (kills a WP 6.7+ `_load_textdomain_just_in_time` notice). Pure i18n-timing fix, no input surface / capability / data-flow change. **v0.15.6** clears 4 of the 🔵 Low findings below (target-page-type guard, symlink containment, `hash_equals()` doc, `.gitignore` hygiene); 3 are deferred with reasons inline (slug-sanitise breaks asset URLs; `unfiltered_html` gate is a multisite capability call; dedicated hash salt causes a one-time dedup reset).
 
 ---
 
@@ -73,18 +73,20 @@ Production-ready. No Critical or High. The two Medium findings are (1) a genuine
 - File: `includes/Cookie.php:89` — Surface E
 - Salted with `wp_salt('auth')`, so it is *not* attacker-forgeable (good). But `wp_salt('auth')` rotates on `AUTH_KEY`/`AUTH_SALT` changes (incident response, host key rotation), silently resetting dedup and re-counting visitors. This is operational robustness, not a security hole.
 - Fix (optional): use a dedicated stored salt — `add_option('abtest_hash_salt', wp_generate_password(64,true,true))` once on activation — so dedup survives auth-key rotation while staying unforgeable.
+- ⏸ **Deferred:** introducing a dedicated salt *now* changes every visitor_hash on upgrade, causing exactly the one-time dedup reset (visitors re-counted once) it aims to prevent in future — mid-flight experiments would see a blip. The benefit (surviving a rare auth-key rotation) doesn't justify the guaranteed one-time disruption. Left as-is; revisit only if paired with a migration.
 
 **[🔵 Low] HTML import raw render relies on implicit kses-on-save rather than an explicit `unfiltered_html` gate**
 - File: `includes/Admin/HtmlImport.php:208` (gate) → `templates/blank-canvas.php:65` (raw echo) — Surface C
 - Import is `manage_options` + nonce, no `nopriv`. `post_content` is rendered raw (no `the_content`, no escaping). Today this is safe because `wp_insert_post` applies WP's default `content_save_pre` kses filtering for users *without* `unfiltered_html` (the multisite site-admin case), so only true `unfiltered_html` admins get raw `<script>` — stored-XSS-to-self, the accepted WP trust model. The risk is *latent*: a future refactor that bypassed `wp_insert_post` or called `kses_remove_filters()` would hand a multisite site-admin a stored-XSS-to-visitors primitive.
 - Fix: gate import on `current_user_can('unfiltered_html')` (matching the URL-scripts path at `Admin.php:358`) — explicit, self-documenting, multisite-safe.
+- ⏸ **Deferred — needs a product call:** gating on `unfiltered_html` removes HTML import from multisite *site* admins (who hold `manage_options` but not `unfiltered_html`), a visible capability change. Single-site is unaffected (admins have both). Currently safe (WP kses-on-save covers lower-trust users); the risk is latent. Flagged to the maintainer rather than silently tightening a capability.
 
-**[🔵 Low] `target_page_id` lets an admin overwrite an arbitrary post, not just plugin pages**
+**[🔵 Low] `target_page_id` lets an admin overwrite an arbitrary post, not just plugin pages** — ✅ FIXED in v0.15.6: `replace_existing()` now returns `invalid_target` unless `'page' === $existing->post_type`.
 - File: `includes/Admin/HtmlImport.php:280, 363–379` — Surface A
 - `replace_existing()` validates only `instanceof WP_Post`, not post type or plugin origin, then `wp_update_post` overwrites content + forces the Blank Canvas template. Admin-only, nonce-gated → self-inflicted/social-engineering, not a boundary crossing.
 - Fix (optional): require `'page' === get_post_type($page_id)` (or membership in the curated dropdown list) before overwriting.
 
-**[🔵 Low] `wp-tests-config.php` is tracked despite its `.gitignore` entry**
+**[🔵 Low] `wp-tests-config.php` is tracked despite its `.gitignore` entry** — ✅ FIXED in v0.15.6: removed the misleading `.gitignore` line; the file is now intentionally tracked (integration-test bootstrap needs it; holds only wp-env public defaults) with a comment saying never to put a real credential in it.
 - File: `.gitignore:48` — Surface H
 - The file was committed before being ignored, so the ignore rule is inert — future edits adding a real DB password would commit silently. Current contents read `DB_PASSWORD` from `getenv()` with wp-env's public default `'password'`; no real secret today.
 - Fix: either `git rm --cached wp-tests-config.php` or drop the misleading `.gitignore` line and keep it tracked intentionally.
@@ -93,7 +95,7 @@ Production-ready. No Critical or High. The two Medium findings are (1) a genuine
 - File: `includes/Stats.php:58, 185`; `includes/Admin/CsvExport.php:217` — Surface D
 - `GROUP BY day/experiment/variant/event_type` so the result set is naturally small (#days × #variants × #types), but the underlying `abtest_events` table is unbounded so aggregation cost grows over time. Not a DoS vector; informational. Indexes (`exp_var_type`, `test_url_idx`) already cover the queries.
 
-**[🔵 Low] Webhook receiver-side `hash_equals()` not documented**
+**[🔵 Low] Webhook receiver-side `hash_equals()` not documented** — ✅ FIXED in v0.15.6: the Secret field help text now says to compare the signature with a constant-time function (e.g. `hash_equals()`), never `==`.
 - File: `includes/Admin/Settings.php:224` — Surface F
 - The help text describes the `X-Abtest-Signature` HMAC header but gives no verification guidance, so integrators may verify with `==`/`===` (timing side-channel on their end).
 - Fix: append "Verify with a constant-time comparison (e.g. PHP `hash_equals()`)." to the help string.
@@ -102,8 +104,9 @@ Production-ready. No Critical or High. The two Medium findings are (1) a genuine
 - File: `includes/Watcher.php:116, 166, 224–236` — Surface G
 - `$slug = basename($folder)` (no traversal — `basename` strips paths) flows unsanitized into the `META_SLUG` lookup while `wp_insert_post` runs `sanitize_title` internally on `post_name`. A folder name that `sanitize_title` mangles could desync create-vs-update detection (re-create instead of update). Correctness edge case, not a security hole; no arbitrary-post-overwrite (updates match the private `_abtest_watcher_slug` meta).
 - Fix (optional): `$slug = sanitize_title(basename($folder)); if ('' === $slug) continue;` used consistently for both lookup and `post_name`.
+- ⏸ **Deferred (v0.15.6):** sanitising `$slug` would break asset URLs — `scan()` builds the asset base URL from `$slug` to point at the *real on-disk folder* (`$base_url . $slug . '/'`), so a sanitised value would 404 the page's CSS/images. Store and lookup already use the same raw basename via `META_SLUG`, so there is no real desync. Not a security issue; left as-is to avoid breaking asset resolution.
 
-**[🔵 Low] `RecursiveDirectoryIterator` follows symlinks by default**
+**[🔵 Low] `RecursiveDirectoryIterator` follows symlinks by default** — ✅ FIXED in v0.15.6: `scan()` now `realpath()`-contains the resolved index file under the watch dir and skips it (logging `index outside watch dir`) if it escapes.
 - File: `includes/Watcher.php:211` — Surface G
 - The iterator is rooted inside `uploads/abtest-templates/` but follows symlinks by default, so a symlinked subfolder pointing outside the watch dir would be traversed. Requires an attacker who can already write symlinks into `wp-content/uploads` (pre-existing FS access) → very low.
 - Fix (optional): guard each yielded path with a `realpath()` containment check against the watch root.

@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.5
+Stable tag: 0.15.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.6 =
+* **Security hardening (defence-in-depth, from the 2026-06-12 audit).** Four low-severity items addressed: HTML import "replace existing" now refuses any target that is not a page (can no longer be coerced into overwriting an arbitrary post); the watch-directory scanner verifies the resolved index file stays inside its folder (rejects symlink escapes); the webhook Secret help text now recommends a constant-time signature comparison (`hash_equals()`); and a misleading `.gitignore` entry was cleaned up. No functional change for normal use.
 
 = 0.15.5 =
 * **Fix "translation triggered too early" PHP notice (WP 6.7+).** The custom 5-minute cron interval registered a translated display label from the `cron_schedules` filter, which fires before the `init` action — tripping WordPress 6.7+'s `_load_textdomain_just_in_time` notice on every cron run (visible with WP_DEBUG and flagged by Plugin Check). The label, only ever shown in cron-management tools, is no longer translated, so nothing loads the text domain early. No functional change.

@@ -365,6 +365,13 @@ final class HtmlImport {
 		if ( ! $existing instanceof \WP_Post ) {
 			return new \WP_Error( 'not_found', __( 'Target page not found.', 'variolab-ab-testing' ) );
 		}
+		// Only overwrite actual pages. Without this an admin could (by editing the
+		// hidden target_page_id field) clobber an arbitrary post / CPT with imported
+		// HTML and force the Blank Canvas template onto it. The replace dropdown only
+		// ever lists pages, so a non-page target is always a tampered request.
+		if ( 'page' !== $existing->post_type ) {
+			return new \WP_Error( 'invalid_target', __( 'The selected target is not a page.', 'variolab-ab-testing' ) );
+		}
 		$result = wp_update_post(
 			[
 				'ID'           => $page_id,
