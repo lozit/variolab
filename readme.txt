@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.8
+Stable tag: 0.15.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,10 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.9 =
+* **Conversion goals now work on imported HTML landing pages.** Click and URL conversion goals previously never fired on pages imported via Import HTML (Blank Canvas), because the conversion tracker was only loaded on regular theme pages. The tracker is now injected into imported landings too, so "click a button matching a CSS selector" and "visit/click a URL" goals are recorded for real visitors. If your test runs on an imported page, this is the fix that makes its conversions count.
+* **New admin preview mode for goals.** When you view a running test page while logged in (as an admin/editor — your visits are never counted), the page now shows a small "A/B preview" badge, outlines every element your CSS-selector goal matches, and pops a toast when you click one — so you can confirm a goal is wired correctly without polluting your stats.
 
 = 0.15.8 =
 * **Visitor-dedup salt decoupled from WordPress auth keys.** The de-duplication hash used `wp_salt('auth')`, so rotating your site's authentication keys silently reset visitor de-duplication (re-counting returning visitors). It now uses a dedicated salt seeded once from the current auth salt — existing counts are preserved (no reset on update), and future key rotations no longer disturb your stats. Last clean-up item from the 2026-06-12 internal security audit.

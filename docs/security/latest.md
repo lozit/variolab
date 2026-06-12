@@ -40,6 +40,8 @@ Both Medium findings that capped the previous audit at 8/10 are closed and indep
 
 ✅ **GO release.** No Critical/High/Medium. Nothing to fix before shipping.
 
+> **v0.15.9 — no security delta vs v0.15.8.** Injects the conversion tracker into Blank Canvas (imported-HTML) pages, which previously never loaded it, plus an admin-only preview mode. The tracker config is emitted via `wp_get_inline_script_tag()` + `wp_json_encode()` (no injection; `goalValue` is JSON-encoded), the page already sends `nocache_headers()` so the per-request nonce isn't cached, and the conversion endpoint keeps its M1 impression gate + rate-limit. Preview mode runs only for logged-in `edit_posts` users and never POSTs. No new input surface / capability / data-flow.
+
 ---
 
 ## ✅ Remediation re-verification (independently confirmed)

@@ -64,6 +64,21 @@ if ( '' !== $abtest_router_url ) {
 	}
 }
 
+// Inject the conversion tracker. Themed pages get it via wp_enqueue_scripts, but
+// Blank Canvas bypasses that pipeline — without this, click/URL conversion goals
+// never fire on imported landings. Returns '' for untracked visitors (bots /
+// out-of-target / consent); tracked visitors get the real tracker, logged-in
+// admins get it in preview mode (toast on click, nothing logged).
+$abtest_tracker = \Abtest\Tracker::instance()->blank_canvas_script_tags();
+if ( '' !== $abtest_tracker ) {
+	$abtest_body_close = stripos( $abtest_html, '</body>' );
+	if ( false !== $abtest_body_close ) {
+		$abtest_html = substr_replace( $abtest_html, $abtest_tracker, $abtest_body_close, 0 );
+	} else {
+		$abtest_html .= $abtest_tracker;
+	}
+}
+
 // Raw passthrough: no the_content filter (which would run wpautop, shortcodes, etc.).
 echo $abtest_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 exit;

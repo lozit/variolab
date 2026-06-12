@@ -6,6 +6,7 @@
 	}
 
 	var cfg = window.AbtestTracker;
+	var preview = !!cfg.preview;
 
 	function fireConversion() {
 		try {
@@ -21,6 +22,84 @@
 			});
 		} catch (e) {
 			// swallow — tracking must never break the page
+		}
+	}
+
+	// --- Admin preview helpers (only used when cfg.preview is true) ------------
+	// In preview mode the visitor is a logged-in admin/editor who is NOT tracked,
+	// so clicks must never log a conversion. Instead we surface a visible signal
+	// (badge + outline + toast) so the goal can be verified without polluting stats.
+
+	var toastEl = null;
+	var toastTimer = null;
+
+	function toast(message) {
+		if (!toastEl) {
+			toastEl = document.createElement('div');
+			toastEl.setAttribute('role', 'status');
+			toastEl.style.cssText =
+				'position:fixed;z-index:2147483647;left:50%;bottom:60px;transform:translateX(-50%);' +
+				'max-width:90vw;padding:12px 18px;border-radius:10px;background:#11150f;color:#fff;' +
+				'font:600 14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;' +
+				'box-shadow:0 6px 24px rgba(0,0,0,.35);opacity:0;transition:opacity .15s;pointer-events:none;';
+			(document.body || document.documentElement).appendChild(toastEl);
+		}
+		toastEl.textContent = message;
+		toastEl.style.opacity = '1';
+		if (toastTimer) {
+			clearTimeout(toastTimer);
+		}
+		toastTimer = setTimeout(function () {
+			toastEl.style.opacity = '0';
+		}, 2400);
+	}
+
+	function addBadge() {
+		var badge = document.createElement('div');
+		badge.textContent = 'A/B preview';
+		badge.title =
+			'Variolab admin preview — clicks are NOT counted.\nGoal: ' +
+			(cfg.goalType || '(none)') + ' = ' + (cfg.goalValue || '(none)');
+		badge.style.cssText =
+			'position:fixed;z-index:2147483647;right:12px;bottom:12px;padding:6px 11px;border-radius:999px;' +
+			'background:#E8643C;color:#fff;font:600 12px/1 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;' +
+			'box-shadow:0 2px 10px rgba(0,0,0,.25);cursor:default;';
+		(document.body || document.documentElement).appendChild(badge);
+	}
+
+	function outlineTargets() {
+		if (cfg.goalType !== 'selector' || !cfg.goalValue) {
+			return;
+		}
+		try {
+			var nodes = document.querySelectorAll(cfg.goalValue);
+			for (var i = 0; i < nodes.length; i++) {
+				nodes[i].style.outline = '2px dashed #E8643C';
+				nodes[i].style.outlineOffset = '2px';
+			}
+		} catch (e) {
+			// invalid selector — the badge tooltip already shows what was configured
+		}
+	}
+
+	if (preview) {
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', function () {
+				addBadge();
+				outlineTargets();
+			});
+		} else {
+			addBadge();
+			outlineTargets();
+		}
+	}
+
+	// A goal matched. Real visitor -> log it; admin preview -> just show feedback.
+	function onGoalMatched(label) {
+		if (preview) {
+			toast('✓ ' + label + ' matched — conversion would be logged (admin preview, not counted)');
+		} else {
+			fireConversion();
 		}
 	}
 
@@ -47,7 +126,7 @@
 					return;
 				}
 				if (matchesUrlGoal(anchor.getAttribute('href'))) {
-					fireConversion();
+					onGoalMatched('URL goal');
 				}
 			},
 			true
@@ -64,7 +143,7 @@
 				}
 				try {
 					if (target.closest(cfg.goalValue)) {
-						fireConversion();
+						onGoalMatched('Selector goal');
 					}
 				} catch (e) {
 					// invalid selector — ignore

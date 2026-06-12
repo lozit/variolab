@@ -31,14 +31,47 @@ final class Tracker {
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tracker_js' ] );
 	}
 
-	public function enqueue_tracker_js(): void {
+	/**
+	 * Build the front-end tracker config for the current request, or null when no
+	 * tracker should load.
+	 *
+	 * Returns config when the visitor is tracked (real conversions) OR is a
+	 * logged-in editor/admin being bypassed (preview mode — clicks show a toast
+	 * but log nothing, so admins can verify a goal without polluting stats).
+	 * Genuine untracked visitors (bots, out-of-target, consent-blocked) get null.
+	 *
+	 * @return array{experimentId:int,restUrl:string,nonce:string,goalType:string,goalValue:string,preview:bool}|null
+	 */
+	public function script_config(): ?array {
 		$experiment = Router::instance()->get_current_experiment();
 		if ( null === $experiment ) {
-			return;
+			return null;
 		}
-		// Skip the conversion JS for visitors we don't track (out-of-target, admin/bot bypass).
-		// They see the baseline page but their clicks must not log conversions.
-		if ( ! Router::instance()->is_current_tracked() ) {
+
+		$tracked = Router::instance()->is_current_tracked();
+		$preview = ! $tracked && is_user_logged_in() && current_user_can( 'edit_posts' );
+		if ( ! $tracked && ! $preview ) {
+			return null;
+		}
+
+		$goal = Experiment::get_goal( $experiment->ID );
+		return [
+			'experimentId' => (int) $experiment->ID,
+			'restUrl'      => esc_url_raw( rest_url( 'abtest/v1/convert' ) ),
+			'nonce'        => wp_create_nonce( 'wp_rest' ),
+			'goalType'     => (string) $goal['type'],
+			'goalValue'    => (string) $goal['value'],
+			'preview'      => $preview,
+		];
+	}
+
+	/**
+	 * Enqueue the tracker on themed pages (those that run wp_head/wp_footer).
+	 * Blank Canvas pages bypass this pipeline — see {@see blank_canvas_script_tags()}.
+	 */
+	public function enqueue_tracker_js(): void {
+		$config = $this->script_config();
+		if ( null === $config ) {
 			return;
 		}
 
@@ -50,20 +83,37 @@ final class Tracker {
 			ABTEST_VERSION,
 			true
 		);
+		wp_localize_script( $handle, 'AbtestTracker', $config );
+		wp_enqueue_script( $handle );
+	}
 
-		$goal = Experiment::get_goal( $experiment->ID );
-		wp_localize_script(
-			$handle,
-			'AbtestTracker',
+	/**
+	 * Build the tracker `<script>` tags for the Blank Canvas template.
+	 *
+	 * Imported-HTML pages render raw via templates/blank-canvas.php and never run
+	 * wp_enqueue_scripts, so {@see enqueue_tracker_js()} cannot reach them and the
+	 * conversion tracker was previously absent on every imported landing. This
+	 * returns the inline config + the tracker `<script src>` (both via WP-blessed
+	 * helpers) so the template can inject them before `</body>`. Returns '' when no
+	 * tracker should load.
+	 */
+	public function blank_canvas_script_tags(): string {
+		$config = $this->script_config();
+		if ( null === $config ) {
+			return '';
+		}
+
+		$tags  = wp_get_inline_script_tag(
+			'window.AbtestTracker = ' . wp_json_encode( $config ) . ';',
+			[ 'id' => 'abtest-tracker-config' ]
+		);
+		$tags .= wp_get_script_tag(
 			[
-				'experimentId' => $experiment->ID,
-				'restUrl'      => esc_url_raw( rest_url( 'abtest/v1/convert' ) ),
-				'nonce'        => wp_create_nonce( 'wp_rest' ),
-				'goalType'     => $goal['type'],
-				'goalValue'    => $goal['value'],
+				'id'  => 'abtest-tracker-js',
+				'src' => add_query_arg( 'ver', rawurlencode( ABTEST_VERSION ), ABTEST_PLUGIN_URL . 'assets/js/tracker.js' ),
 			]
 		);
-		wp_enqueue_script( $handle );
+		return $tags;
 	}
 
 	public function log_impression( int $experiment_id, string $variant, string $test_url = '' ): void {
