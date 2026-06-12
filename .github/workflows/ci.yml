@@ -221,19 +221,33 @@ jobs:
           set -e
           wp-env run cli wp plugin activate "${PLUGIN_SLUG}"
 
-          echo "::group::Plugin Check (raw JSON)"
-          # stdout (the JSON report) -> file ; wp-env's own chatter goes to stderr.
+          echo "::group::Plugin Check (raw output)"
+          # stdout (the JSON report) -> pc.json ; stderr (wp-env chatter + any PHP
+          # notices emitted while loading the plugin under test) -> pc.err, so it
+          # never pollutes the JSON. Capture the real exit code: `wp plugin check`
+          # returns 0 whether or not it finds anything, and non-zero ONLY when the
+          # command itself fails — so a crash can't slip through as an empty file.
+          set +e
           wp-env run cli wp plugin check "${PLUGIN_SLUG}" \
             --format=json \
             --ignore-codes="${IGNORE_CODES}" \
             --require=./wp-content/plugins/plugin-check/cli.php \
-            > pc.json || true
-          cat pc.json
+            > pc.json 2> pc.err
+          check_rc=$?
+          set -e
+          echo "--- stderr ---"; cat pc.err || true
+          echo "--- stdout (pc.json) ---"; cat pc.json || true
           echo "::endgroup::"
 
+          if [ "${check_rc}" != "0" ]; then
+            echo "::error::wp plugin check failed to run (exit ${check_rc}) — see stderr above"
+            exit 1
+          fi
+
           # Pass/fail = the same rule the action applies: any ERROR-severity finding
-          # fails the job (warnings stay informational). Tolerant of wp-env wrapping
-          # the JSON in leading/trailing chatter, and of array- vs file-keyed shapes.
+          # fails the job (warnings stay informational). An empty pc.json here means
+          # zero findings (clean), since the command exited 0 above. Tolerant of any
+          # leading/trailing chatter and of array- vs file-keyed JSON shapes.
           node -e '
             const fs = require("fs");
             let raw = fs.readFileSync("pc.json", "utf8");
