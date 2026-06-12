@@ -100,6 +100,28 @@ final class UrlScripts {
 	}
 
 	/**
+	 * Return every script entry for the given URL+position as a concatenated
+	 * string of `<script>` tags, built via {@see wp_get_inline_script_tag()}.
+	 *
+	 * Used by the blank-canvas template (templates/blank-canvas.php) which
+	 * needs the rendered HTML as a string in order to inject it at byte
+	 * offsets inside the imported HTML document (just after `<body>` and just
+	 * before `</body>`). Themed pages echo via {@see print_for_position()}.
+	 */
+	public static function render_for_position( string $url, string $position ): string {
+		$scripts = self::get( $url );
+		$out     = '';
+		foreach ( $scripts as $s ) {
+			if ( $s['position'] !== $position ) {
+				continue;
+			}
+			$parsed = self::parse_script_input( $s['code'] );
+			$out   .= wp_get_inline_script_tag( $parsed['body'], $parsed['attrs'] );
+		}
+		return $out;
+	}
+
+	/**
 	 * Print every script entry for the given URL+position, wrapped via
 	 * {@see wp_print_inline_script_tag()} — the WP-blessed inline-script
 	 * helper. Each entry's stored body is run through {@see parse_script_input()}

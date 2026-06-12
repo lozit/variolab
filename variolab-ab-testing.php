@@ -3,7 +3,7 @@
  * Plugin Name:       Variolab – A/B Testing
  * Plugin URI:        https://github.com/lozit/variolab
  * Description:       Lightweight A/B testing for pages: internal tracking, persistent-cookie 50/50 split, GDPR-friendly. No third-party dependency.
- * Version:           0.15.0
+ * Version:           0.15.1
  * Requires at least: 6.0
  * Requires PHP:      8.1
  * Author:            Guillaume Ferrari
@@ -17,7 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ABTEST_VERSION', '0.15.0' );
+define( 'ABTEST_VERSION', '0.15.1' );
 define( 'ABTEST_DB_VERSION', '1.4.0' );
 define( 'ABTEST_PLUGIN_FILE', __FILE__ );
 define( 'ABTEST_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

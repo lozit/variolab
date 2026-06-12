@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.0
+Stable tag: 0.15.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.1 =
+* **Fix fatal error on imported HTML landings.** `templates/blank-canvas.php` called `UrlScripts::render_for_position()`, which was never defined on the class — every visit to an HTML-imported page running an A/B test crashed with `Call to undefined method`. Added the missing method as the return-string counterpart of the existing `print_for_position()`; themed pages are unaffected.
 
 = 0.15.0 =
 * **List page redesign.** New branded dashboard at A/B Tests: header with Variolab brandline (icon + wordmark + version pill); 5-card KPI strip (Active tests / Impressions / Conversions / Overall rate / Winners shipped) driven by a new `Stats::overview_kpis()` aggregator; toolbar with 5 status chips (All / Draft / Running / Paused / Ended) + date range with 7d/30d/All-time presets; URL blocks rendered as cards with per-experiment 3-column CSS grid; ended experiments collapse into a native `<details>` per URL block. Cream canvas (#EFECE4) replaces the wp-admin gray across every plugin admin screen (scoped via `body.toplevel_page_abtest-experiments`).
