@@ -24,6 +24,15 @@ final class HtmlImport {
 	public const ASSETS_SUBDIR = 'abtest-templates';
 
 	/**
+	 * Post-meta flag recording whether the imported HTML may be rendered raw.
+	 * '1' = imported by an `unfiltered_html` user (raw render allowed);
+	 * '0' = imported by a lower-trust user (re-filtered through wp_kses_post at
+	 * output). Absent = legacy import or a Watcher/filesystem page → treated as
+	 * trusted (see {@see render_html()}).
+	 */
+	public const META_TRUSTED = '_abtest_raw_trusted';
+
+	/**
 	 * Maximum upload size in bytes. Default 5 MiB.
 	 * Filterable via 'abtest_html_import_max_bytes'. Capped by PHP's upload_max_filesize.
 	 */
@@ -311,6 +320,14 @@ final class HtmlImport {
 		// Always assign the Blank Canvas template (idempotent).
 		update_post_meta( (int) $page_id, '_wp_page_template', Template::TEMPLATE_SLUG );
 
+		// Record whether this content may be rendered raw. Only `unfiltered_html`
+		// users can store executable HTML/JS that survives WP's save-time kses;
+		// everyone else's content was already sanitised on save. Blank Canvas
+		// re-checks this flag at output (see render_html()) and re-filters anything
+		// not explicitly trusted — making the trust boundary explicit instead of
+		// relying solely on WP's implicit kses-on-save.
+		update_post_meta( (int) $page_id, self::META_TRUSTED, current_user_can( 'unfiltered_html' ) ? '1' : '0' );
+
 		// Tag zip-imported pages with their on-disk slug so the Watcher recognizes
 		// them as managed and updates this same post instead of creating a duplicate.
 		if ( '' !== $assets_slug ) {
@@ -330,6 +347,29 @@ final class HtmlImport {
 			),
 			(int) $page_id
 		);
+	}
+
+	/**
+	 * Return the post's HTML ready for raw Blank Canvas output, enforcing the
+	 * import trust flag.
+	 *
+	 * - Flag '1' (importer had `unfiltered_html`): rendered raw — the canonical WP
+	 *   trust model, unchanged behaviour for single-site admins.
+	 * - Flag '0' (lower-trust importer, e.g. a multisite site admin): re-filtered
+	 *   through wp_kses_post(). Idempotent for content WP already kses'd at save,
+	 *   and a fail-safe should a future change ever store it un-sanitised.
+	 * - Flag absent (legacy import predating this flag, or a Watcher/filesystem
+	 *   page): treated as trusted — on single-site the importer was an
+	 *   `unfiltered_html` admin, and filesystem/SFTP access is itself high-trust.
+	 *
+	 * @param \WP_Post $post The Blank Canvas page.
+	 */
+	public static function render_html( \WP_Post $post ): string {
+		$html = (string) $post->post_content;
+		if ( '0' === (string) get_post_meta( $post->ID, self::META_TRUSTED, true ) ) {
+			$html = wp_kses_post( $html );
+		}
+		return $html;
 	}
 
 	/**

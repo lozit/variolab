@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.6
+Stable tag: 0.15.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.7 =
+* **Make the HTML-import trust boundary explicit (defence-in-depth).** Imported pages are rendered with no theme wrapper, so any markup they contain runs as-is. The plugin now records, at import time, whether the importer was allowed to store raw HTML/JS (the `unfiltered_html` capability) and, when rendering, re-filters anything that wasn't through WordPress's standard sanitizer. Single-site admins and existing imported pages are unaffected; the feature also remains available to multisite site administrators (their content is simply sanitized as WordPress already does on save). Closes the last actionable item from the 2026-06-12 internal security audit.
 
 = 0.15.6 =
 * **Security hardening (defence-in-depth, from the 2026-06-12 audit).** Four low-severity items addressed: HTML import "replace existing" now refuses any target that is not a page (can no longer be coerced into overwriting an arbitrary post); the watch-directory scanner verifies the resolved index file stays inside its folder (rejects symlink escapes); the webhook Secret help text now recommends a constant-time signature comparison (`hash_equals()`); and a misleading `.gitignore` entry was cleaned up. No functional change for normal use.

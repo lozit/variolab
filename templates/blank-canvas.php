@@ -31,7 +31,10 @@ if ( ! $abtest_post instanceof WP_Post ) {
 nocache_headers();
 header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
 
-$abtest_html = $abtest_post->post_content;
+// Enforce the import trust flag: content imported by an unfiltered_html user is
+// rendered raw; anything lower-trust is re-filtered through wp_kses_post. Makes
+// the trust boundary explicit rather than leaning only on WP's save-time kses.
+$abtest_html = \Abtest\Admin\HtmlImport::render_html( $abtest_post );
 
 // Inject per-URL tracking scripts at the configured positions inside the user's HTML.
 // We call wp_body_open / wp_footer indirectly via the same helper used by themed pages.
