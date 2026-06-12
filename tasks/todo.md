@@ -141,11 +141,13 @@ The official `wordpress/plugin-check-action@v1` was added to CI in v0.11.1, scop
 ### Security — audit backlog (auto-managed)
 
 Managed by `/security-audit`. Latest report: [`docs/security/latest.md`](../docs/security/latest.md).
-Disclosure policy: [`SECURITY.md`](../SECURITY.md). Current score: **10 / 10**.
+Disclosure policy: [`SECURITY.md`](../SECURITY.md). Current score: **8 / 10**.
 
 **Auto-rules**: the command adds only new Critical / High / Medium findings. Lows stay in the report, not here. Items that disappear from a subsequent audit are auto-ticked.
 
-**Open findings**: ✅ none (all closed in v0.9.2 / v0.9.3).
+**Open findings** (audit 2026-06-12, v0.15.2):
+- [ ] [MEDIUM] B — `includes/Rest/ConvertController.php:77` — bind conversions to server-side proof of impression (existing-impression-row check or HMAC token issued at impression time); the variant is currently read from a client-controlled cookie so an unauth attacker can forge conversions for any running experiment (audit 2026-06-12)
+- [ ] [MEDIUM] F — `includes/Integrations/Webhook.php:177` — add `'reject_unsafe_urls' => true` to `wp_remote_post` (+ optionally reject loopback/link-local/RFC1918 at intake) to close the authenticated webhook SSRF (audit 2026-06-12)
 
 **All findings closed in v0.9.1 → v0.9.3**:
 - [x] [MEDIUM] F — `includes/Integrations/Webhook.php:160` — explicit `'sslverify' => true` (fixed v0.9.1, commit `5eff481`)
