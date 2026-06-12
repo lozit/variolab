@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.4
+Stable tag: 0.15.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.5 =
+* **Fix "translation triggered too early" PHP notice (WP 6.7+).** The custom 5-minute cron interval registered a translated display label from the `cron_schedules` filter, which fires before the `init` action — tripping WordPress 6.7+'s `_load_textdomain_just_in_time` notice on every cron run (visible with WP_DEBUG and flagged by Plugin Check). The label, only ever shown in cron-management tools, is no longer translated, so nothing loads the text domain early. No functional change.
 
 = 0.15.4 =
 * **Security: webhooks can no longer be pointed at internal addresses (SSRF hardening).** Outgoing event webhooks now refuse URLs whose host is a loopback, link-local, private, or reserved IP — both when you save them (literal IPs like `127.0.0.1`, `169.254.169.254`, `10.0.0.0/8`, `192.168.x`) and at request time, where WordPress resolves the hostname and rejects targets that point inside your network (`reject_unsafe_urls`, which also blocks redirect-based bypasses). Legitimate public endpoints (Zapier, Make, Slack, your own API) are unaffected. Hardening from the 2026-06-12 internal security audit.

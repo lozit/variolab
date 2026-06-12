@@ -62,6 +62,13 @@ final class Watcher {
 	/**
 	 * Register the 5-minute cron interval (WP only ships hourly / twicedaily / daily).
 	 *
+	 * The `display` label is intentionally NOT wrapped in __() : the `cron_schedules`
+	 * filter fires from wp_schedule_event() at `plugins_loaded` (and on every
+	 * wp-cron.php run), i.e. before `init`, so translating here would trigger WP 6.7+'s
+	 * `_load_textdomain_just_in_time` "translation triggered too early" notice. The
+	 * label only ever surfaces in cron-management tooling (WP Crontrol / Site Health),
+	 * so a plain English string is the right trade-off.
+	 *
 	 * @param array<string,array{interval:int,display:string}> $schedules
 	 * @return array<string,array{interval:int,display:string}>
 	 */
@@ -69,7 +76,7 @@ final class Watcher {
 		if ( ! isset( $schedules[ self::CRON_INTERVAL ] ) ) {
 			$schedules[ self::CRON_INTERVAL ] = [
 				'interval' => 5 * MINUTE_IN_SECONDS,
-				'display'  => __( 'Every 5 minutes (A/B Testing)', 'variolab-ab-testing' ),
+				'display'  => 'Every 5 minutes (A/B Testing)',
 			];
 		}
 		return $schedules;
