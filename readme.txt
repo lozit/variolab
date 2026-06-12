@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.11
+Stable tag: 0.16.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -111,6 +111,12 @@ No. Logged-in users with `edit_posts` capability are bypassed and always see the
 = Does it work with WooCommerce / Gutenberg blocks? =
 v1 only swaps the entire page (the variant must be a separate post). Block-level and product-level testing are on the roadmap.
 
+= My conversions aren't recorded / I use a CDN or a cache (Cloudflare, Cloudways, SiteGround, Kinsta, WP Rocket…) =
+A/B test pages must never be served from a cache. A cached page freezes one variant for every visitor (breaking the 50/50 split) and skips impression logging — so conversions get dropped. The plugin already sends `no-store` headers and auto-excludes test URLs from WP Rocket and LiteSpeed, but server-level and edge caches it can't control (Cloudways/Varnish, generic nginx caches, Cloudflare APO) may still cache the page. Two options:
+
+1. **Exclude your test URLs from the cache (recommended).** Add them to your host/CDN cache-exclusion list. Tip: give test URLs a common prefix (e.g. `/lp/…`) so one rule covers all of them. Step-by-step guidance for your host is shown in **Settings → Caching & CDN**.
+2. **Turn on Cache-resilient mode** (Settings → Caching & CDN). It forces a fresh render of test pages via a one-time redirect to a unique URL no cache can have stored — no cache config needed. Trade-off: a brief redirect on first paint and a query parameter on test URLs (consider `noindex` on those pages if SEO matters).
+
 == Screenshots ==
 
 1. A/B Tests admin list — KPI strip (active tests, impressions, conversions, overall rate, winners shipped), status filter chips (All / Draft / Running / Paused / Ended), date range with 7d / 30d / All-time presets, experiments grouped by URL with per-variant stats + lift + confidence interval + significance badges, archived ended tests collapsed into a details panel, daily conversion-rate sparkline per URL with start/end markers
@@ -141,6 +147,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.16.0 =
+* **Caching & CDN: new guidance + an opt-in "Cache-resilient mode".** A cached A/B test page breaks the test (one variant frozen for everyone, conversions silently dropped because WordPress never runs to log the impression). New in Settings → Caching & CDN: clear, host-specific instructions for excluding test URLs from your cache (Cloudways/Varnish, Cloudflare, Kinsta, nginx…), and a one-click **Cache-resilient mode** that forces a fresh render via a one-time `?_abtcb=…` redirect when you can't edit your cache rules. The admin cache notice now also detects Cloudflare and points to both options. (Default off; recommended fix remains a proper cache exclusion.)
 
 = 0.15.11 =
 * **Fix conversions with WP Rocket "Delay JavaScript Execution" (the real "click twice" cause).** When that optimisation is on (also in Perfmatters and similar), it defers every script until the visitor's first interaction — so the very first click only woke the tracker up and wasn't recorded, and you had to click again. The conversion tracker is now automatically excluded from delay-JS, so it runs on page load and the first click counts. If you use another delay-JS tool, exclude `variolab-ab-testing/assets/js/tracker.js` and `AbtestTracker` from it manually.

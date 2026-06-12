@@ -40,8 +40,64 @@ final class CacheBypass {
 		// LiteSpeed: filter that takes URL patterns to mark non-cacheable.
 		add_filter( 'litespeed_force_nocache_url', [ self::class, 'add_test_urls_to_rejection_list' ] );
 
+		// Cache-resilient mode (opt-in): inject a client-side cache-buster redirect
+		// HIGH in <head> on test pages, for server/edge caches we can't exclude via a
+		// plugin API (Cloudways/Varnish, generic nginx page caches). Blank Canvas pages
+		// inject it in their own template; this covers themed pages.
+		add_action( 'wp_head', [ self::class, 'print_cache_buster' ], 0 );
+
 		// Admin notice (one-time per page load) when a cache plugin is detected.
 		add_action( 'admin_notices', [ self::class, 'maybe_render_notice' ] );
+	}
+
+	/**
+	 * Whether the opt-in cache-resilient mode is enabled in settings.
+	 */
+	public static function is_resilient_mode(): bool {
+		$settings = (array) get_option( 'abtest_settings', [] );
+		return ! empty( $settings['cache_resilient'] );
+	}
+
+	/**
+	 * Build the cache-buster `<script>` for the current request, or '' when it
+	 * should not run.
+	 *
+	 * When the page is served from a cache we can't exclude (Varnish, a generic
+	 * server/edge cache), WordPress never runs on the page load — so the variant is
+	 * frozen for everyone and no impression is logged. This tiny script, placed high
+	 * in the document, redirects a cache-served page to a one-time unique URL
+	 * (`?_abtcb=…`) that the cache can't have stored, forcing a fresh server render
+	 * (correct 50/50 split + impression). On the fresh URL the param is already
+	 * present, so it is a no-op (no loop). Skipped for logged-in users (they bypass
+	 * server caches) and when there is no experiment on the URL.
+	 */
+	public static function cache_buster_script_tag(): string {
+		if ( ! self::is_resilient_mode() ) {
+			return '';
+		}
+		if ( null === Router::instance()->get_current_experiment() ) {
+			return '';
+		}
+		if ( is_user_logged_in() ) {
+			return '';
+		}
+
+		$js = "(function(){try{var P='_abtcb',u=new URL(window.location.href);"
+			. 'if(!u.searchParams.has(P)){u.searchParams.set(P,Date.now().toString(36)+Math.random().toString(36).slice(2,8));'
+			. 'window.location.replace(u.toString());}}catch(e){}})();';
+
+		return wp_get_inline_script_tag( $js, [ 'id' => 'abtest-cache-buster' ] );
+	}
+
+	/**
+	 * Output the cache-buster on themed pages (wp_head). Blank Canvas injects via
+	 * the same builder inside its template.
+	 */
+	public static function print_cache_buster(): void {
+		$tag = self::cache_buster_script_tag();
+		if ( '' !== $tag ) {
+			echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_get_inline_script_tag() output is already a safe script tag.
+		}
 	}
 
 	/**
@@ -119,6 +175,13 @@ final class CacheBypass {
 	}
 
 	/**
+	 * Detect that the current request came through Cloudflare (edge cache / CDN).
+	 */
+	public static function is_cloudflare(): bool {
+		return ! empty( $_SERVER['HTTP_CF_RAY'] ) || ! empty( $_SERVER['HTTP_CF_CONNECTING_IP'] );
+	}
+
+	/**
 	 * Detect Kinsta hosting environment (edge cache via Cloudflare + nginx page cache).
 	 */
 	public static function is_kinsta(): bool {
@@ -139,10 +202,11 @@ final class CacheBypass {
 			return;
 		}
 
-		$plugin = self::detect_active_plugin();
-		$kinsta = self::is_kinsta();
+		$plugin     = self::detect_active_plugin();
+		$kinsta     = self::is_kinsta();
+		$cloudflare = self::is_cloudflare();
 
-		if ( null === $plugin && ! $kinsta ) {
+		if ( null === $plugin && ! $kinsta && ! $cloudflare ) {
 			return;
 		}
 
@@ -169,6 +233,19 @@ final class CacheBypass {
 				/* translators: %s: link to Kinsta cache bypass docs */
 				esc_html__( 'Kinsta hosting detected. We send no-store headers on every test page so the edge cache should bypass them. For 100%% safety, also add your test URLs to %s.', 'variolab-ab-testing' ),
 				'<a href="https://kinsta.com/help/cache-control-bypass/" target="_blank" rel="noopener">MyKinsta → Tools → Cache → Cache Bypass</a>'
+			);
+		}
+
+		if ( $cloudflare ) {
+			$messages[] = esc_html__( 'Cloudflare detected. By default it respects our no-store headers, but server-level caches that sit behind it (e.g. Cloudways/Varnish, SiteGround, generic nginx page caches) often cache the page anyway — and a cached test page breaks the 50/50 split AND silently drops conversions (WordPress never runs, so no impression is logged). Add your test URLs to your host/CDN cache-exclusion list, or enable the cache-resilient mode below.', 'variolab-ab-testing' );
+		}
+
+		// Point to the no-config escape hatch unless it's already on.
+		if ( ! self::is_resilient_mode() ) {
+			$messages[] = sprintf(
+				/* translators: %s: link to the plugin Settings page */
+				esc_html__( 'Can\'t edit your cache rules? Turn on %s — it forces a fresh render of test pages via a one-time redirect (small trade-off: a brief redirect on first paint).', 'variolab-ab-testing' ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=' . \Abtest\Admin\Admin::menu_slug() . '&action=settings' ) ) . '">' . esc_html__( 'Settings → Cache-resilient mode', 'variolab-ab-testing' ) . '</a>'
 			);
 		}
 

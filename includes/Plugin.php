@@ -42,6 +42,7 @@ final class Plugin {
 				'bypass_admins'   => true,
 				'bypass_bots'     => true,
 				'require_consent' => false,
+				'cache_resilient' => false,
 			]
 		);
 

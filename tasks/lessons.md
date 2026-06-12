@@ -132,3 +132,15 @@ Solution: mutate the global objects in place on `template_redirect` priority 1:
 See `Router::swap_to_variant()` (commit fixing this bug).
 
 **Rule for me**: For any filter/action on a singular page's content, **always test on a block theme**, not just a classic theme. Loop hooks (`the_post`, `loop_start`, `loop_end`) are obsolete for block-based renders — prefer direct mutation of the globals, or `the_content` / `render_block` filters which stay universal.
+
+---
+
+## 2026-06-12 — [Workflow] Diagnose before shipping; batch releases — don't tag a wp.org version per file change
+
+**Context**: A user reported a conversion goal "doesn't work" / "had to click twice" on an imported-HTML landing. I shipped a sequence of patch releases (v0.15.9 tracker-on-blank-canvas, v0.15.10 cookie-independence) reasoning from the code, then finally opened a real browser and found the actual cause: WP Rocket "Delay JavaScript Execution" rewrites the tracker's `<script type>` to `rocketlazyloadscript`, deferring it until the first interaction (so the first click only wakes it). ~10 tag+deploy cycles in an hour.
+
+**Mistake**: (1) Reasoned from code and shipped fixes before reproducing the symptom in a browser — v0.15.10 addressed the wrong root cause. (2) Tagged + deployed a new wp.org release after almost every file change, creating noise and burning version numbers.
+
+**Fix**: For a front-end "it doesn't work" report, **reproduce in a real browser FIRST** (playwright MCP: navigate the live URL, inspect `window.AbtestTracker`, the script `type`/attributes, the network call, click and watch). On blank-canvas pages the tracker is injected by `Tracker::blank_canvas_script_tags()` (not `wp_enqueue_scripts`), but cache/optimisation plugins still process the HTML output buffer — so WP Rocket/Perfmatters/LiteSpeed delay-JS can defer it. Exclude via `rocket_delay_js_exclusions` / `perfmatters_delay_js_exclusions`.
+
+**Rule for me**: Commit locally and **batch** changes; do NOT `git tag` + push a wp.org release per change. Tag/deploy only when the user asks, or once a coherent batch is verified. Diagnose (browser/repro) before coding a fix, especially for "doesn't work on my site" reports where the environment (cache/CDN/optimiser) is the likely culprit.

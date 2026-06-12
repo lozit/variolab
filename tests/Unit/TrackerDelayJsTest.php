@@ -23,6 +23,7 @@ final class TrackerDelayJsTest extends TestCase {
 
 		$this->assertContains( 'variolab-ab-testing/assets/js/tracker.js', $out, 'External tracker is excluded.' );
 		$this->assertContains( 'AbtestTracker', $out, 'Inline config is excluded.' );
+		$this->assertContains( 'abtest-cache-buster', $out, 'Cache-buster redirect is excluded.' );
 		$this->assertContains( 'some/other/script.js', $out, 'Existing exclusions are preserved.' );
 	}
 

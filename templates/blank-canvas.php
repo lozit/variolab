@@ -36,6 +36,19 @@ header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
 // the trust boundary explicit rather than leaning only on WP's save-time kses.
 $abtest_html = \Abtest\Admin\HtmlImport::render_html( $abtest_post );
 
+// Cache-resilient mode: inject the cache-buster redirect as high as possible (right
+// after <head>) so a cache-served page bounces to a fresh render before painting.
+// Returns '' unless the mode is on, an experiment matches, and the visitor is anon.
+$abtest_cachebuster = \Abtest\CacheBypass::cache_buster_script_tag();
+if ( '' !== $abtest_cachebuster ) {
+	if ( preg_match( '/<head\b[^>]*>/i', $abtest_html, $abtest_head_match, PREG_OFFSET_CAPTURE ) ) {
+		$abtest_head_at = (int) $abtest_head_match[0][1] + strlen( $abtest_head_match[0][0] );
+		$abtest_html    = substr_replace( $abtest_html, $abtest_cachebuster, $abtest_head_at, 0 );
+	} else {
+		$abtest_html = $abtest_cachebuster . $abtest_html;
+	}
+}
+
 // Inject per-URL tracking scripts at the configured positions inside the user's HTML.
 // We call wp_body_open / wp_footer indirectly via the same helper used by themed pages.
 $abtest_router_url = \Abtest\Router::instance()->get_current_test_url();

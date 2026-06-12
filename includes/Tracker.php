@@ -55,6 +55,9 @@ final class Tracker {
 		}
 		$exclusions[] = 'variolab-ab-testing/assets/js/tracker.js';
 		$exclusions[] = 'AbtestTracker';
+		// The cache-resilient redirect must fire on load, never on first interaction.
+		$exclusions[] = 'abtest-cache-buster';
+		$exclusions[] = '_abtcb';
 		return $exclusions;
 	}
 

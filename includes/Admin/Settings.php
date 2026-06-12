@@ -23,8 +23,9 @@ final class Settings {
 		$ga4_cfg     = Ga4::get_settings();
 		$webhooks    = Webhook::get_all();
 		$action_url  = admin_url( 'admin-post.php' );
-		$plugin_cfg  = (array) get_option( 'abtest_settings', [] );
-		$req_consent = ! empty( $plugin_cfg['require_consent'] );
+		$plugin_cfg      = (array) get_option( 'abtest_settings', [] );
+		$req_consent     = ! empty( $plugin_cfg['require_consent'] );
+		$cache_resilient = ! empty( $plugin_cfg['cache_resilient'] );
 		?>
 		<div class="wrap vlab-page abtest-wrap">
 			<?php Admin::render_brand_header( __( 'Settings', 'variolab-ab-testing' ) ); ?>
@@ -54,6 +55,34 @@ final class Settings {
 							</label>
 							<p class="description">
 								<?php esc_html_e( 'Off by default — the plugin behaves as today (tracks every visitor). Turn on if your site uses a consent banner and you want to align A/B testing with the visitor\'s choice. Admin/bot bypass remains exempt so previews keep working without a banner consent.', 'variolab-ab-testing' ); ?>
+							</p>
+						</td>
+					</tr>
+				</table>
+
+				<h2 class="abtest-section-title"><?php esc_html_e( 'Caching & CDN', 'variolab-ab-testing' ); ?></h2>
+				<p class="description">
+					<?php esc_html_e( 'A/B test pages must never be served from a cache: a cached page freezes one variant for every visitor (breaking the 50/50 split) and skips impression logging (so conversions are dropped). The plugin already sends no-store headers and auto-excludes test URLs from WP Rocket and LiteSpeed. For other caches you must exclude the test URLs yourself:', 'variolab-ab-testing' ); ?>
+				</p>
+				<ul class="abtest-cache-hosts" style="list-style:disc;margin-left:1.4em">
+					<li><strong>Cloudways / Varnish, SiteGround, nginx page cache</strong> — <?php esc_html_e( 'add your test URLs to the host\'s cache-exclusion list (or ask support). These server caches sit behind the CDN and ignore plugin-level rules.', 'variolab-ab-testing' ); ?></li>
+					<li><strong>Cloudflare</strong> — <?php esc_html_e( 'respects no-store by default; if you use APO or a "Cache Everything" rule, add a Cache Rule to Bypass cache for the test paths.', 'variolab-ab-testing' ); ?></li>
+					<li><strong>Kinsta</strong> — <?php esc_html_e( 'MyKinsta → Tools → Cache → add the test URLs to Cache Bypass.', 'variolab-ab-testing' ); ?></li>
+				</ul>
+				<p class="description">
+					<?php esc_html_e( 'Tip: give your test URLs a common prefix (e.g. /lp/…) so a single exclusion rule covers every current and future test.', 'variolab-ab-testing' ); ?>
+				</p>
+
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Cache-resilient mode', 'variolab-ab-testing' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="cache_resilient" value="1" <?php checked( $cache_resilient ); ?>>
+								<?php esc_html_e( 'Force a fresh render of test pages, even behind a cache you can\'t configure', 'variolab-ab-testing' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'Off by default. When on, a tiny script redirects a cache-served test page to a one-time unique URL (…?_abtcb=…) that no cache can have stored, forcing WordPress to render it fresh — so the split and conversions work without touching your cache config. Trade-off: a brief redirect on first paint (a small flicker), and test URLs gain a query parameter. Prefer a proper cache exclusion (above) when you can; use this when you can\'t.', 'variolab-ab-testing' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -250,6 +279,7 @@ final class Settings {
 		// other keys (cookie_days, bypass_admins, bypass_bots).
 		$plugin_cfg                    = (array) get_option( 'abtest_settings', [] );
 		$plugin_cfg['require_consent'] = ! empty( $_POST['require_consent'] );
+		$plugin_cfg['cache_resilient'] = ! empty( $_POST['cache_resilient'] );
 		update_option( 'abtest_settings', $plugin_cfg );
 
 		// --- GA4 ---
