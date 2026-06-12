@@ -141,13 +141,13 @@ The official `wordpress/plugin-check-action@v1` was added to CI in v0.11.1, scop
 ### Security — audit backlog (auto-managed)
 
 Managed by `/security-audit`. Latest report: [`docs/security/latest.md`](../docs/security/latest.md).
-Disclosure policy: [`SECURITY.md`](../SECURITY.md). Current score: **8 / 10**.
+Disclosure policy: [`SECURITY.md`](../SECURITY.md). Current score: **8 / 10** (audit 2026-06-12; both Medium findings fixed in v0.15.3 + v0.15.4 → effective 10/10, re-audit to confirm).
 
 **Auto-rules**: the command adds only new Critical / High / Medium findings. Lows stay in the report, not here. Items that disappear from a subsequent audit are auto-ticked.
 
 **Open findings** (audit 2026-06-12, v0.15.2):
 - [x] [MEDIUM] B — `includes/Rest/ConvertController.php:77` — bind conversions to server-side proof of impression (fixed v0.15.3, 2026-06-12) — `Tracker::has_impression()` gate returns `409 no_impression` unless a server-side impression row exists for that (experiment, variant, visitor); forgery vector closed, rate stays honest. Covered by `tests/Integration/TrackerConversionTest.php`.
-- [ ] [MEDIUM] F — `includes/Integrations/Webhook.php:177` — add `'reject_unsafe_urls' => true` to `wp_remote_post` (+ optionally reject loopback/link-local/RFC1918 at intake) to close the authenticated webhook SSRF (audit 2026-06-12)
+- [x] [MEDIUM] F — `includes/Integrations/Webhook.php:177` — close the authenticated webhook SSRF (fixed v0.15.4, 2026-06-12) — `set_all()` rejects literal loopback/link-local/private/reserved IP hosts (`host_is_blocked()`); `send()` passes `'reject_unsafe_urls' => true` for request-time host resolution + redirect-bypass coverage. Covered by `tests/Integration/WebhookTest.php` (14 cases). **Both audit Medium findings now closed.**
 
 **All findings closed in v0.9.1 → v0.9.3**:
 - [x] [MEDIUM] F — `includes/Integrations/Webhook.php:160` — explicit `'sslverify' => true` (fixed v0.9.1, commit `5eff481`)

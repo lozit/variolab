@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.3
+Stable tag: 0.15.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.4 =
+* **Security: webhooks can no longer be pointed at internal addresses (SSRF hardening).** Outgoing event webhooks now refuse URLs whose host is a loopback, link-local, private, or reserved IP — both when you save them (literal IPs like `127.0.0.1`, `169.254.169.254`, `10.0.0.0/8`, `192.168.x`) and at request time, where WordPress resolves the hostname and rejects targets that point inside your network (`reject_unsafe_urls`, which also blocks redirect-based bypasses). Legitimate public endpoints (Zapier, Make, Slack, your own API) are unaffected. Hardening from the 2026-06-12 internal security audit.
 
 = 0.15.3 =
 * **Security: conversions now require a prior impression.** The public conversion endpoint used to log a conversion based on a cookie value, which a client fully controls — so a request with a hand-crafted cookie for a guessed experiment ID could record conversions that never happened and skew a test's result. Conversions are now only recorded when the visitor already has a server-side impression for that exact experiment and variant (impressions are written by the server when the page is actually served, and cannot be forged). Every real conversion therefore moves in lock-step with an impression, keeping the conversion rate honest. No change to legitimate tracking. Hardening from the 2026-06-12 internal security audit; combines with the existing per-IP rate limit and per-visitor dedup.

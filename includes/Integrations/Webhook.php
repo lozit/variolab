@@ -80,6 +80,13 @@ final class Webhook {
 			if ( ! preg_match( '#^https?://#i', $url ) ) {
 				continue;
 			}
+			// Anti-SSRF: refuse URLs whose host is a literal loopback / link-local /
+			// private / reserved IP (e.g. 127.0.0.1, 169.254.169.254 cloud metadata,
+			// 10.0.0.0/8). Hostnames are left to wp_remote_post()'s reject_unsafe_urls
+			// at request time, which resolves them and also covers DNS rebinding.
+			if ( self::host_is_blocked( $url ) ) {
+				continue;
+			}
 			$clean[] = [
 				'name'    => isset( $entry['name'] ) ? sanitize_text_field( (string) $entry['name'] ) : '',
 				'url'     => $url,
@@ -89,6 +96,35 @@ final class Webhook {
 			];
 		}
 		update_option( self::OPTION_KEY, $clean );
+	}
+
+	/**
+	 * Whether a webhook URL points at a literal IP we refuse to call (loopback,
+	 * link-local, private, or otherwise reserved). Returns false for hostnames —
+	 * those are validated at request time by wp_remote_post()'s reject_unsafe_urls,
+	 * which resolves the name and rejects private/reserved targets (and covers DNS
+	 * rebinding, which an intake-time check cannot).
+	 */
+	private static function host_is_blocked( string $url ): bool {
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( ! is_string( $host ) || '' === $host ) {
+			return true;
+		}
+		// Strip IPv6 brackets, e.g. "[::1]" -> "::1".
+		$host = trim( $host, '[]' );
+
+		// Not a literal IP -> a hostname; allow here, validated at request time.
+		if ( false === filter_var( $host, FILTER_VALIDATE_IP ) ) {
+			return false;
+		}
+
+		// A public IP passes NO_PRIV_RANGE|NO_RES_RANGE and returns the address;
+		// loopback / link-local / private / reserved fail and return false -> block.
+		return false === filter_var(
+			$host,
+			FILTER_VALIDATE_IP,
+			FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+		);
 	}
 
 	public function on_event( int $experiment_id, string $variant, string $event_type, string $visitor, string $test_url ): void {
@@ -174,7 +210,12 @@ final class Webhook {
 				// Explicit so a third-party `http_request_args` filter can't silently flip
 				// SSL verification off — webhook endpoints carry analytics events, not
 				// secrets, but we don't want to be the channel for a downgrade attack.
-				'sslverify' => true,
+				'sslverify'         => true,
+				// Anti-SSRF at request time: WP resolves the host and refuses loopback /
+				// link-local / private / reserved targets (incl. hostnames that resolve
+				// to them, and redirects to them). Complements the intake check in
+				// set_all(), which only sees literal IPs.
+				'reject_unsafe_urls' => true,
 			]
 		);
 	}
