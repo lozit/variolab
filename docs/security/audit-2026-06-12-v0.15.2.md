@@ -43,7 +43,7 @@ Production-ready. No Critical or High. The two Medium findings are (1) a genuine
 
 ## 🟡 Medium findings
 
-**[🟡 Medium] Public `/convert` endpoint accepts forged conversions via attacker-set cookie**
+**[🟡 Medium] Public `/convert` endpoint accepts forged conversions via attacker-set cookie** — ✅ FIXED in v0.15.3 (2026-06-12): `ConvertController::handle()` now calls `Tracker::has_impression( $experiment_id, $variant, $visitor )` and returns `409 no_impression` unless a server-side impression row exists for that exact (experiment, variant, visitor). Covered by `tests/Integration/TrackerConversionTest.php` (4 tests). The forgery vector is closed and the conversion rate stays honest (every conversion now requires a preceding impression).
 - File: `includes/Rest/ConvertController.php`
 - Line: 77–84
 - Surface: B (REST endpoints)

@@ -74,14 +74,29 @@ final class ConvertController {
 			return new \WP_REST_Response( [ 'logged' => false, 'reason' => 'rate_limited' ], 429 );
 		}
 
-		// Variant comes from the cookie set during impression — never trusted from the client.
+		// The variant is read from a cookie, which is fully client-controlled — it
+		// is NOT a trust boundary on its own. The real guard is the impression
+		// check below: a conversion is only logged if this visitor already has a
+		// server-side impression for this exact (experiment, variant), which the
+		// attacker cannot forge without actually loading the test page.
 		$variant = Cookie::get_variant( $experiment_id );
 		if ( null === $variant ) {
 			return new \WP_REST_Response( [ 'logged' => false, 'reason' => 'no_variant_cookie' ], 400 );
 		}
 
 		$visitor = Cookie::visitor_hash();
-		$logged  = Tracker::instance()->log_conversion( $experiment_id, $variant, $visitor );
+
+		// Require proof of a prior impression for this (experiment, variant, visitor).
+		// Impressions are written server-side only (Router), so a request with a
+		// hand-crafted cookie for a guessed experiment_id has no matching row and is
+		// rejected — neutralising forged-conversion stat inflation. Because every
+		// real conversion now requires a preceding impression, an attacker who does
+		// load the page inflates impressions in lock-step, keeping the rate honest.
+		if ( ! Tracker::instance()->has_impression( $experiment_id, $variant, $visitor ) ) {
+			return new \WP_REST_Response( [ 'logged' => false, 'reason' => 'no_impression' ], 409 );
+		}
+
+		$logged = Tracker::instance()->log_conversion( $experiment_id, $variant, $visitor );
 
 		return new \WP_REST_Response(
 			[

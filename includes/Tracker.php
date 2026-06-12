@@ -83,6 +83,19 @@ final class Tracker {
 		return true;
 	}
 
+	/**
+	 * Whether this (experiment, variant, visitor) has a recorded impression.
+	 *
+	 * Impressions are only ever written server-side by {@see Router} when the
+	 * test page is actually served to a tracked visitor, so this is the proof
+	 * the public /convert endpoint uses to reject forged conversions: a request
+	 * carrying a hand-crafted cookie for a guessed experiment has no matching
+	 * impression row and is turned away. See ConvertController::handle().
+	 */
+	public function has_impression( int $experiment_id, string $variant, string $visitor ): bool {
+		return $this->already_logged( $experiment_id, $variant, self::EVENT_IMPRESSION, $visitor );
+	}
+
 	private function insert( int $experiment_id, string $variant, string $event_type, string $visitor, string $test_url = '' ): void {
 		global $wpdb;
 
