@@ -6,6 +6,8 @@
 **Previous** : [`audit-2026-05-20-v0.15.0.md`](./audit-2026-05-20-v0.15.0.md)
 
 > First full code-path audit since the v0.14.0 wp.org round-2 review. The v0.15.0/0.15.1/0.15.2 deltas (list redesign, `UrlScripts::render_for_position()` fatal fix, `wp-header-end` notice reposition) were all UI/render-path changes; this audit re-walks every surface end to end, not just the deltas.
+>
+> **Patch trail since this audit** — v0.15.3 fixes M1 (forged conversions), v0.15.4 fixes M2 (webhook SSRF); both Medium findings closed (see the marked entries below). **v0.15.5 — no security delta vs v0.15.4**: drops a `__()` from the `cron_schedules` display label so the text domain no longer loads before `init` (kills a WP 6.7+ `_load_textdomain_just_in_time` notice). Pure i18n-timing fix, no input surface / capability / data-flow change.
 
 ---
 
