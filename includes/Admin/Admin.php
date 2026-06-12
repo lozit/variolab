@@ -776,6 +776,7 @@ final class Admin {
 		$brand_home = admin_url( 'admin.php?page=' . self::MENU_SLUG );
 		$icon_src   = ABTEST_PLUGIN_URL . 'assets/img/icon-128.png';
 		?>
+		<hr class="wp-header-end">
 		<header class="vlab-page-header">
 			<div class="vlab-page-header-l">
 				<a class="vlab-brandline" href="<?php echo esc_url( $brand_home ); ?>" title="<?php esc_attr_e( 'Variolab', 'variolab-ab-testing' ); ?>">

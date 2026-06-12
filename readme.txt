@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.1
+Stable tag: 0.15.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.2 =
+* **Admin notices reposition.** Third-party admin notices (security plugins, cache plugins, the plugin's own CacheNotice, etc.) used to land between the Variolab brand header and the page content, pushing the table down. They now appear above the brand header — same slot WordPress uses on every other admin screen. Implemented via the standard `<hr class="wp-header-end">` marker injected at the top of `Admin::render_brand_header()`, so all four plugin pages (List / Edit / Settings / Import) get the fix.
 
 = 0.15.1 =
 * **Fix fatal error on imported HTML landings.** `templates/blank-canvas.php` called `UrlScripts::render_for_position()`, which was never defined on the class — every visit to an HTML-imported page running an A/B test crashed with `Call to undefined method`. Added the missing method as the return-string counterpart of the existing `print_for_position()`; themed pages are unaffected.

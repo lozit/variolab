@@ -1,5 +1,7 @@
 # Security Audit Report — `variolab-ab-testing` v0.15.0
 
+> **v0.15.2 — no security delta vs v0.15.1.** Patch is a one-line UI tweak in `Admin::render_brand_header()`: emits `<hr class="wp-header-end">` so WP's core notice-repositioning JS (`wp-admin/js/common.js` `notices.move()`) drops third-party admin notices above the brand header instead of after the `<h1>`. No code path / option / DB touched.
+>
 > **v0.15.1 — no security delta vs v0.15.0.** Patch ships a single-method addition: `UrlScripts::render_for_position()` (return-string counterpart of the pre-existing `print_for_position()`), called by `templates/blank-canvas.php` to inject inline `<script>` tags at byte offsets inside imported HTML. Both methods wrap output via `wp_get_inline_script_tag()` / `wp_print_inline_script_tag()` — the WP-blessed inline-script helpers cleared in the v0.14.0 audit. No new SQL, no new input surface, no new capability check; the same trust model gate at intake in `Admin\Admin::handle_save()` (`manage_options` + nonce + `unfiltered_html`) governs every script body the new method renders. Verdict: ✅ ship.
 
 **Date** : 2026-05-20
