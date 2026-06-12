@@ -29,6 +29,33 @@ final class Tracker {
 
 	public function register(): void {
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tracker_js' ] );
+
+		// Keep the conversion tracker out of "Delay JavaScript Execution" optimisers.
+		// WP Rocket (and Perfmatters, etc.) rewrite <script type> to defer ALL JS until
+		// the first user interaction. That breaks click/URL goals: the visitor's first
+		// click only *wakes* the tracker — the listener isn't attached yet, so that click
+		// isn't recorded (the "had to click twice" symptom). The tracker is tiny and must
+		// run on load, so we exclude it. Both filters share the same array-of-patterns
+		// shape and no-op when the plugin isn't installed. Other delay-JS tools may need a
+		// manual exclusion of `variolab-ab-testing/assets/js/tracker.js` + `AbtestTracker`.
+		add_filter( 'rocket_delay_js_exclusions', [ $this, 'exclude_from_delay_js' ] );
+		add_filter( 'perfmatters_delay_js_exclusions', [ $this, 'exclude_from_delay_js' ] );
+	}
+
+	/**
+	 * Add the tracker (external script + inline config) to a delay-JS optimiser's
+	 * exclusion list so it executes on load instead of on first interaction.
+	 *
+	 * @param mixed $exclusions Current exclusion patterns (array).
+	 * @return mixed
+	 */
+	public function exclude_from_delay_js( $exclusions ) {
+		if ( ! is_array( $exclusions ) ) {
+			return $exclusions;
+		}
+		$exclusions[] = 'variolab-ab-testing/assets/js/tracker.js';
+		$exclusions[] = 'AbtestTracker';
+		return $exclusions;
 	}
 
 	/**

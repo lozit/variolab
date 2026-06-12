@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.10
+Stable tag: 0.15.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.11 =
+* **Fix conversions with WP Rocket "Delay JavaScript Execution" (the real "click twice" cause).** When that optimisation is on (also in Perfmatters and similar), it defers every script until the visitor's first interaction — so the very first click only woke the tracker up and wasn't recorded, and you had to click again. The conversion tracker is now automatically excluded from delay-JS, so it runs on page load and the first click counts. If you use another delay-JS tool, exclude `variolab-ab-testing/assets/js/tracker.js` and `AbtestTracker` from it manually.
 
 = 0.15.10 =
 * **Conversions no longer depend on the variant cookie ("had to click twice" fix).** A conversion was only recorded if the visitor's variant cookie was present, which could be missing on the first click (a CDN stripping the Set-Cookie header, or first-paint timing) — so the conversion was lost and you had to click again. The variant is now determined from the visitor's server-side impression instead, so a real click counts the first time even if the cookie didn't arrive. As a bonus this is also more tamper-resistant: a forged cookie can no longer attribute a conversion to a different variant.

@@ -55,3 +55,6 @@ secrets.json
 # bootstrap requires it and it holds only wp-env's public defaults, no real
 # secret). It used to be listed above, which was misleading — a committed file
 # is never actually ignored. Keep it tracked; never put a real credential in it.
+
+# Playwright MCP browser artifacts
+.playwright-mcp/
