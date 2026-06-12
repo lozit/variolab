@@ -144,7 +144,7 @@ The official `wordpress/plugin-check-action@v1` was added to CI in v0.11.1, scop
 ### Security — audit backlog (auto-managed)
 
 Managed by `/security-audit`. Latest report: [`docs/security/latest.md`](../docs/security/latest.md).
-Disclosure policy: [`SECURITY.md`](../SECURITY.md). Current score: **8 / 10** (audit 2026-06-12; both Medium findings fixed in v0.15.3 + v0.15.4 → effective 10/10, re-audit to confirm).
+Disclosure policy: [`SECURITY.md`](../SECURITY.md). Current score: **10 / 10** (re-audit 2026-06-12 @ v0.15.7 — both Mediums + 4 Lows fixed and independently re-verified; 0 Critical/High/Medium; see [`docs/security/latest.md`](../docs/security/latest.md)).
 
 **Auto-rules**: the command adds only new Critical / High / Medium findings. Lows stay in the report, not here. Items that disappear from a subsequent audit are auto-ticked.
 
