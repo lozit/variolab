@@ -74,32 +74,33 @@ final class ConvertController {
 			return new \WP_REST_Response( [ 'logged' => false, 'reason' => 'rate_limited' ], 429 );
 		}
 
-		// The variant is read from a cookie, which is fully client-controlled — it
-		// is NOT a trust boundary on its own. The real guard is the impression
-		// check below: a conversion is only logged if this visitor already has a
-		// server-side impression for this exact (experiment, variant), which the
-		// attacker cannot forge without actually loading the test page.
-		$variant = Cookie::get_variant( $experiment_id );
-		if ( null === $variant ) {
-			return new \WP_REST_Response( [ 'logged' => false, 'reason' => 'no_variant_cookie' ], 400 );
-		}
-
 		$visitor = Cookie::visitor_hash();
 
-		// Require proof of a prior impression for this (experiment, variant, visitor).
-		// Impressions are written server-side only (Router), so a request with a
-		// hand-crafted cookie for a guessed experiment_id has no matching row and is
-		// rejected — neutralising forged-conversion stat inflation. Because every
-		// real conversion now requires a preceding impression, an attacker who does
-		// load the page inflates impressions in lock-step, keeping the rate honest.
+		// The variant is determined from server-side proof — the visitor's logged
+		// impression — never trusted from the client. We prefer the variant cookie
+		// ONLY when it matches a real impression for this visitor; otherwise we
+		// derive the variant from the impression row itself. This does two things:
+		//
+		// 1. Security: a forged conversion (hand-crafted cookie for a guessed
+		// experiment_id) has no matching impression and is rejected below, and
+		// a tampered cookie can't pick the arm it skews — the impression wins.
+		// Impressions are written server-side only (Router), so the rate stays
+		// honest (every conversion is backed by an impression).
+		//
+		// 2. Robustness: a missing/stale variant cookie — a CDN stripping the
+		// Set-Cookie header, or first-paint timing — no longer loses the
+		// conversion (the previous "had to click twice" symptom). The impression
+		// is the source of truth, so the cookie being absent is fine.
 		//
 		// Trade-off (accepted): the visitor hash is IP+UA based, so a legitimate
-		// visitor whose IP or User-Agent changes between the impression (page render)
-		// and this conversion POST — mobile Wi-Fi/cellular handoff, CGNAT, a browser
-		// update — hashes differently and is turned away here. This fails *closed*
-		// (under-counts, never inflates) and the page is unaffected; the common
-		// same-session case is fine since running experiments bypass page cache.
-		if ( ! Tracker::instance()->has_impression( $experiment_id, $variant, $visitor ) ) {
+		// visitor whose IP/UA changes between the impression and this POST (mobile
+		// Wi-Fi/cellular handoff, CGNAT, a browser update) has no matching impression
+		// and is turned away. Fails *closed* (under-counts, never inflates).
+		$variant = Cookie::get_variant( $experiment_id );
+		if ( null === $variant || ! Tracker::instance()->has_impression( $experiment_id, $variant, $visitor ) ) {
+			$variant = Tracker::instance()->impression_variant( $experiment_id, $visitor );
+		}
+		if ( null === $variant ) {
 			return new \WP_REST_Response( [ 'logged' => false, 'reason' => 'no_impression' ], 409 );
 		}
 

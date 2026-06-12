@@ -67,6 +67,16 @@ final class TrackerConversionTest extends WP_UnitTestCase {
 		);
 	}
 
+	public function test_impression_variant_returns_the_logged_variant(): void {
+		$this->insert_impression( self::EXP_ID, 'B', self::VISITOR );
+
+		$this->assertSame( 'B', Tracker::instance()->impression_variant( self::EXP_ID, self::VISITOR ) );
+		$this->assertNull(
+			Tracker::instance()->impression_variant( self::EXP_ID, self::OTHER ),
+			'A visitor with no impression has no derivable variant.'
+		);
+	}
+
 	public function test_conversion_dedup_still_holds(): void {
 		$this->insert_impression( self::EXP_ID, 'A', self::VISITOR );
 

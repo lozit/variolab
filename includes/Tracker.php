@@ -146,6 +146,27 @@ final class Tracker {
 		return $this->already_logged( $experiment_id, $variant, self::EVENT_IMPRESSION, $visitor );
 	}
 
+	/**
+	 * Variant recorded in this visitor's most recent impression for the experiment,
+	 * or null if they have none. This is the server-side source of truth for the
+	 * variant — used by the conversion endpoint when the client variant cookie is
+	 * missing or stale (e.g. a CDN stripped Set-Cookie, or first-paint timing), so
+	 * a real conversion isn't lost just because the cookie didn't arrive.
+	 */
+	public function impression_variant( int $experiment_id, string $visitor ): ?string {
+		global $wpdb;
+		$table   = Schema::events_table();
+		$variant = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT variant FROM {$table} WHERE experiment_id = %d AND event_type = %s AND visitor_hash = %s ORDER BY id DESC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$experiment_id,
+				self::EVENT_IMPRESSION,
+				$visitor
+			)
+		);
+		return is_string( $variant ) && '' !== $variant ? $variant : null;
+	}
+
 	private function insert( int $experiment_id, string $variant, string $event_type, string $visitor, string $test_url = '' ): void {
 		global $wpdb;
 

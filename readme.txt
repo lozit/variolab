@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.15.9
+Stable tag: 0.15.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,6 +141,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.15.10 =
+* **Conversions no longer depend on the variant cookie ("had to click twice" fix).** A conversion was only recorded if the visitor's variant cookie was present, which could be missing on the first click (a CDN stripping the Set-Cookie header, or first-paint timing) — so the conversion was lost and you had to click again. The variant is now determined from the visitor's server-side impression instead, so a real click counts the first time even if the cookie didn't arrive. As a bonus this is also more tamper-resistant: a forged cookie can no longer attribute a conversion to a different variant.
 
 = 0.15.9 =
 * **Conversion goals now work on imported HTML landing pages.** Click and URL conversion goals previously never fired on pages imported via Import HTML (Blank Canvas), because the conversion tracker was only loaded on regular theme pages. The tracker is now injected into imported landings too, so "click a button matching a CSS selector" and "visit/click a URL" goals are recorded for real visitors. If your test runs on an imported page, this is the fix that makes its conversions count.
