@@ -107,6 +107,28 @@ jobs:
     # in the .zip), not the raw repo — otherwise it flags every dev-only file
     # (.claude/, .github/, tests/, docs/, CLAUDE.md, composer.json…) which would
     # never reach a wp.org installer anyway.
+    #
+    # Why hand-rolled instead of `wordpress/plugin-check-action@v1` :
+    #   The action runs `npm -g i @wordpress/env` (always latest) on every run, and
+    #   @wordpress/env 11.8.0 (2026-06-04) regressed — `wp-env start` exits 0 WITHOUT
+    #   bringing Docker up, so the check then fails with "Environment not initialized".
+    #   The action's internal retry only fires on a non-zero exit, so the false
+    #   success is never retried (it failed 4×/4 on 2026-06-12). We replicate the
+    #   action's steps here so we can (a) PIN @wordpress/env to the last good 11.7.0
+    #   and (b) VERIFY WordPress actually responds (`wp core version`) before checking.
+    #   Revisit the pin once @wordpress/env ships a fix for the silent-start regression.
+    env:
+      # Codes we knowingly suppress, with rationale :
+      #   - WordPress.WP.AlternativeFunctions.rand_*       : mt_rand/srand for variant pick (speed > crypto, see Cookie.php)
+      #   - WordPress.WP.AlternativeFunctions.file_system_*: zip extraction streams + local-disk reads on plugin-controlled paths
+      #   - WordPress.DB.DirectDatabaseQuery.*             : we own a custom table (wp_abtest_events), no WP API alternative
+      #   - WordPress.DB.SlowDBQuery.*                     : intentional meta_query for experiment lookup
+      #   - PluginCheck.Security.DirectDB.UnescapedDBParameter : false positive on $table from Schema::events_table()
+      #   - WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound : we hook into core actions like `init`
+      #   - trademarked_term : "wordpress" appears in descriptive copy, not the plugin name
+      PLUGIN_SLUG: variolab-ab-testing
+      WP_ENV_VERSION: '11.7.0'
+      IGNORE_CODES: 'WordPress.WP.AlternativeFunctions.rand_seeding_mt_srand,WordPress.WP.AlternativeFunctions.rand_mt_rand,WordPress.WP.AlternativeFunctions.file_system_operations_fopen,WordPress.WP.AlternativeFunctions.file_system_operations_fclose,WordPress.WP.AlternativeFunctions.file_system_operations_fwrite,WordPress.WP.AlternativeFunctions.file_system_operations_fread,WordPress.WP.AlternativeFunctions.file_system_operations_feof,WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents,WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.SlowDBQuery.slow_db_query_meta_query,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound,trademarked_term'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -149,17 +171,86 @@ jobs:
             --exclude='phpcs.xml*' \
             ./ build/variolab-ab-testing/
 
-      - name: Run WordPress Plugin Check
-        uses: wordpress/plugin-check-action@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          build-dir: './build/variolab-ab-testing'
-          wp-version: 'latest'
-          # Codes we knowingly suppress, with rationale :
-          #   - WordPress.WP.AlternativeFunctions.rand_*       : mt_rand/srand for variant pick (speed > crypto, see Cookie.php)
-          #   - WordPress.WP.AlternativeFunctions.file_system_*: zip extraction streams + local-disk reads on plugin-controlled paths
-          #   - WordPress.DB.DirectDatabaseQuery.*             : we own a custom table (wp_abtest_events), no WP API alternative
-          #   - WordPress.DB.SlowDBQuery.*                     : intentional meta_query for experiment lookup
-          #   - PluginCheck.Security.DirectDB.UnescapedDBParameter : false positive on $table from Schema::events_table()
-          #   - WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound : we hook into core actions like `init`
-          #   - PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound : addressed at load time but Plugin Check still emits
-          ignore-codes: 'WordPress.WP.AlternativeFunctions.rand_seeding_mt_srand,WordPress.WP.AlternativeFunctions.rand_mt_rand,WordPress.WP.AlternativeFunctions.file_system_operations_fopen,WordPress.WP.AlternativeFunctions.file_system_operations_fclose,WordPress.WP.AlternativeFunctions.file_system_operations_fwrite,WordPress.WP.AlternativeFunctions.file_system_operations_fread,WordPress.WP.AlternativeFunctions.file_system_operations_feof,WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents,WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.SlowDBQuery.slow_db_query_meta_query,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound,trademarked_term'
+          node-version: '20'
+
+      - name: Setup wp-env (pinned) + Plugin Check plugin
+        run: |
+          PLUGIN_DIR=$(realpath ./build/variolab-ab-testing)
+          # core:null => wp-env's bundled latest WP (same as the action for any
+          # wp-version other than 'trunk'). The build folder is mapped in as the
+          # plugin under test; the official plugin-check plugin runs the audit.
+          cat > .wp-env.json <<EOF
+          {
+            "core": null,
+            "plugins": [ "https://downloads.wordpress.org/plugin/plugin-check.zip" ],
+            "mappings": { "wp-content/plugins/${PLUGIN_SLUG}": "${PLUGIN_DIR}" }
+          }
+          EOF
+          cat .wp-env.json
+          npm -g --no-fund i "@wordpress/env@${WP_ENV_VERSION}"
+          wp-env --version
+
+      - name: Start wp-env (verified, retry on silent failure)
+        run: |
+          ok=0
+          for attempt in 1 2 3; do
+            echo "::group::wp-env start (attempt ${attempt})"
+            wp-env start --update || true
+            echo "::endgroup::"
+            # wp-env start can exit 0 without bringing Docker up (the 11.8 regression
+            # and occasional cold-Docker races). Verify WordPress actually answers.
+            if wp-env run cli wp core version; then
+              echo "WordPress environment is up."
+              ok=1
+              break
+            fi
+            echo "Environment not ready — destroying and retrying."
+            wp-env destroy --yes || true
+            sleep 5
+          done
+          if [ "${ok}" != "1" ]; then
+            echo "::error::wp-env failed to start a working WordPress after 3 attempts"
+            exit 1
+          fi
+
+      - name: Run Plugin Check
+        run: |
+          set -e
+          wp-env run cli wp plugin activate "${PLUGIN_SLUG}"
+
+          echo "::group::Plugin Check (raw JSON)"
+          # stdout (the JSON report) -> file ; wp-env's own chatter goes to stderr.
+          wp-env run cli wp plugin check "${PLUGIN_SLUG}" \
+            --format=json \
+            --ignore-codes="${IGNORE_CODES}" \
+            --require=./wp-content/plugins/plugin-check/cli.php \
+            > pc.json || true
+          cat pc.json
+          echo "::endgroup::"
+
+          # Pass/fail = the same rule the action applies: any ERROR-severity finding
+          # fails the job (warnings stay informational). Tolerant of wp-env wrapping
+          # the JSON in leading/trailing chatter, and of array- vs file-keyed shapes.
+          node -e '
+            const fs = require("fs");
+            let raw = fs.readFileSync("pc.json", "utf8");
+            const a = raw.search(/[\[{]/);
+            const b = Math.max(raw.lastIndexOf("]"), raw.lastIndexOf("}"));
+            if (a === -1 || b < a) {
+              console.log("No JSON payload — treating as no findings.");
+              process.exit(0);
+            }
+            let data;
+            try { data = JSON.parse(raw.slice(a, b + 1)); }
+            catch (e) { console.error("Could not parse Plugin Check JSON:", e.message); process.exit(1); }
+            let findings = [];
+            if (Array.isArray(data)) findings = data;
+            else for (const k of Object.keys(data)) if (Array.isArray(data[k])) findings = findings.concat(data[k]);
+            const errors = findings.filter(f => String(f.type || "").toUpperCase() === "ERROR");
+            console.log("Plugin Check: " + findings.length + " finding(s), " + errors.length + " error(s).");
+            for (const e of errors) console.log("  ERROR " + (e.code || "") + " " + (e.file || "") + ":" + (e.line || "") + " " + (e.message || ""));
+            process.exit(errors.length > 0 ? 1 : 0);
+          '
