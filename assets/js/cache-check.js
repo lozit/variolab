@@ -107,6 +107,25 @@
 		return document.querySelector( '[data-abtest-cache-baseline]' );
 	}
 
+	// Reveal the explanatory note in the box only when an active cache is detected:
+	// either the baseline normal page is cached, or some test URL is cached/handled.
+	function updateNote( results, baseline ) {
+		var el = document.querySelector( '[data-abtest-cache-note]' );
+		if ( ! el ) {
+			return;
+		}
+		var detected = ( baseline === 'baseOk' );
+		if ( ! detected ) {
+			for ( var key in results ) {
+				if ( results[ key ] === 'cached' || results[ key ] === 'handled' ) {
+					detected = true;
+					break;
+				}
+			}
+		}
+		el.hidden = ! detected;
+	}
+
 	function renderFromStore() {
 		var store = readStore();
 		var results = store.results || {};
@@ -115,6 +134,7 @@
 			setPill( el, results[ key ] || 'pending' );
 		} );
 		setPill( baselinePill(), store.baseline || 'pending' );
+		updateNote( results, store.baseline );
 		return store;
 	}
 
@@ -154,6 +174,7 @@
 
 		function next() {
 			if ( i >= jobs.length ) {
+				updateNote( results, baseline );
 				writeStore( { ts: Date.now(), results: results, baseline: baseline } );
 				return Promise.resolve();
 			}

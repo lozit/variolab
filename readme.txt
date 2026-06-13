@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.17.0
+Stable tag: 0.17.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -147,6 +147,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.17.1 =
+* **Cache check polish.** The "how to fix it" guidance now appears in the Cache check box only when an active cache is actually detected (instead of always living in Settings). And a test page handled by cache-resilient mode now reads **CACHE RESILIENT MODE** (amber) instead of the ambiguous "CACHED (RESILIENT)".
 
 = 0.17.0 =
 * **Cache check on the A/B Tests list.** Each running test now shows a status pill — **out of cache ✓** or **CACHED ⚠️** — so you can confirm at a glance that your test pages bypass the cache (a cached test page freezes the variant and drops conversions). A baseline pill checks a normal page too, which *should* be cached, confirming your cache works in general. The check runs from your browser, anonymously, and never logs an impression (it sends a header that tells the plugin to skip counting). Choose **Smart** (auto, refreshed in the background) or **Manual** (only on the “Re-check” button) in Settings → Caching & CDN — handy if you run many tests.

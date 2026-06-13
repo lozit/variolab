@@ -121,9 +121,20 @@ final class ExperimentsList {
 			if ( ! empty( $running_by_url ) ) :
 				?>
 				<div class="vlab-cache-bar" data-abtest-cache-bar>
-					<span class="vlab-cache-bar-label"><?php esc_html_e( 'Cache check', 'variolab-ab-testing' ); ?></span>
-					<span class="vlab-cache-pill vlab-cache-pill--pending" data-abtest-cache-baseline title="<?php esc_attr_e( 'Cache state of a normal page on your site (this one SHOULD be cached).', 'variolab-ab-testing' ); ?>"><?php esc_html_e( 'classic page…', 'variolab-ab-testing' ); ?></span>
-					<button type="button" class="vlab-btn vlab-btn--ghost" data-abtest-cache-recheck><?php esc_html_e( 'Re-check', 'variolab-ab-testing' ); ?></button>
+					<div class="vlab-cache-bar-row">
+						<span class="vlab-cache-bar-label"><?php esc_html_e( 'Cache check', 'variolab-ab-testing' ); ?></span>
+						<span class="vlab-cache-pill vlab-cache-pill--pending" data-abtest-cache-baseline title="<?php esc_attr_e( 'Cache state of a normal page on your site (this one SHOULD be cached).', 'variolab-ab-testing' ); ?>"><?php esc_html_e( 'classic page…', 'variolab-ab-testing' ); ?></span>
+						<button type="button" class="vlab-btn vlab-btn--ghost" data-abtest-cache-recheck><?php esc_html_e( 'Re-check', 'variolab-ab-testing' ); ?></button>
+					</div>
+					<p class="vlab-cache-note" data-abtest-cache-note hidden>
+						<?php
+						printf(
+							/* translators: %s: link to the plugin Settings → Caching & CDN page */
+							esc_html__( 'A cache is active on your site — make sure every test URL above shows “out of cache”. A cached test page freezes the variant for every visitor and drops conversions. See %s for per-host exclusion steps, or enable cache-resilient mode.', 'variolab-ab-testing' ),
+							'<a href="' . esc_url( admin_url( 'admin.php?page=' . Admin::menu_slug() . '&action=settings' ) ) . '">' . esc_html__( 'Settings → Caching & CDN', 'variolab-ab-testing' ) . '</a>'
+						);
+						?>
+					</p>
 				</div>
 				<?php
 			endif;

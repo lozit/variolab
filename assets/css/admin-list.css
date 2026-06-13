@@ -764,9 +764,6 @@
 
 /* --- Cache diagnostic: per-URL pills + baseline bar (cache-check.js) --- */
 .vlab-cache-bar {
-	display: flex;
-	align-items: center;
-	gap: 10px;
 	margin: 0 0 16px;
 	padding: 8px 12px;
 	background: #fff;
@@ -774,9 +771,27 @@
 	border-radius: 8px;
 }
 
+.vlab-cache-bar-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
 .vlab-cache-bar-label {
 	font-weight: 600;
 	font-size: 12px;
+}
+
+.vlab-cache-note {
+	margin: 8px 0 2px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--vlab-status-paused-fg, #856404);
+}
+
+.vlab-cache-note a {
+	color: inherit;
+	text-decoration: underline;
 }
 
 .vlab-cache-pill {

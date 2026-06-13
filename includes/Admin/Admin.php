@@ -144,7 +144,7 @@ final class Admin {
 						'i18n'          => [
 							'ok'        => __( 'out of cache', 'variolab-ab-testing' ),
 							'cached'    => __( 'CACHED', 'variolab-ab-testing' ),
-							'handled'   => __( 'cached (resilient)', 'variolab-ab-testing' ),
+							'handled'   => __( 'cache resilient mode', 'variolab-ab-testing' ),
 							'checking'  => __( 'checking…', 'variolab-ab-testing' ),
 							'error'     => __( 'check failed', 'variolab-ab-testing' ),
 							'baselineCached'   => __( 'cache active', 'variolab-ab-testing' ),
