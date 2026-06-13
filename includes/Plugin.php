@@ -38,11 +38,12 @@ final class Plugin {
 		add_option(
 			'abtest_settings',
 			[
-				'cookie_days'     => 30,
-				'bypass_admins'   => true,
-				'bypass_bots'     => true,
-				'require_consent' => false,
-				'cache_resilient' => false,
+				'cookie_days'      => 30,
+				'bypass_admins'    => true,
+				'bypass_bots'      => true,
+				'require_consent'  => false,
+				'cache_resilient'  => false,
+				'cache_check_mode' => 'smart',
 			]
 		);
 

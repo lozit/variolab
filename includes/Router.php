@@ -58,6 +58,10 @@ final class Router {
 		}
 
 		$bypass         = $this->should_bypass();
+		// A cache-diagnostic probe (admin's browser checking whether this URL is cached)
+		// must render fresh so it reveals the cache + gets the X-Abtest-Bypass header, but
+		// it must NOT count: no impression, no variant cookie, no cache-resilient redirect.
+		$is_probe       = CacheBypass::is_cache_probe();
 		$has_underlying = $this->url_resolves_to_public_page( $path );
 		$preview        = $this->read_preview_param();
 		$labels         = Experiment::get_variant_labels( $experiment->ID ); // baseline = single label A, multi = A B C…
@@ -109,14 +113,16 @@ final class Router {
 			$variant       = in_array( $preview_upper, $labels, true ) ? $preview_upper : ( $labels[0] ?? 'A' );
 		} elseif ( count( $labels ) <= 1 ) {
 			$variant = $labels[0] ?? 'A';
-			if ( null === Cookie::get_variant( $experiment->ID, $labels ) ) {
+			if ( ! $is_probe && null === Cookie::get_variant( $experiment->ID, $labels ) ) {
 				Cookie::set_variant( $experiment->ID, $variant );
 			}
 		} else {
 			$variant = Cookie::get_variant( $experiment->ID, $labels );
 			if ( null === $variant ) {
 				$variant = Cookie::pick_variant( $labels );
-				Cookie::set_variant( $experiment->ID, $variant );
+				if ( ! $is_probe ) {
+					Cookie::set_variant( $experiment->ID, $variant );
+				}
 			}
 		}
 
@@ -144,9 +150,10 @@ final class Router {
 		$this->current_experiment  = $experiment;
 		$this->current_variant     = $variant;
 		$this->current_test_url    = Experiment::get_test_url( $experiment->ID );
-		// Tracked = the visitor counts in the test stats. Out-of-target and admin/bot
-		// bypass do NOT count: they see a variant but no impression/conversion is logged.
-		$this->current_is_tracked  = ! $bypass && ! $out_of_target;
+		// Tracked = the visitor counts in the test stats. Out-of-target, admin/bot
+		// bypass, and cache-diagnostic probes do NOT count: they see a variant but no
+		// impression/conversion is logged.
+		$this->current_is_tracked  = ! $bypass && ! $out_of_target && ! $is_probe;
 
 		// Send no-cache headers IMMEDIATELY on every test page so caches at any layer
 		// (server, plugin, edge CDN like Cloudflare/Kinsta) never store this response.

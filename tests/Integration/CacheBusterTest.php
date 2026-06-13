@@ -72,4 +72,19 @@ final class CacheBusterTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'location.replace', $tag, 'Redirects without a history entry.' );
 		$this->assertStringContainsString( 'searchParams.has', $tag, 'No-ops once the param is present (no loop).' );
 	}
+
+	public function test_diagnostic_probe_is_never_redirected(): void {
+		$this->set_mode( true );
+		$this->set_current_experiment( $this->exp_id );
+		wp_set_current_user( 0 );
+		$_SERVER['HTTP_X_ABTEST_CACHE_CHECK'] = '1';
+
+		$this->assertSame(
+			'',
+			CacheBypass::cache_buster_script_tag(),
+			'A cache-diagnostic probe must reach the origin, not be redirected.'
+		);
+
+		unset( $_SERVER['HTTP_X_ABTEST_CACHE_CHECK'] );
+	}
 }

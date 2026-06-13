@@ -59,6 +59,19 @@ final class CacheBypass {
 	}
 
 	/**
+	 * Whether the current request is a cache-diagnostic probe.
+	 *
+	 * The admin's browser sends `X-Abtest-Cache-Check: 1` (a custom request header,
+	 * which does NOT change the cache key) when checking whether a test URL is being
+	 * cached. The Router uses this to skip impression logging + variant cookie, and
+	 * {@see cache_buster_script_tag()} uses it to skip the redirect — so the probe
+	 * reaches the origin and reveals the real cache state without polluting stats.
+	 */
+	public static function is_cache_probe(): bool {
+		return ! empty( $_SERVER['HTTP_X_ABTEST_CACHE_CHECK'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- presence check only; value never used.
+	}
+
+	/**
 	 * Build the cache-buster `<script>` for the current request, or '' when it
 	 * should not run.
 	 *
@@ -72,6 +85,9 @@ final class CacheBypass {
 	 * server caches) and when there is no experiment on the URL.
 	 */
 	public static function cache_buster_script_tag(): string {
+		if ( self::is_cache_probe() ) {
+			return ''; // The diagnostic probe must reach the origin, never be redirected.
+		}
 		if ( ! self::is_resilient_mode() ) {
 			return '';
 		}
@@ -137,7 +153,7 @@ final class CacheBypass {
 	/**
 	 * @return string[] List of URL paths (e.g. "/promo/") with at least one running experiment.
 	 */
-	private static function get_running_test_urls(): array {
+	public static function get_running_test_urls(): array {
 		$post_ids = get_posts(
 			[
 				'post_type'      => Experiment::POST_TYPE,
@@ -160,6 +176,54 @@ final class CacheBypass {
 			}
 		}
 		return array_keys( $urls );
+	}
+
+	/**
+	 * A random published page/post URL that is NOT part of any A/B test, used as the
+	 * "classic page" cache baseline (it SHOULD be cached, unlike test pages). Excludes
+	 * experiment variant pages and Watcher-managed imports. Falls back to the site
+	 * home URL when nothing else qualifies.
+	 */
+	public static function random_classic_url(): string {
+		$variant_ids = [];
+		$experiments = get_posts(
+			[
+				'post_type'      => Experiment::POST_TYPE,
+				'post_status'    => 'any',
+				'posts_per_page' => 200,
+				'fields'         => 'ids',
+			]
+		);
+		foreach ( $experiments as $exp_id ) {
+			foreach ( Experiment::get_variants( (int) $exp_id ) as $variant ) {
+				$variant_ids[] = (int) $variant['post_id'];
+			}
+		}
+
+		$candidates = get_posts(
+			[
+				'post_type'      => [ 'page', 'post' ],
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'orderby'        => 'rand',
+				'fields'         => 'ids',
+				'post__not_in'   => $variant_ids,
+				'meta_query'     => [
+					[
+						'key'     => '_abtest_watcher_slug',
+						'compare' => 'NOT EXISTS',
+					],
+				],
+			]
+		);
+
+		if ( ! empty( $candidates ) ) {
+			$url = get_permalink( (int) $candidates[0] );
+			if ( is_string( $url ) && '' !== $url ) {
+				return $url;
+			}
+		}
+		return home_url( '/' );
 	}
 
 	public static function detect_active_plugin(): ?string {

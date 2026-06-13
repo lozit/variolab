@@ -23,9 +23,10 @@ final class Settings {
 		$ga4_cfg     = Ga4::get_settings();
 		$webhooks    = Webhook::get_all();
 		$action_url  = admin_url( 'admin-post.php' );
-		$plugin_cfg      = (array) get_option( 'abtest_settings', [] );
-		$req_consent     = ! empty( $plugin_cfg['require_consent'] );
-		$cache_resilient = ! empty( $plugin_cfg['cache_resilient'] );
+		$plugin_cfg       = (array) get_option( 'abtest_settings', [] );
+		$req_consent      = ! empty( $plugin_cfg['require_consent'] );
+		$cache_resilient  = ! empty( $plugin_cfg['cache_resilient'] );
+		$cache_check_mode = ( isset( $plugin_cfg['cache_check_mode'] ) && 'manual' === $plugin_cfg['cache_check_mode'] ) ? 'manual' : 'smart';
 		?>
 		<div class="wrap vlab-page abtest-wrap">
 			<?php Admin::render_brand_header( __( 'Settings', 'variolab-ab-testing' ) ); ?>
@@ -83,6 +84,22 @@ final class Settings {
 							</label>
 							<p class="description">
 								<?php esc_html_e( 'Off by default. When on, a tiny script redirects a cache-served test page to a one-time unique URL (…?_abtcb=…) that no cache can have stored, forcing WordPress to render it fresh — so the split and conversions work without touching your cache config. Trade-off: a brief redirect on first paint (a small flicker), and test URLs gain a query parameter. Prefer a proper cache exclusion (above) when you can; use this when you can\'t.', 'variolab-ab-testing' ); ?>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Cache check on the list', 'variolab-ab-testing' ); ?></th>
+						<td>
+							<label>
+								<input type="radio" name="cache_check_mode" value="smart" <?php checked( 'smart' === $cache_check_mode ); ?>>
+								<?php esc_html_e( 'Smart — show cache status pills automatically, refreshing in the background when stale', 'variolab-ab-testing' ); ?>
+							</label><br>
+							<label>
+								<input type="radio" name="cache_check_mode" value="manual" <?php checked( 'manual' === $cache_check_mode ); ?>>
+								<?php esc_html_e( 'Manual — only check when I click the “Re-check” button', 'variolab-ab-testing' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'The A/B Tests list shows a per-URL pill telling you whether each test page is correctly out of cache (plus a normal page as a baseline). The check runs anonymously from your browser and never logs an impression. Pick Manual if you run many tests and want to avoid background checks.', 'variolab-ab-testing' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -280,6 +297,8 @@ final class Settings {
 		$plugin_cfg                    = (array) get_option( 'abtest_settings', [] );
 		$plugin_cfg['require_consent'] = ! empty( $_POST['require_consent'] );
 		$plugin_cfg['cache_resilient'] = ! empty( $_POST['cache_resilient'] );
+		$check_mode                     = isset( $_POST['cache_check_mode'] ) ? sanitize_key( wp_unslash( $_POST['cache_check_mode'] ) ) : 'smart';
+		$plugin_cfg['cache_check_mode'] = ( 'manual' === $check_mode ) ? 'manual' : 'smart';
 		update_option( 'abtest_settings', $plugin_cfg );
 
 		// --- GA4 ---

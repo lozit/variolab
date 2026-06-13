@@ -115,6 +115,19 @@ final class ExperimentsList {
 			$grouped        = self::group_by_url( $experiments );
 			$running_by_url = self::running_by_url( $experiments );
 
+			// Cache-diagnostic bar: a baseline pill for a normal (cacheable) page +
+			// a manual "Re-check" trigger. Filled client-side by cache-check.js. Only
+			// shown when at least one experiment is running (something to check).
+			if ( ! empty( $running_by_url ) ) :
+				?>
+				<div class="vlab-cache-bar" data-abtest-cache-bar>
+					<span class="vlab-cache-bar-label"><?php esc_html_e( 'Cache check', 'variolab-ab-testing' ); ?></span>
+					<span class="vlab-cache-pill vlab-cache-pill--pending" data-abtest-cache-baseline title="<?php esc_attr_e( 'Cache state of a normal page on your site (this one SHOULD be cached).', 'variolab-ab-testing' ); ?>"><?php esc_html_e( 'classic page…', 'variolab-ab-testing' ); ?></span>
+					<button type="button" class="vlab-btn vlab-btn--ghost" data-abtest-cache-recheck><?php esc_html_e( 'Re-check', 'variolab-ab-testing' ); ?></button>
+				</div>
+				<?php
+			endif;
+
 			foreach ( $grouped as $url => $exps_in_group ) {
 				self::render_url_block( $url, $exps_in_group, $counts, $running_by_url, $status_filter, $from, $to );
 			}
@@ -406,6 +419,9 @@ final class ExperimentsList {
 			<header class="vlab-url-header">
 				<?php if ( '' !== $url ) : ?>
 					<a href="<?php echo esc_url( $full_url ); ?>" class="vlab-url-name" target="_blank" rel="noopener"><?php echo esc_html( $url ); ?></a>
+					<?php if ( isset( $running_by_url[ $url ] ) ) : ?>
+						<span class="vlab-cache-pill vlab-cache-pill--pending" data-abtest-cache-url="<?php echo esc_attr( $url ); ?>" title="<?php esc_attr_e( 'Checking whether this test page is served from cache…', 'variolab-ab-testing' ); ?>"><?php esc_html_e( 'cache…', 'variolab-ab-testing' ); ?></span>
+					<?php endif; ?>
 				<?php else : ?>
 					<span class="vlab-url-name"><?php esc_html_e( '(no URL set)', 'variolab-ab-testing' ); ?></span>
 				<?php endif; ?>
