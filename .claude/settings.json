@@ -30,5 +30,8 @@
       "Edit(.env*)",
       "Read(.env*)"
     ]
+  },
+  "enabledPlugins": {
+    "groundrules@claude-code-groundrules": true
   }
 }
