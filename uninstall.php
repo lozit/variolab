@@ -7,6 +7,16 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
+// Safeguard: preserve all A/B data by default. Deleting the plugin (e.g. to
+// reinstall, or by accident) must NOT wipe a user's experiments + stats. Only
+// purge when the admin has explicitly opted in via the "Delete all data on
+// uninstall" setting. This is also why upgrading via Delete+reinstall — which
+// some users do — no longer loses data; still, prefer the normal Update action.
+$abtest_settings = (array) get_option( 'abtest_settings', [] );
+if ( empty( $abtest_settings['delete_data_on_uninstall'] ) ) {
+	return;
+}
+
 global $wpdb;
 
 $wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}abtest_events" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared

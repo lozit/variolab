@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.17.1
+Stable tag: 0.18.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -108,6 +108,9 @@ On their first visit to the control page, a cookie `abtest_{experiment_id}` is s
 = Will admins see the test? =
 No. Logged-in users with `edit_posts` capability are bypassed and always see the control. The admin bar shows a marker indicating which experiment is running on the page.
 
+= How do I upgrade without losing my experiments and stats? =
+Always use the **Update** action — Plugins → Installed Plugins → Update, or `wp plugin update variolab-ab-testing` on the command line. Do **not** delete the plugin to reinstall a newer copy: deleting runs the uninstaller. As of v0.18.0 the uninstaller keeps your data by default (so an accidental delete no longer wipes your experiments, stats, page-import records, or settings), but the Update action is still the correct, cleanest way to upgrade. If you ever do want a full clean removal that erases everything, tick **Delete all data on uninstall** in Settings → Data & uninstall *before* deleting the plugin.
+
 = Does it work with WooCommerce / Gutenberg blocks? =
 v1 only swaps the entire page (the variant must be a separate post). Block-level and product-level testing are on the roadmap.
 
@@ -147,6 +150,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.18.0 =
+* **Your data now survives a plugin delete.** Deleting the plugin used to run the uninstaller, which dropped the events table and removed every experiment, page-import record, and setting — so anyone who "deleted + reinstalled" to upgrade lost all their A/B history. The uninstaller now **keeps your data by default**: an accidental delete (or a delete-to-reinstall) no longer wipes anything. Always use the normal **Update** action to upgrade (Plugins → Update, or `wp plugin update`); only delete when you really want the plugin gone. A new **Settings → Data & uninstall** section explains this and offers an opt-in "Delete all data on uninstall" checkbox (off by default) for when you want a clean removal that erases everything.
 
 = 0.17.1 =
 * **Cache check polish.** The "how to fix it" guidance now appears in the Cache check box only when an active cache is actually detected (instead of always living in Settings). And a test page handled by cache-resilient mode now reads **CACHE RESILIENT MODE** (amber) instead of the ambiguous "CACHED (RESILIENT)".

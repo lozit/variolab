@@ -27,6 +27,7 @@ final class Settings {
 		$req_consent      = ! empty( $plugin_cfg['require_consent'] );
 		$cache_resilient  = ! empty( $plugin_cfg['cache_resilient'] );
 		$cache_check_mode = ( isset( $plugin_cfg['cache_check_mode'] ) && 'manual' === $plugin_cfg['cache_check_mode'] ) ? 'manual' : 'smart';
+		$delete_on_uninstall = ! empty( $plugin_cfg['delete_data_on_uninstall'] );
 		?>
 		<div class="wrap vlab-page abtest-wrap">
 			<?php Admin::render_brand_header( __( 'Settings', 'variolab-ab-testing' ) ); ?>
@@ -159,6 +160,25 @@ final class Settings {
 				<p>
 					<button type="button" class="button button-secondary abtest-webhook-add">+ <?php esc_html_e( 'Add webhook', 'variolab-ab-testing' ); ?></button>
 				</p>
+
+				<h2 class="abtest-section-title"><?php esc_html_e( 'Data & uninstall', 'variolab-ab-testing' ); ?></h2>
+				<p class="description">
+					<?php esc_html_e( 'To upgrade the plugin, always use the Update action (Plugins → Update, or wp-cli “wp plugin update”). Do NOT delete the plugin to reinstall it: deleting runs the uninstaller. By default the uninstaller now KEEPS your experiments, stats and settings, so an accidental delete (or a delete-to-reinstall) no longer wipes your data. Tick the box below only if you really want a clean removal that erases everything.', 'variolab-ab-testing' ); ?>
+				</p>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Delete all data on uninstall', 'variolab-ab-testing' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="delete_data_on_uninstall" value="1" <?php checked( $delete_on_uninstall ); ?>>
+								<?php esc_html_e( 'When the plugin is deleted, also drop the events table and remove every experiment, page-import record, and setting', 'variolab-ab-testing' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'Off by default (your data survives a delete/reinstall). Turn on only before permanently removing the plugin.', 'variolab-ab-testing' ); ?>
+							</p>
+						</td>
+					</tr>
+				</table>
 
 				<?php submit_button( __( 'Save settings', 'variolab-ab-testing' ) ); ?>
 			</form>
@@ -299,6 +319,7 @@ final class Settings {
 		$plugin_cfg['cache_resilient'] = ! empty( $_POST['cache_resilient'] );
 		$check_mode                     = isset( $_POST['cache_check_mode'] ) ? sanitize_key( wp_unslash( $_POST['cache_check_mode'] ) ) : 'smart';
 		$plugin_cfg['cache_check_mode'] = ( 'manual' === $check_mode ) ? 'manual' : 'smart';
+		$plugin_cfg['delete_data_on_uninstall'] = ! empty( $_POST['delete_data_on_uninstall'] );
 		update_option( 'abtest_settings', $plugin_cfg );
 
 		// --- GA4 ---
