@@ -41,6 +41,7 @@ final class Experiment {
 
 	public const GOAL_URL      = 'url';
 	public const GOAL_SELECTOR = 'selector';
+	public const GOAL_HUBSPOT  = 'hubspot';
 
 	public static function register(): void {
 		$labels = [

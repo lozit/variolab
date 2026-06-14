@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.19.0
+Stable tag: 0.20.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -150,6 +150,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.20.0 =
+* **New conversion goal: "HubSpot form submitted".** Embedded HubSpot forms render inside a cross-origin iframe, so a CSS-selector "click" goal can never reach the submit button (the browser blocks it). This new goal type listens for HubSpot's own form-submission event (the `hsFormCallback` message HubSpot posts to the page — the same hook Google Analytics / GTM use), verifies it really comes from a HubSpot origin, and records the conversion. Leave the goal value empty to count any HubSpot form submission on the test page, or paste a HubSpot form GUID to count only that specific form. When you preview a running test as a logged-in admin, the browser console logs each HubSpot event so you can confirm the wiring with one test submission.
 
 = 0.19.0 =
 * **Clearer cache diagnostics on the A/B Tests list.** The "Cache check" box now shows what was detected as neutral chips — **Kinsta**, **Cloudflare**, your cache plugin, and a **cache detected** indicator (blue/grey, because a site-level cache is normal and not a problem in itself; only your *test* URLs must bypass it). When a cache is present, a single bold, highlighted line spells out what matters — *make sure every test URL above shows "out of cache"* — followed by short, host-specific guidance (e.g. the Kinsta Cache Bypass steps, and the one-click cache-resilient mode). The separate caching admin notice that used to sit at the top of the screen is gone: everything now lives in one place, right next to the per-URL pills it refers to. Per-test pills still turn red **CACHED** when a test page is wrongly served from cache.

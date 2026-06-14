@@ -705,10 +705,12 @@ final class Admin {
 			}
 		}
 
-		if ( ! in_array( $goal_type, [ Experiment::GOAL_URL, Experiment::GOAL_SELECTOR ], true ) ) {
+		if ( ! in_array( $goal_type, [ Experiment::GOAL_URL, Experiment::GOAL_SELECTOR, Experiment::GOAL_HUBSPOT ], true ) ) {
 			$errors[] = __( 'Invalid goal type.', 'variolab-ab-testing' );
 		}
-		if ( '' === $goal_value ) {
+		// A HubSpot-form goal needs no value (empty = any HubSpot form on the page;
+		// an optional form GUID narrows it). URL/selector goals require a value.
+		if ( '' === $goal_value && Experiment::GOAL_HUBSPOT !== $goal_type ) {
 			$errors[] = __( 'Goal value is required.', 'variolab-ab-testing' );
 		}
 		$valid_status = [ Experiment::STATUS_DRAFT, Experiment::STATUS_RUNNING, Experiment::STATUS_PAUSED, Experiment::STATUS_ENDED ];
@@ -743,10 +745,10 @@ final class Admin {
 		if ( $variant_id > 0 && $control_id > 0 && $control_id === $variant_id ) {
 			$errors[] = __( 'Variant A and Variant B must be different posts.', 'variolab-ab-testing' );
 		}
-		if ( ! in_array( $goal_type, [ Experiment::GOAL_URL, Experiment::GOAL_SELECTOR ], true ) ) {
+		if ( ! in_array( $goal_type, [ Experiment::GOAL_URL, Experiment::GOAL_SELECTOR, Experiment::GOAL_HUBSPOT ], true ) ) {
 			$errors[] = __( 'Invalid goal type.', 'variolab-ab-testing' );
 		}
-		if ( '' === $goal_value ) {
+		if ( '' === $goal_value && Experiment::GOAL_HUBSPOT !== $goal_type ) {
 			$errors[] = __( 'Goal value is required.', 'variolab-ab-testing' );
 		}
 		$valid_status = [ Experiment::STATUS_DRAFT, Experiment::STATUS_RUNNING, Experiment::STATUS_PAUSED, Experiment::STATUS_ENDED ];

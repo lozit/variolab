@@ -152,4 +152,61 @@
 			true
 		);
 	}
+
+	// HubSpot embedded forms render in a cross-origin iframe, so a click goal can't
+	// reach the submit button. HubSpot instead posts a `hsFormCallback` message to
+	// the parent window on submission (the same hook GA/GTM integrations use). We
+	// verify the message comes from a HubSpot origin, optionally match a specific
+	// form GUID (cfg.goalValue), and fire once. Origin can't be spoofed cross-window,
+	// and the conversion endpoint still enforces nonce + prior-impression + dedup.
+	if (cfg.goalType === 'hubspot') {
+		var hsFired = false;
+
+		var isHubspotOrigin = function (origin) {
+			try {
+				var host = new URL(origin).hostname;
+				return /(^|\.)hsforms\.(net|com)$/.test(host) ||
+					/(^|\.)hubspot\.com$/.test(host) ||
+					/(^|\.)hubspotusercontent[^.]*\.(net|com)$/.test(host);
+			} catch (e) {
+				return false;
+			}
+		};
+
+		window.addEventListener('message', function (event) {
+			if (!isHubspotOrigin(event.origin)) {
+				return;
+			}
+			var d = event.data;
+			if (!d || typeof d !== 'object') {
+				return;
+			}
+			// Preview: surface every HubSpot message so the goal can be verified and
+			// the exact event schema confirmed with a single real test submission.
+			if (preview) {
+				try {
+					/* eslint-disable-next-line no-console */
+					console.log('[Variolab] HubSpot message from ' + event.origin + ':', d);
+				} catch (e) {}
+			}
+			if (d.type !== 'hsFormCallback') {
+				return;
+			}
+			// onFormSubmit = submit attempt, onFormSubmitted = success. Accept either
+			// (server-side dedup keeps it to one conversion per visitor); the local
+			// guard avoids a duplicate network call within the page.
+			if (d.eventName !== 'onFormSubmitted' && d.eventName !== 'onFormSubmit') {
+				return;
+			}
+			// Optional: when a form GUID is configured, only count that form.
+			if (cfg.goalValue && d.id && String(d.id) !== String(cfg.goalValue)) {
+				return;
+			}
+			if (hsFired) {
+				return;
+			}
+			hsFired = true;
+			onGoalMatched('HubSpot form');
+		});
+	}
 })();

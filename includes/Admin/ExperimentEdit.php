@@ -255,15 +255,20 @@ final class ExperimentEdit {
 								<label>
 									<input type="radio" name="goal_type" value="<?php echo esc_attr( Experiment::GOAL_SELECTOR ); ?>" <?php checked( $goal['type'], Experiment::GOAL_SELECTOR ); ?>>
 									<?php esc_html_e( 'CSS selector clicked (e.g. .cta-buy)', 'variolab-ab-testing' ); ?>
+								</label><br>
+								<label>
+									<input type="radio" name="goal_type" value="<?php echo esc_attr( Experiment::GOAL_HUBSPOT ); ?>" <?php checked( $goal['type'], Experiment::GOAL_HUBSPOT ); ?>>
+									<?php esc_html_e( 'HubSpot form submitted', 'variolab-ab-testing' ); ?>
 								</label>
+								<p class="description"><?php esc_html_e( 'Use “HubSpot form submitted” for embedded HubSpot forms: they render inside an iframe, so a CSS-selector click goal cannot reach the button. The tracker listens for HubSpot’s submission event instead.', 'variolab-ab-testing' ); ?></p>
 							</fieldset>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="abtest-goal-value"><?php esc_html_e( 'Goal value', 'variolab-ab-testing' ); ?></label></th>
 						<td>
-							<input type="text" id="abtest-goal-value" name="goal_value" class="regular-text" value="<?php echo esc_attr( $goal['value'] ); ?>" required>
-							<p class="description"><?php esc_html_e( 'URL path or CSS selector matching the conversion event.', 'variolab-ab-testing' ); ?></p>
+							<input type="text" id="abtest-goal-value" name="goal_value" class="regular-text" value="<?php echo esc_attr( $goal['value'] ); ?>">
+							<p class="description"><?php esc_html_e( 'URL goal: a URL path (e.g. /thank-you). Selector goal: a CSS selector (e.g. .cta-buy). HubSpot form goal: leave empty to count any HubSpot form submission on the page, or paste a HubSpot form GUID to count only that form.', 'variolab-ab-testing' ); ?></p>
 						</td>
 					</tr>
 					<tr>
