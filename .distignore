@@ -20,13 +20,17 @@
 /dist
 *.zip
 
-# Tests, tasks, docs, internal
+# Tests, docs, internal (groundrules project docs are dev-only, never shipped)
 /tests
-/tasks
 /docs
+/intake
 /SECURITY.md
 /CLAUDE.md
 /tools
+/PLAN.md
+/CHANGELOG.md
+/RELEASE.md
+/.groundrules.json
 
 # Local dev env & caches
 /.wp-env.json

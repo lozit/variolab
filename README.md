@@ -423,7 +423,7 @@ npx wp-env run cli wp plugin activate AB-testing-wordpress
 ```
 
 ### Common gotchas
-A growing list of WordPress traps documented in [`tasks/lessons.md`](./tasks/lessons.md):
+A growing list of WordPress traps documented in [`docs/LEARNINGS.md`](./docs/LEARNINGS.md):
 - `register_post_type` on `init`, never `plugins_loaded` — `$wp_rewrite` not built before then.
 - WP filters `private` post status on the front. Combo `pre_get_posts` + `posts_results` to bypass.
 - `wp_insert_post`/`wp_update_post` strip one level of backslashes via internal `wp_unslash`. Always `wp_slash()` content from non-`$_POST` sources.
@@ -434,7 +434,7 @@ A growing list of WordPress traps documented in [`tasks/lessons.md`](./tasks/les
 
 ## Roadmap
 
-Most-likely next iterations (see [`tasks/todo.md`](./tasks/todo.md) for the full backlog and what's already shipped):
+Most-likely next iterations (see [`docs/ROADMAP.md`](./docs/ROADMAP.md) for milestones and [`PLAN.md`](./PLAN.md) for the full backlog and what's already shipped):
 
 - Block-level testing (target a single Gutenberg block instead of a whole page)
 - WooCommerce variants (test prices, product descriptions)

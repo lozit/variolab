@@ -6,7 +6,7 @@ Run a complete security audit **specific to this plugin**. Trigger before a rele
 
 The audit produces:
 - a **persisted report** in `docs/security/audit-YYYY-MM-DD-vX.Y.Z.md` (archive) + `docs/security/latest.md` (overwrite),
-- an **automatic update** of `tasks/todo.md` (section "Security — audit backlog"),
+- an **automatic update** of `PLAN.md` (section "Security — audit backlog"),
 - a **chat summary** with score 1–10, Go/No-Go verdict, and top 3 priorities.
 
 ---
@@ -188,9 +188,9 @@ Create the `docs/security/` directory if it doesn't exist. The directory is excl
 
 ---
 
-## Step 6 — sync `tasks/todo.md`
+## Step 6 — sync `PLAN.md`
 
-Locate (or create if missing) the `### Security — audit backlog (auto-managed)` section in `tasks/todo.md`.
+Locate (or create if missing) the `### Security — audit backlog (auto-managed)` section in `PLAN.md`.
 
 For each **Critical / High / Medium** finding in the new report:
 - If it doesn't already exist in the section (match by `file:line` + severity) → append in the format:
@@ -201,7 +201,7 @@ For each **Critical / High / Medium** finding in the new report:
 
 For each **unticked** item already present that no longer appears in the new report (= fixed between 2 audits) → tick `[x]` and append `(fixed YYYY-MM-DD)`.
 
-**Low** findings stay in the report but **don't pollute** `tasks/todo.md`.
+**Low** findings stay in the report but **don't pollute** `PLAN.md`.
 
 ---
 
@@ -212,7 +212,7 @@ Print:
 - Counter by severity.
 - Top 3 priorities with their file:line.
 - Link to the persisted report (`docs/security/latest.md`).
-- Diff of `tasks/todo.md` (how many items added, how many ticked as fixed).
+- Diff of `PLAN.md` (how many items added, how many ticked as fixed).
 
 ---
 

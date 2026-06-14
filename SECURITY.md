@@ -40,7 +40,7 @@ Security is verified at three points :
 | Before every release tag | Full manual review using the `/security-audit` slash command — situated checklist (9 plugin-specific surfaces) + OWASP grid (SQLi / XSS / CSRF / RCE / Access Control / Input Sanitization / File Uploads / Info Disclosure) | Reports persisted under [`docs/security/`](./docs/security/) |
 | Continuously | GitHub Dependabot alerts (when enabled in repo settings) | GitHub Security tab |
 
-The `/security-audit` command source lives in [`.claude/commands/security-audit.md`](./.claude/commands/security-audit.md). It auto-saves each run's report to `docs/security/audit-YYYY-MM-DD-vX.Y.Z.md` and updates the security backlog in [`tasks/todo.md`](./tasks/todo.md).
+The `/security-audit` command source lives in [`.claude/commands/security-audit.md`](./.claude/commands/security-audit.md). It auto-saves each run's report to `docs/security/audit-YYYY-MM-DD-vX.Y.Z.md` and updates the security backlog in [`PLAN.md`](./PLAN.md).
 
 ## Latest Audit
 

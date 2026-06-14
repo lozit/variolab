@@ -146,8 +146,12 @@ jobs:
             --exclude='node_modules' \
             --exclude='vendor' \
             --exclude='tests' \
-            --exclude='tasks' \
             --exclude='docs' \
+            --exclude='intake' \
+            --exclude='PLAN.md' \
+            --exclude='CHANGELOG.md' \
+            --exclude='RELEASE.md' \
+            --exclude='.groundrules.json' \
             --exclude='SECURITY.md' \
             --exclude='build' \
             --exclude='dist' \

@@ -42,13 +42,18 @@ tools/                     # one-off helper scripts (excluded from .zip release)
 ## Workflow
 1. **Plan mode by default** for any non-trivial task (3+ steps or architectural decision).
 2. Subagents for parallel exploration, keep the main context clean.
-3. After a user correction → update `tasks/lessons.md`.
+3. After a user correction → update `docs/LEARNINGS.md`.
 4. Mark a task complete ONLY after proof it works (green tests + demo).
 5. Simplicity first — no abstraction "just in case". Three similar lines beat a bad abstraction.
 
 ## Tracking
-- `tasks/todo.md` — current and shipped tasks
-- `tasks/lessons.md` — lessons learned from user corrections
+- `PLAN.md` — active todo + shipped history (was `tasks/todo.md`)
+- `docs/LEARNINGS.md` — lessons learned from user corrections (was `tasks/lessons.md`)
+
+### Project docs (groundrules)
+- Vision: `docs/VISION.md` · Decisions: `docs/decisions/` · Learnings: `docs/LEARNINGS.md` · Active plan: `PLAN.md` · Roadmap: `docs/ROADMAP.md`
+- Architecture: `docs/ARCHITECTURE.md` · Data model: `docs/DATA_MODEL.md` · Glossary: `docs/GLOSSARY.md` · Process: `docs/PROCESS.md` · Release runbook: `RELEASE.md`
+- Capture at checkpoints: decided → an ADR (`docs/decisions/`), learned/blocked → `docs/LEARNINGS.md`, agent drift → `docs/AGENT-EVALS.md`. The repo is the only memory.
 
 ## Language policy
 **Every file committed to this repo MUST be in English** : code, comments, docblocks, UI strings (the source string passed to `__()`/`_e()`), `.md` docs, `readme.txt`, audit reports, slash commands, commit messages, tag annotations. The only exception is the live chat conversation between Claude and the user. French translations of UI strings can later live as `.po` files under `languages/`.

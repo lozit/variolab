@@ -1,0 +1,76 @@
+{
+  "groundrulesVersion": "1.5.0",
+  "adopted": true,
+  "adoptedAt": "2026-06-14",
+  "bootstrappedWithVersion": null,
+  "migrations": [],
+  "answers": {
+    "projectName": "Variolab – A/B Testing",
+    "adoptionStrategy": "consolidate",
+    "visionSource": "synthesize from README + readme.txt + CLAUDE.md",
+    "planning": "consolidate — create canonical files, copy existing content in",
+    "optionalDocs": [
+      "docs/ARCHITECTURE.md",
+      "docs/DATA_MODEL.md",
+      "docs/GLOSSARY.md",
+      "docs/DESIGN_SYSTEM.md",
+      "RELEASE.md",
+      "CHANGELOG.md",
+      "docs/I18N.md",
+      "docs/ROADMAP.md",
+      "docs/PROCESS.md",
+      "docs/AGENT-EVALS.md",
+      "docs/ADOPTION-LOG.md"
+    ]
+  },
+  "intent": {
+    "source": "file",
+    "files": ["README.md", "readme.txt", "CLAUDE.md"],
+    "note": "No separate upstream brief; intent authored in-repo. Synthesized into docs/VISION.md; raw pointer in intake/INTENT.md."
+  },
+  "appliedPractices": [],
+  "policies": {
+    "noAiAttribution": false
+  },
+  "generatedFiles": [
+    "PLAN.md",
+    "docs/LEARNINGS.md",
+    "docs/VISION.md",
+    "intake/INTENT.md",
+    "intake/README.md",
+    "docs/media/README.md",
+    "docs/decisions/0000-template.md",
+    "docs/decisions/README.md",
+    "docs/decisions/0001-internal-db-tracking-no-third-party.md",
+    "docs/decisions/0002-stable-internal-names-across-renames.md",
+    "docs/decisions/0003-universal-no-store-cache-strategy.md",
+    "docs/decisions/0004-preserve-data-on-uninstall.md",
+    "docs/decisions/0005-trademark-safe-naming-variolab.md",
+    "docs/ARCHITECTURE.md",
+    "docs/DATA_MODEL.md",
+    "docs/GLOSSARY.md",
+    "docs/DESIGN_SYSTEM.md",
+    "docs/I18N.md",
+    "docs/PROCESS.md",
+    "docs/ROADMAP.md",
+    "docs/AGENT-EVALS.md",
+    "CHANGELOG.md",
+    "RELEASE.md",
+    "docs/ADOPTION-LOG.md"
+  ],
+  "adoptedFiles": {
+    "README.md": "README",
+    "readme.txt": "wp.org readme (product description + canonical changelog)",
+    "SECURITY.md": "security policy",
+    "docs/security/": "security audit archive (managed by /security-audit)",
+    "CLAUDE.md": "instructions (project, hand-authored; groundrules docs-pointer appended, Tracking refs repointed)"
+  },
+  "adoptionMode": "consolidate",
+  "migratedFiles": {
+    "tasks/todo.md": "PLAN.md",
+    "tasks/lessons.md": "docs/LEARNINGS.md"
+  },
+  "skippedFiles": {
+    "docs/SECURITY.md": "root SECURITY.md already exists — not duplicated"
+  }
+}
