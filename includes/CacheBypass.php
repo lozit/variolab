@@ -46,8 +46,10 @@ final class CacheBypass {
 		// inject it in their own template; this covers themed pages.
 		add_action( 'wp_head', [ self::class, 'print_cache_buster' ], 0 );
 
-		// Admin notice (one-time per page load) when a cache plugin is detected.
-		add_action( 'admin_notices', [ self::class, 'maybe_render_notice' ] );
+		// No top-of-page admin notice: the caching diagnostic + host-specific guidance
+		// now live in the "Cache check" box on the A/B Tests list (see ExperimentsList),
+		// right next to the per-URL pills they refer to. Detection helpers below
+		// (detect_active_plugin / is_kinsta / is_cloudflare) feed that box.
 	}
 
 	/**
@@ -256,94 +258,5 @@ final class CacheBypass {
 			return true;
 		}
 		return false;
-	}
-
-	public static function maybe_render_notice(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		if ( ! self::has_running_experiment() ) {
-			return;
-		}
-
-		$plugin     = self::detect_active_plugin();
-		$kinsta     = self::is_kinsta();
-		$cloudflare = self::is_cloudflare();
-
-		if ( null === $plugin && ! $kinsta && ! $cloudflare ) {
-			return;
-		}
-
-		$messages = [];
-
-		if ( null !== $plugin ) {
-			if ( in_array( $plugin, [ 'WP Rocket', 'LiteSpeed Cache' ], true ) ) {
-				$messages[] = sprintf(
-					/* translators: %s: plugin name */
-					esc_html__( '%s detected — running experiments are auto-excluded from cache.', 'variolab-ab-testing' ),
-					esc_html( $plugin )
-				);
-			} else {
-				$messages[] = sprintf(
-					/* translators: %s: plugin name */
-					esc_html__( '%s detected. No automatic exclusion API for this plugin — manually add your test URLs to its cache exclusion list, otherwise all visitors will see the same variant.', 'variolab-ab-testing' ),
-					esc_html( $plugin )
-				);
-			}
-		}
-
-		if ( $kinsta ) {
-			$messages[] = sprintf(
-				/* translators: %s: link to Kinsta cache bypass docs */
-				esc_html__( 'Kinsta hosting detected. We send no-store headers on every test page so the edge cache should bypass them. For 100%% safety, also add your test URLs to %s.', 'variolab-ab-testing' ),
-				'<a href="https://kinsta.com/help/cache-control-bypass/" target="_blank" rel="noopener">MyKinsta → Tools → Cache → Cache Bypass</a>'
-			);
-		}
-
-		if ( $cloudflare ) {
-			$messages[] = esc_html__( 'Cloudflare detected. By default it respects our no-store headers, but server-level caches that sit behind it (e.g. Cloudways/Varnish, SiteGround, generic nginx page caches) often cache the page anyway — and a cached test page breaks the 50/50 split AND silently drops conversions (WordPress never runs, so no impression is logged). Add your test URLs to your host/CDN cache-exclusion list, or enable the cache-resilient mode below.', 'variolab-ab-testing' );
-		}
-
-		// Point to the no-config escape hatch unless it's already on.
-		if ( ! self::is_resilient_mode() ) {
-			$messages[] = sprintf(
-				/* translators: %s: link to the plugin Settings page */
-				esc_html__( 'Can\'t edit your cache rules? Turn on %s — it forces a fresh render of test pages via a one-time redirect (small trade-off: a brief redirect on first paint).', 'variolab-ab-testing' ),
-				'<a href="' . esc_url( admin_url( 'admin.php?page=' . \Abtest\Admin\Admin::menu_slug() . '&action=settings' ) ) . '">' . esc_html__( 'Settings → Cache-resilient mode', 'variolab-ab-testing' ) . '</a>'
-			);
-		}
-
-		$allowed_tags = [
-			'br'     => [],
-			'strong' => [],
-			'a'      => [
-				'href'   => true,
-				'target' => true,
-				'rel'    => true,
-			],
-		];
-		printf(
-			'<div class="notice notice-info"><p><strong>%s</strong> %s</p></div>',
-			esc_html__( 'A/B Testing — caching:', 'variolab-ab-testing' ),
-			wp_kses( implode( '<br>', $messages ), $allowed_tags )
-		);
-	}
-
-	private static function has_running_experiment(): bool {
-		$running = get_posts(
-			[
-				'post_type'      => Experiment::POST_TYPE,
-				'post_status'    => 'publish',
-				'posts_per_page' => 1,
-				'fields'         => 'ids',
-				'meta_query'     => [
-					[
-						'key'   => Experiment::META_STATUS,
-						'value' => Experiment::STATUS_RUNNING,
-					],
-				],
-			]
-		);
-		return ! empty( $running );
 	}
 }

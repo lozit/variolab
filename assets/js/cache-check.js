@@ -49,8 +49,10 @@
 			cached:   [ 'vlab-cache-pill--bad', i18n.cached || 'CACHED', i18n.cachedTitle || '' ],
 			handled:  [ 'vlab-cache-pill--warn', i18n.handled || 'cached (resilient)', i18n.handledTitle || '' ],
 			error:    [ 'vlab-cache-pill--error', i18n.error || 'check failed', '' ],
-			baseOk:   [ 'vlab-cache-pill--ok', i18n.baselineCached || 'cache active', '' ],
-			baseNone: [ 'vlab-cache-pill--warn', i18n.baselineNoCache || 'no page cache detected', '' ]
+			// Baseline = a normal page. A site-level cache is NOT a problem in itself
+			// (only test pages must bypass it), so these stay neutral (blue / grey).
+			baseOk:   [ 'vlab-cache-pill--info', i18n.baselineCached || 'cache detected', '' ],
+			baseNone: [ 'vlab-cache-pill--muted', i18n.baselineNoCache || 'no cache detected', '' ]
 		};
 		var spec = map[ state ] || map.pending;
 		el.className = 'vlab-cache-pill ' + spec[0];
@@ -114,7 +116,7 @@
 		if ( ! el ) {
 			return;
 		}
-		var detected = ( baseline === 'baseOk' );
+		var detected = !! cfg.cacheDetectedServerSide || ( baseline === 'baseOk' );
 		if ( ! detected ) {
 			for ( var key in results ) {
 				if ( results[ key ] === 'cached' || results[ key ] === 'handled' ) {

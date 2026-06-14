@@ -13,6 +13,4 @@ This file exists for the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
-- **v0.18.0 — uninstall data safeguard + upgrade warning** (built + committed locally `52ce25a`, awaiting release). Uninstaller preserves all A/B data by default; opt-in "Delete all data on uninstall" in Settings → Data & uninstall; readme FAQ "Update, don't Delete". See [`PLAN.md`](./PLAN.md) and ADR [0004](./docs/decisions/0004-preserve-data-on-uninstall.md).
-
-> On release, this entry moves into `readme.txt` `== Changelog ==` as `= 0.18.0 =` (already drafted there).
+- _Nothing unreleased._ Latest shipped: **0.19.0** (cache-diagnostics rework) which also bundles **0.18.0** (uninstall data safeguard). Full notes in [`readme.txt`](./readme.txt) `== Changelog ==`; engineering context in [`PLAN.md`](./PLAN.md); the uninstall decision in ADR [0004](./docs/decisions/0004-preserve-data-on-uninstall.md).

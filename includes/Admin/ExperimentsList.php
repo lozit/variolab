@@ -115,26 +115,75 @@ final class ExperimentsList {
 			$grouped        = self::group_by_url( $experiments );
 			$running_by_url = self::running_by_url( $experiments );
 
-			// Cache-diagnostic bar: a baseline pill for a normal (cacheable) page +
-			// a manual "Re-check" trigger. Filled client-side by cache-check.js. Only
-			// shown when at least one experiment is running (something to check).
+			// Cache-diagnostic bar: detection chips (what cache tech we found) + a
+			// "cache detected" indicator + concise host-specific guidance + a manual
+			// "Re-check" trigger. The per-URL test pills are filled client-side by
+			// cache-check.js. Only shown when at least one experiment is running.
+			// This box also replaces the old top-of-page caching admin notice.
 			if ( ! empty( $running_by_url ) ) :
+				$abtest_cache_plugin = \Abtest\CacheBypass::detect_active_plugin();
+				$abtest_is_kinsta    = \Abtest\CacheBypass::is_kinsta();
+				$abtest_is_cf        = \Abtest\CacheBypass::is_cloudflare();
+				$abtest_resilient    = \Abtest\CacheBypass::is_resilient_mode();
+				$abtest_cache_seen   = $abtest_is_kinsta || $abtest_is_cf || ( null !== $abtest_cache_plugin );
+				$abtest_settings_url = admin_url( 'admin.php?page=' . Admin::menu_slug() . '&action=settings' );
 				?>
 				<div class="vlab-cache-bar" data-abtest-cache-bar>
 					<div class="vlab-cache-bar-row">
 						<span class="vlab-cache-bar-label"><?php esc_html_e( 'Cache check', 'variolab-ab-testing' ); ?></span>
-						<span class="vlab-cache-pill vlab-cache-pill--pending" data-abtest-cache-baseline title="<?php esc_attr_e( 'Cache state of a normal page on your site (this one SHOULD be cached).', 'variolab-ab-testing' ); ?>"><?php esc_html_e( 'classic page…', 'variolab-ab-testing' ); ?></span>
+						<?php if ( $abtest_is_kinsta ) : ?>
+							<span class="vlab-cache-pill vlab-cache-pill--info">Kinsta</span>
+						<?php endif; ?>
+						<?php if ( $abtest_is_cf ) : ?>
+							<span class="vlab-cache-pill vlab-cache-pill--info">Cloudflare</span>
+						<?php endif; ?>
+						<?php if ( null !== $abtest_cache_plugin ) : ?>
+							<span class="vlab-cache-pill vlab-cache-pill--info"><?php echo esc_html( $abtest_cache_plugin ); ?></span>
+						<?php endif; ?>
+						<?php if ( $abtest_cache_seen ) : ?>
+							<span class="vlab-cache-pill vlab-cache-pill--info" title="<?php esc_attr_e( 'A cache layer is present on your site. That is fine in general — only your test URLs must bypass it.', 'variolab-ab-testing' ); ?>"><?php esc_html_e( 'cache detected', 'variolab-ab-testing' ); ?></span>
+						<?php else : ?>
+							<span class="vlab-cache-pill vlab-cache-pill--muted vlab-cache-pill--pending" data-abtest-cache-baseline title="<?php esc_attr_e( 'Cache state of a normal page on your site. A site-level cache is fine — only test URLs must bypass it.', 'variolab-ab-testing' ); ?>"><?php esc_html_e( 'classic page…', 'variolab-ab-testing' ); ?></span>
+						<?php endif; ?>
 						<button type="button" class="vlab-btn vlab-btn--ghost" data-abtest-cache-recheck><?php esc_html_e( 'Re-check', 'variolab-ab-testing' ); ?></button>
 					</div>
-					<p class="vlab-cache-note" data-abtest-cache-note hidden>
-						<?php
-						printf(
-							/* translators: %s: link to the plugin Settings → Caching & CDN page */
-							esc_html__( 'A cache is active on your site — make sure every test URL above shows “out of cache”. A cached test page freezes the variant for every visitor and drops conversions. See %s for per-host exclusion steps, or enable cache-resilient mode.', 'variolab-ab-testing' ),
-							'<a href="' . esc_url( admin_url( 'admin.php?page=' . Admin::menu_slug() . '&action=settings' ) ) . '">' . esc_html__( 'Settings → Caching & CDN', 'variolab-ab-testing' ) . '</a>'
-						);
-						?>
-					</p>
+					<div class="vlab-cache-note" data-abtest-cache-note <?php echo $abtest_cache_seen ? '' : 'hidden'; ?>>
+						<p class="vlab-cache-callout"><?php esc_html_e( 'A cache is active on your site — make sure every test URL above shows “out of cache”.', 'variolab-ab-testing' ); ?></p>
+						<p class="vlab-cache-hint"><?php esc_html_e( 'A cached test page freezes the variant for every visitor and silently drops conversions.', 'variolab-ab-testing' ); ?></p>
+						<?php if ( $abtest_is_kinsta ) : ?>
+							<p class="vlab-cache-hint">
+								<?php
+								printf(
+									/* translators: %s: link to the Kinsta cache-bypass docs */
+									esc_html__( 'Kinsta: add your test URLs to %s, then purge the cache.', 'variolab-ab-testing' ),
+									'<a href="https://kinsta.com/help/cache-control-bypass/" target="_blank" rel="noopener">' . esc_html__( 'MyKinsta → Tools → Cache → Cache Bypass', 'variolab-ab-testing' ) . '</a>'
+								);
+								?>
+							</p>
+						<?php elseif ( $abtest_is_cf || null !== $abtest_cache_plugin ) : ?>
+							<p class="vlab-cache-hint"><?php esc_html_e( 'Add your test URLs to your host/CDN cache-exclusion list.', 'variolab-ab-testing' ); ?></p>
+						<?php endif; ?>
+						<?php if ( ! $abtest_resilient ) : ?>
+							<p class="vlab-cache-hint">
+								<?php
+								printf(
+									/* translators: %s: link to Settings → Caching & CDN */
+									esc_html__( 'Can’t edit your cache rules? Turn on %s.', 'variolab-ab-testing' ),
+									'<a href="' . esc_url( $abtest_settings_url ) . '">' . esc_html__( 'cache-resilient mode', 'variolab-ab-testing' ) . '</a>'
+								);
+								?>
+							</p>
+						<?php endif; ?>
+						<p class="vlab-cache-hint vlab-cache-hint--muted">
+							<?php
+							printf(
+								/* translators: %s: link to Settings → Caching & CDN */
+								esc_html__( 'More help: %s.', 'variolab-ab-testing' ),
+								'<a href="' . esc_url( $abtest_settings_url ) . '">' . esc_html__( 'Settings → Caching & CDN', 'variolab-ab-testing' ) . '</a>'
+							);
+							?>
+						</p>
+					</div>
 				</div>
 				<?php
 			endif;

@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.18.0
+Stable tag: 0.19.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -150,6 +150,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.19.0 =
+* **Clearer cache diagnostics on the A/B Tests list.** The "Cache check" box now shows what was detected as neutral chips — **Kinsta**, **Cloudflare**, your cache plugin, and a **cache detected** indicator (blue/grey, because a site-level cache is normal and not a problem in itself; only your *test* URLs must bypass it). When a cache is present, a single bold, highlighted line spells out what matters — *make sure every test URL above shows "out of cache"* — followed by short, host-specific guidance (e.g. the Kinsta Cache Bypass steps, and the one-click cache-resilient mode). The separate caching admin notice that used to sit at the top of the screen is gone: everything now lives in one place, right next to the per-URL pills it refers to. Per-test pills still turn red **CACHED** when a test page is wrongly served from cache.
 
 = 0.18.0 =
 * **Your data now survives a plugin delete.** Deleting the plugin used to run the uninstaller, which dropped the events table and removed every experiment, page-import record, and setting — so anyone who "deleted + reinstalled" to upgrade lost all their A/B history. The uninstaller now **keeps your data by default**: an accidental delete (or a delete-to-reinstall) no longer wipes anything. Always use the normal **Update** action to upgrade (Plugins → Update, or `wp plugin update`); only delete when you really want the plugin gone. A new **Settings → Data & uninstall** section explains this and offers an opt-in "Delete all data on uninstall" checkbox (off by default) for when you want a clean removal that erases everything.

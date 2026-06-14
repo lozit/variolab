@@ -130,25 +130,29 @@ final class Admin {
 					ABTEST_VERSION,
 					true
 				);
-				$abtest_cfg = (array) get_option( 'abtest_settings', [] );
+				$abtest_cfg        = (array) get_option( 'abtest_settings', [] );
+				$abtest_cache_seen = \Abtest\CacheBypass::is_kinsta()
+					|| \Abtest\CacheBypass::is_cloudflare()
+					|| ( null !== \Abtest\CacheBypass::detect_active_plugin() );
 				wp_localize_script(
 					'vlab-cache-check',
 					'AbtestCacheCheck',
 					[
-						'urls'          => array_map( static fn( $u ) => home_url( $u ), $abtest_running_urls ),
-						'classicUrl'    => \Abtest\CacheBypass::random_classic_url(),
-						'mode'          => ( isset( $abtest_cfg['cache_check_mode'] ) && 'manual' === $abtest_cfg['cache_check_mode'] ) ? 'manual' : 'smart',
-						'resilientMode' => ! empty( $abtest_cfg['cache_resilient'] ),
-						'headerName'    => 'X-Abtest-Cache-Check',
-						'staleMinutes'  => 10,
-						'i18n'          => [
+						'urls'                    => array_map( static fn( $u ) => home_url( $u ), $abtest_running_urls ),
+						'classicUrl'              => \Abtest\CacheBypass::random_classic_url(),
+						'mode'                    => ( isset( $abtest_cfg['cache_check_mode'] ) && 'manual' === $abtest_cfg['cache_check_mode'] ) ? 'manual' : 'smart',
+						'resilientMode'           => ! empty( $abtest_cfg['cache_resilient'] ),
+						'cacheDetectedServerSide' => $abtest_cache_seen,
+						'headerName'              => 'X-Abtest-Cache-Check',
+						'staleMinutes'            => 10,
+						'i18n'                    => [
 							'ok'        => __( 'out of cache', 'variolab-ab-testing' ),
 							'cached'    => __( 'CACHED', 'variolab-ab-testing' ),
 							'handled'   => __( 'cache resilient mode', 'variolab-ab-testing' ),
 							'checking'  => __( 'checking…', 'variolab-ab-testing' ),
 							'error'     => __( 'check failed', 'variolab-ab-testing' ),
-							'baselineCached'   => __( 'cache active', 'variolab-ab-testing' ),
-							'baselineNoCache'  => __( 'no page cache detected', 'variolab-ab-testing' ),
+							'baselineCached'   => __( 'cache detected', 'variolab-ab-testing' ),
+							'baselineNoCache'  => __( 'no cache detected', 'variolab-ab-testing' ),
 							'okTitle'          => __( 'This test page bypasses the cache — good.', 'variolab-ab-testing' ),
 							'cachedTitle'      => __( 'This test page is served from cache: the split is frozen and conversions are dropped. Exclude this URL from your cache, or enable cache-resilient mode in Settings.', 'variolab-ab-testing' ),
 							'handledTitle'     => __( 'Served from cache, but cache-resilient mode redirects visitors to a fresh render. A proper cache exclusion is still preferred for performance.', 'variolab-ab-testing' ),

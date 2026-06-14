@@ -783,15 +783,36 @@
 }
 
 .vlab-cache-note {
-	margin: 8px 0 2px;
+	margin: 10px 0 2px;
 	font-size: 12px;
 	line-height: 1.5;
-	color: var(--vlab-status-paused-fg, #856404);
+	color: var(--vlab-text, #0C1420);
 }
 
 .vlab-cache-note a {
 	color: inherit;
 	text-decoration: underline;
+}
+
+/* The one sentence that must not be missed: a cache is active, test URLs must bypass. */
+.vlab-cache-callout {
+	margin: 0 0 8px;
+	padding: 8px 12px;
+	background: var(--vlab-brand-orange-soft, #FCE6D2);
+	border-left: 4px solid var(--vlab-brand-orange, #F87018);
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--vlab-text, #0C1420);
+}
+
+.vlab-cache-hint {
+	margin: 4px 0;
+	color: var(--vlab-text, #0C1420);
+}
+
+.vlab-cache-hint--muted {
+	color: var(--vlab-text-muted, #6C7280);
 }
 
 .vlab-cache-pill {
@@ -832,6 +853,18 @@
 .vlab-cache-pill--warn {
 	background: var(--vlab-status-paused-bg);
 	color: var(--vlab-status-paused-fg);
+}
+
+/* Neutral chips: cache tech detected + baseline state. Presence of a site cache
+   is informational (blue), absence is just muted (grey) — neither is an alarm. */
+.vlab-cache-pill--info {
+	background: var(--vlab-status-ended-bg);
+	color: var(--vlab-status-ended-fg);
+}
+
+.vlab-cache-pill--muted {
+	background: var(--vlab-status-draft-bg);
+	color: var(--vlab-status-draft-fg);
 }
 
 .vlab-cache-pill--bad {
