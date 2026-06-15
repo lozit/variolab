@@ -9,6 +9,13 @@
 
 ---
 
+## 2026-06-15 — Shipped a third-party integration on the most-documented hook without confirming the live mechanism
+
+**Observed**: v0.20.0's HubSpot goal listened for the legacy `hsFormCallback` postMessage. A pre-release probe even captured **0** window messages from the embed (a red flag) — but I shipped anyway with a debug log, betting on the legacy hook. It didn't fire; the embed was HubSpot Forms V4 (DOM CustomEvent `hs-form-event:on-submission:success`), needing a v0.20.1 follow-up.
+**Trigger**: integrating a third-party embed where the "standard" hook is well-documented but the specific product version differs.
+**Guard added**: `docs/LEARNINGS.md` rule "verify how a third-party embed actually signals before building a listener". Treat a pre-release probe that contradicts the assumption (0 messages) as **blocking**, not a footnote — confirm the real mechanism (vendor global / DOM events) before shipping.
+**Status**: active.
+
 ## 2026-06-12 — Ships fixes from code-reasoning before reproducing the symptom
 
 **Observed**: on a "conversion doesn't work / click twice" report, the agent reasoned from the code and shipped two patch releases (v0.15.9, v0.15.10) before opening a real browser — the actual cause was a cache/optimiser plugin (WP Rocket delay-JS). The wrong root cause was "fixed" first.

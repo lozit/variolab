@@ -7,6 +7,15 @@ One entry = one **actionable rule**, not a journal note. Each entry has a rule-s
 
 ---
 
+## Verify how a third-party embed actually signals before building a listener — HubSpot Forms V4 uses a DOM event, not postMessage
+
+**Why**: We added a "HubSpot form submitted" goal (v0.20.0) listening for HubSpot's legacy `hsFormCallback` window `postMessage` — the hook every GA/GTM guide cites. It silently never fired: the user's embed is **HubSpot Forms V4**, which broadcasts **no** window message (it uses a private MessageChannel internally) and instead dispatches a DOM CustomEvent on `window`. Cost a follow-up release (v0.20.1).
+
+**When to apply**: before shipping any listener for a third-party embed (forms, chat, payment, video), confirm its *actual* signaling mechanism on a live instance — capture `window` messages AND inspect for the vendor global / DOM events. Don't trust the most-documented (often legacy) hook; embeds change. For HubSpot specifically:
+- **Forms V4 (current)**: `window.addEventListener('hs-form-event:on-submission:success', e => { const form = HubSpotFormsV4.getFormFromEvent(e); /* form.getFormId() */ })`. Global is `window.HubSpotFormsV4` (also seen as `HubspotFormsV4`); the embed container is `.hs-form-frame[data-form-id]`.
+- **Legacy v2 embed**: `window` `message` with `data.type === 'hsFormCallback'` + `eventName` `onFormSubmitted`.
+- Support both. And note: a HubSpot form lives in a **cross-origin iframe**, so a CSS-selector/click goal can never reach its button (`querySelectorAll` can't see in, clicks don't bubble). (2026-06-15)
+
 ## Diagnose front-end "it doesn't work" in a real browser FIRST; batch releases — don't tag a wp.org version per change
 
 **Why**: A user reported a conversion goal "doesn't work / had to click twice" on an imported-HTML landing. I reasoned from the code and shipped a sequence of patch releases (v0.15.9 tracker-on-blank-canvas, v0.15.10 cookie-independence) before opening a real browser — where the actual cause was WP Rocket "Delay JavaScript Execution" rewriting the tracker's `<script type>` to `rocketlazyloadscript`, deferring it until the first interaction. ~10 tag+deploy cycles burned in an hour, and v0.15.10 fixed the wrong root cause.
