@@ -4,7 +4,7 @@ Tags: ab testing, split testing, landing page, conversion, html import
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.20.0
+Stable tag: 0.20.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -150,6 +150,9 @@ Service provided by Google. Please review their terms and policies before enabli
 * Google privacy policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 0.20.1 =
+* **Fix the HubSpot form goal for HubSpot's current "Forms V4" embed.** v0.20.0 listened for the legacy `hsFormCallback` window message, but the current HubSpot embed (Forms V4) doesn't broadcast it — it dispatches a DOM event (`hs-form-event:on-submission:success`) instead, so submissions weren't being counted. The tracker now listens for the V4 event (and still supports the legacy message for older embeds), reads the form GUID via HubSpot's `getFormFromEvent` API when present, and records the conversion. If you used a HubSpot goal on 0.20.0, this is the fix that makes it fire.
 
 = 0.20.0 =
 * **New conversion goal: "HubSpot form submitted".** Embedded HubSpot forms render inside a cross-origin iframe, so a CSS-selector "click" goal can never reach the submit button (the browser blocks it). This new goal type listens for HubSpot's own form-submission event (the `hsFormCallback` message HubSpot posts to the page — the same hook Google Analytics / GTM use), verifies it really comes from a HubSpot origin, and records the conversion. Leave the goal value empty to count any HubSpot form submission on the test page, or paste a HubSpot form GUID to count only that specific form. When you preview a running test as a logged-in admin, the browser console logs each HubSpot event so you can confirm the wiring with one test submission.
